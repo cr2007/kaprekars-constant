@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { KaprekarStepCard } from '@/components/kaprekar-step-card'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -63,29 +64,40 @@ export default function App() {
   }
 
   return (
-    <div id="page" className="min-h-svh px-4 py-10 sm:px-6 sm:py-16">
-      <div id="page-content" className="mx-auto flex max-w-xl flex-col gap-8">
-        <header id="hero" className="text-center">
-          <p className="font-heading text-sm font-semibold tracking-wide text-primary uppercase">
-            A number trick that always works
-          </p>
-          <h1 className="mt-2 font-heading text-4xl font-bold text-foreground sm:text-5xl">
-            Kaprekar's constant
+    <div id="page" className="min-h-svh px-4 py-6 sm:px-6 sm:py-10">
+      <div id="page-content" className="mx-auto flex max-w-2xl flex-col gap-10">
+        <div id="top-bar" className="flex items-center justify-between">
+          <span className="font-heading text-sm font-semibold text-muted-foreground">
+            Kaprekar's routine
+          </span>
+          <ThemeToggle />
+        </div>
+
+        <header id="hero" className="relative overflow-hidden text-center">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2 select-none font-heading text-[10rem] leading-none font-bold text-primary/5 sm:text-[13rem]"
+          >
+            6174
+          </span>
+          <h1 className="text-balance font-heading text-4xl font-bold text-foreground sm:text-5xl">
+            Watch a number become <span className="text-primary">6174</span>
           </h1>
-          <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+          <p className="mt-4 text-pretty text-base text-muted-foreground sm:text-lg">
             Pick almost any 4-digit number. Sort its digits high to low and low to
-            high, subtract, and repeat. You will land on{' '}
-            <span className="font-semibold text-primary">6174</span> within 7
-            steps, every time.
+            high, subtract, and repeat. Every path ends at the same place, within
+            seven steps.
           </p>
         </header>
 
         <form
           id="input-form"
           onSubmit={handleSubmit}
-          className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6"
+          className="flex flex-col gap-3 rounded-3xl bg-secondary/40 p-5 sm:p-7"
         >
-          <Label htmlFor="kaprekar-input">Your 4-digit number</Label>
+          <Label htmlFor="kaprekar-input" className="text-muted-foreground">
+            Your 4-digit number
+          </Label>
           <div id="input-row" className="flex flex-col gap-3 sm:flex-row">
             <Input
               id="kaprekar-input"
@@ -94,7 +106,7 @@ export default function App() {
               placeholder="e.g. 3524"
               value={rawInput}
               onChange={(event) => handleInputChange(event.target.value)}
-              className="h-12 text-lg font-semibold tracking-widest sm:text-xl"
+              className="h-14 border-0 bg-card text-center text-2xl font-bold tracking-[0.3em] shadow-sm sm:text-3xl"
               aria-invalid={error ? true : undefined}
             />
             <div id="input-actions" className="flex gap-2">
@@ -102,7 +114,7 @@ export default function App() {
                 id="calculate-button"
                 type="submit"
                 size="lg"
-                className="h-12 flex-1 px-5 text-base sm:flex-none"
+                className="h-14 flex-1 px-5 text-base sm:flex-none"
               >
                 Calculate
               </Button>
@@ -111,7 +123,7 @@ export default function App() {
                 type="button"
                 variant="outline"
                 size="lg"
-                className="h-12 px-4"
+                className="h-14 border-0 bg-card px-4"
                 onClick={handleRandom}
               >
                 Random
@@ -126,15 +138,21 @@ export default function App() {
         </form>
 
         {steps.length > 0 && (
-          <div id="steps" key={runId} className="flex flex-col gap-4">
+          <div id="steps" key={runId} className="rounded-3xl border border-border p-5 sm:p-7">
             {steps.map((step, index) => (
-              <KaprekarStepCard key={index} step={step} index={index} animate />
+              <KaprekarStepCard
+                key={index}
+                step={step}
+                index={index}
+                isLast={index === steps.length - 1}
+                animate
+              />
             ))}
 
             {reachedConstant && !wentFurther && (
               <div
                 id="go-further-prompt"
-                className="animate-step-in flex flex-col items-center gap-3 pt-2 text-center"
+                className="animate-step-in mt-2 flex flex-col items-center gap-3 border-t border-border pt-6 text-center"
                 style={{ animationDelay: `${steps.length * 70}ms` }}
               >
                 <p className="text-sm text-muted-foreground">
@@ -149,7 +167,7 @@ export default function App() {
             {wentFurther && (
               <p
                 id="loop-explainer"
-                className="animate-step-in text-center text-sm text-muted-foreground"
+                className="animate-step-in mt-2 border-t border-border pt-6 text-center text-sm text-muted-foreground"
               >
                 6174 leads straight back to itself. It is the routine's only
                 resting point for 4-digit numbers with at least two different
@@ -158,6 +176,32 @@ export default function App() {
             )}
           </div>
         )}
+
+        <section
+          id="history"
+          className="flex flex-col gap-3 rounded-3xl bg-muted/60 p-5 sm:p-7"
+        >
+          <h2 className="font-heading text-lg font-bold text-foreground">
+            Where 6174 comes from
+          </h2>
+          <p className="text-pretty text-sm text-muted-foreground sm:text-base">
+            The mathematician D. R. Kaprekar discovered this routine in 1949 while
+            experimenting with digit arrangements by hand. He noticed that no
+            matter which 4-digit number he started with, as long as its digits
+            weren't all the same, repeating the sort-and-subtract process always
+            arrived at 6174, and then stayed there. The same kind of routine
+            exists for other digit lengths, each with its own resting number, but
+            6174 is the most famous and now carries his name.
+          </p>
+          <a
+            href="https://en.wikipedia.org/wiki/6174_(number)"
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            Read more on Wikipedia
+          </a>
+        </section>
       </div>
     </div>
   )

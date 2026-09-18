@@ -1,13 +1,15 @@
+// Deepened from the original pastel set so white tile text clears
+// WCAG contrast (>=3:1, the large-bold-text threshold) against every one.
 export const DIGIT_COLORS: readonly string[] = [
   '#e63946',
-  '#f3722c',
-  '#f8961e',
-  '#f9a620',
-  '#f9c74f',
-  '#f4845f',
+  '#f05d0e',
+  '#d07506',
+  '#c57b05',
+  '#b88406',
+  '#f15d2d',
   '#ef476f',
-  '#ff6b6b',
-  '#ffa62b',
+  '#ff4a4a',
+  '#ce7800',
   '#e85d75',
 ]
 
