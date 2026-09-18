@@ -17,6 +17,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [steps, setSteps] = useState<KaprekarStep[]>([])
   const [wentFurther, setWentFurther] = useState(false)
+  const [runId, setRunId] = useState(0)
 
   const reachedConstant = steps.at(-1)?.result === KAPREKAR_CONSTANT
 
@@ -30,6 +31,7 @@ export default function App() {
     setError(null)
     setSteps(runKaprekarRoutine(Number(value)))
     setWentFurther(false)
+    setRunId((id) => id + 1)
   }
 
   function handleSubmit(event: FormEvent) {
@@ -61,9 +63,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-svh px-4 py-10 sm:px-6 sm:py-16">
-      <div className="mx-auto flex max-w-xl flex-col gap-8">
-        <header className="text-center">
+    <div id="page" className="min-h-svh px-4 py-10 sm:px-6 sm:py-16">
+      <div id="page-content" className="mx-auto flex max-w-xl flex-col gap-8">
+        <header id="hero" className="text-center">
           <p className="font-heading text-sm font-semibold tracking-wide text-primary uppercase">
             A number trick that always works
           </p>
@@ -79,11 +81,12 @@ export default function App() {
         </header>
 
         <form
+          id="input-form"
           onSubmit={handleSubmit}
           className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6"
         >
           <Label htmlFor="kaprekar-input">Your 4-digit number</Label>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div id="input-row" className="flex flex-col gap-3 sm:flex-row">
             <Input
               id="kaprekar-input"
               inputMode="numeric"
@@ -94,11 +97,17 @@ export default function App() {
               className="h-12 text-lg font-semibold tracking-widest sm:text-xl"
               aria-invalid={error ? true : undefined}
             />
-            <div className="flex gap-2">
-              <Button type="submit" size="lg" className="h-12 flex-1 px-5 text-base sm:flex-none">
+            <div id="input-actions" className="flex gap-2">
+              <Button
+                id="calculate-button"
+                type="submit"
+                size="lg"
+                className="h-12 flex-1 px-5 text-base sm:flex-none"
+              >
                 Calculate
               </Button>
               <Button
+                id="random-button"
                 type="button"
                 variant="outline"
                 size="lg"
@@ -109,19 +118,24 @@ export default function App() {
               </Button>
             </div>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && (
+            <p id="input-error" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
         </form>
 
         {steps.length > 0 && (
-          <div className="flex flex-col gap-4">
+          <div id="steps" key={runId} className="flex flex-col gap-4">
             {steps.map((step, index) => (
               <KaprekarStepCard key={index} step={step} index={index} animate />
             ))}
 
             {reachedConstant && !wentFurther && (
               <div
+                id="go-further-prompt"
                 className="animate-step-in flex flex-col items-center gap-3 pt-2 text-center"
-                style={{ animationDelay: `${steps.length * 90}ms` }}
+                style={{ animationDelay: `${steps.length * 70}ms` }}
               >
                 <p className="text-sm text-muted-foreground">
                   Curious what happens if you keep going?
@@ -133,7 +147,10 @@ export default function App() {
             )}
 
             {wentFurther && (
-              <p className="animate-step-in text-center text-sm text-muted-foreground">
+              <p
+                id="loop-explainer"
+                className="animate-step-in text-center text-sm text-muted-foreground"
+              >
                 6174 leads straight back to itself. It is the routine's only
                 resting point for 4-digit numbers with at least two different
                 digits.
