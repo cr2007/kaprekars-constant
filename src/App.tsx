@@ -122,7 +122,10 @@ export default function App() {
         </p>
 
         <main id="main-content" className="contents">
-          <header id="hero" className="relative overflow-hidden text-center">
+          <header
+            id="hero"
+            className="relative min-h-44 overflow-hidden text-center sm:min-h-56"
+          >
             <span
               aria-hidden
               className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2 select-none font-heading text-[10rem] leading-none font-bold text-primary/12 sm:text-[13rem] dark:text-primary/15"
