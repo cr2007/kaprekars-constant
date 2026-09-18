@@ -158,7 +158,7 @@ export default function App() {
                 placeholder="e.g. 3524"
                 value={rawInput}
                 onChange={(event) => handleInputChange(event.target.value)}
-                className="h-14 border-0 bg-card text-center text-2xl font-bold tracking-[0.3em] shadow-sm sm:text-3xl"
+                className="h-14 border-0 bg-card text-center text-2xl font-bold tracking-[0.3em] shadow-sm sm:text-3xl lg:h-16 lg:text-4xl"
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? 'input-error' : undefined}
               />
@@ -167,7 +167,7 @@ export default function App() {
                   id="calculate-button"
                   type="submit"
                   size="lg"
-                  className="h-14 flex-1 px-5 text-base sm:flex-none"
+                  className="h-14 flex-1 px-5 text-base sm:flex-none lg:h-16 lg:text-lg"
                 >
                   Calculate
                 </Button>
@@ -176,7 +176,7 @@ export default function App() {
                   type="button"
                   variant="outline"
                   size="lg"
-                  className="h-14 border-0 bg-card px-4"
+                  className="h-14 border-0 bg-card px-4 lg:h-16 lg:text-lg"
                   onClick={handleRandom}
                 >
                   Random
