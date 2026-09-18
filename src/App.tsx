@@ -24,6 +24,10 @@ export default function App() {
   const { side: bookSide, toggleSide: toggleBookSide } = useBookSide()
 
   const reachedConstant = steps.at(-1)?.result === KAPREKAR_CONSTANT
+  const statusMessage =
+    steps.length > 0 && reachedConstant
+      ? `Reached 6174 in ${steps.length} step${steps.length === 1 ? '' : 's'}.`
+      : ''
 
   function runFor(value: string) {
     const validation = validateInput(value)
@@ -68,6 +72,13 @@ export default function App() {
 
   return (
     <div id="page" className="min-h-svh px-4 py-6 sm:px-6 sm:py-10">
+      <a
+        href="#main-content"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-lg focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-primary-foreground focus-visible:shadow-lg"
+      >
+        Skip to main content
+      </a>
+
       <div
         id="page-content"
         data-book-side={bookSide}
@@ -83,6 +94,11 @@ export default function App() {
           </div>
         </div>
 
+        <p role="status" className="sr-only">
+          {statusMessage}
+        </p>
+
+        <main id="main-content" className="contents">
         <header id="hero" className="relative overflow-hidden text-center">
           <span
             aria-hidden
@@ -118,6 +134,7 @@ export default function App() {
               onChange={(event) => handleInputChange(event.target.value)}
               className="h-14 border-0 bg-card text-center text-2xl font-bold tracking-[0.3em] shadow-sm sm:text-3xl"
               aria-invalid={error ? true : undefined}
+              aria-describedby={error ? 'input-error' : undefined}
             />
             <div id="input-actions" className="flex gap-2">
               <Button
@@ -141,7 +158,7 @@ export default function App() {
             </div>
           </div>
           {error && (
-            <p id="input-error" className="text-sm text-destructive">
+            <p id="input-error" role="alert" className="text-sm text-destructive">
               {error}
             </p>
           )}
@@ -197,9 +214,10 @@ export default function App() {
 
         <section
           id="history"
+          aria-labelledby="history-heading"
           className="flex flex-col gap-3 rounded-3xl bg-muted/60 p-5 sm:p-7"
         >
-          <h2 className="font-heading text-lg font-bold text-foreground">
+          <h2 id="history-heading" className="font-heading text-lg font-bold text-foreground">
             Where 6174 comes from
           </h2>
           <p className="max-w-prose text-pretty text-sm text-muted-foreground sm:text-base">
@@ -218,8 +236,10 @@ export default function App() {
             className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
           >
             Read more on Wikipedia
+            <span className="sr-only"> (opens in a new tab)</span>
           </a>
         </section>
+        </main>
       </div>
     </div>
   )
