@@ -72,12 +72,22 @@ export default function App() {
   }
 
   /**
-   * Keeps the input numeric and at most 4 digits as the user types, and
-   * clears any previous result, since it no longer matches what's typed.
+   * Keeps the input numeric and at most 4 digits as the user types. Once
+   * the 4th digit lands, runs the routine immediately rather than making
+   * the user click Calculate; an invalid number then shows its error
+   * right away too, instead of waiting for a submit.
    */
   function handleInputChange(value: string) {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 4)
     setRawInput(digitsOnly)
+
+    if (digitsOnly.length === 4) {
+      runFor(digitsOnly)
+      return
+    }
+
+    // Fewer than 4 digits: nothing to validate yet, just clear any
+    // earlier result or error so it doesn't linger next to the input.
     if (steps.length > 0) {
       setSteps([])
       setWentFurther(false)
