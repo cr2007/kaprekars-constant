@@ -34,6 +34,13 @@ export default function App() {
       ? `Reached 6174 in ${steps.length} step${steps.length === 1 ? '' : 's'}.`
       : ''
 
+  /** Clears any earlier result, if there is one, without touching the input or error. */
+  function resetRun() {
+    if (steps.length === 0) return
+    setSteps([])
+    setWentFurther(false)
+  }
+
   /**
    * Validates `value` and either runs the full routine on it or reports
    * why it can't be run. Shared by the input's own auto-run and the
@@ -45,7 +52,7 @@ export default function App() {
     const validation = validateInput(value)
     if (!validation.valid) {
       setError(validation.message ?? 'Enter a 4-digit number.')
-      setSteps([])
+      resetRun()
       return
     }
 
@@ -67,40 +74,26 @@ export default function App() {
   }
 
   /**
-   * Keeps the input numeric and at most 4 digits as the user types (extra
-   * digits beyond the 4th are dropped, not appended). Once the 4th digit
-   * lands, runs the routine immediately rather than making the user click
-   * Calculate. A number that can never reach 6174, or a still-incomplete
-   * one, shows its error right away too, instead of waiting for a submit.
+   * Keeps the input numeric and at most 4 digits as the user types (a 5th
+   * digit is dropped, not appended). Once the 4th digit lands, runs the
+   * routine immediately rather than making the user click a Calculate
+   * button; an incomplete or otherwise invalid number shows its error
+   * right away too, instead of waiting for a submit.
    */
   function handleInputChange(value: string) {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 4)
     setRawInput(digitsOnly)
 
-    // Step 1: an empty field has nothing to report yet, just clear any
-    // earlier result or error so it doesn't linger next to the input.
-    if (digitsOnly.length === 0) {
-      if (steps.length > 0) {
-        setSteps([])
-        setWentFurther(false)
-      }
-      setError(null)
-      return
-    }
-
-    // Step 2: run the routine once 4 digits are in, otherwise show why
-    // the number typed so far isn't usable (too short, repdigit, etc.).
+    // Step 1: 4 digits in means there's a full number to run the routine on.
     if (digitsOnly.length === 4) {
       runFor(digitsOnly)
       return
     }
 
-    const validation = validateInput(digitsOnly)
-    setError(validation.message ?? null)
-    if (steps.length > 0) {
-      setSteps([])
-      setWentFurther(false)
-    }
+    // Step 2: fewer than 4 digits. An empty field has nothing to report
+    // yet; a partial one shows why it isn't a usable number so far.
+    resetRun()
+    setError(digitsOnly.length === 0 ? null : (validateInput(digitsOnly).message ?? null))
   }
 
   /** Appends one more round after reaching 6174, to show it loops back to itself. */
