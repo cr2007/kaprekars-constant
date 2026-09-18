@@ -18,11 +18,21 @@ interface KaprekarStepCardProps {
 
 /**
  * Renders one round of the routine: the timeline badge, and the equation
- * itself in two forms. A single-line compact equation is shown below the
- * `@5xl` container breakpoint, where there isn't room for the full tile
- * layout to fit without wrapping; a colorful tile equation is shown above
- * it. Both are always in the DOM so no state is lost switching between
- * them; only one is visible at a time via CSS.
+ * itself in two forms. A single-line compact equation is shown below an
+ * `@[800px]` container-width threshold, where there isn't room for the
+ * full tile layout to fit without wrapping; a colorful tile equation is
+ * shown above it. Both are always in the DOM so no state is lost
+ * switching between them; only one is visible at a time via CSS.
+ *
+ * The threshold is a raw pixel value, not a named breakpoint, because a
+ * CSS `@container` size query is measured against the container's
+ * *content box* (padding and border excluded), not the border-box width
+ * `getBoundingClientRect` reports. The tile row itself needs ~770px of
+ * that content-box width (measured across several widest-spread
+ * numbers); 800px leaves margin above that need, and below the ~840px
+ * content-box width a 1024px browser viewport actually produces once
+ * `#steps`'s own padding and border are subtracted from its ~896px
+ * border-box width.
  */
 export function KaprekarStepCard({
   step,
@@ -67,7 +77,7 @@ export function KaprekarStepCard({
           {/* Step 2: compact equation, plain text, for narrow containers. */}
           <div
             id={`step-${index}-equation-compact`}
-            className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 text-lg font-bold @5xl:hidden"
+            className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 text-lg font-bold @[800px]:hidden"
           >
             <span className="flex items-baseline gap-2 whitespace-nowrap">
               <InlineNumber digits={step.descendingDigits} />
@@ -83,10 +93,14 @@ export function KaprekarStepCard({
           </div>
 
           {/* Step 3: tile equation, for containers wide enough to fit it
-              on one line (see the component doc comment above). */}
+              on one line (see the component doc comment above). The
+              "Kaprekar's constant" badge sits below the equation, not
+              inside its flex-wrap row: including it there would count its
+              width against the one-line fit, forcing the whole equation
+              down a line just to make room for the badge. */}
           <div
             id={`step-${index}-equation`}
-            className="hidden flex-wrap items-end gap-x-5 gap-y-4 @5xl:flex"
+            className="hidden flex-wrap items-end gap-x-5 gap-y-4 @[800px]:flex"
           >
             <div className="flex flex-col gap-1.5">
               <span className="text-xs text-muted-foreground">Biggest arrangement</span>
@@ -105,14 +119,19 @@ export function KaprekarStepCard({
             <div
               id={`step-${index}-result`}
               className={cn(
-                '-m-2 flex flex-wrap items-center gap-3 rounded-xl border p-2',
+                '-m-2 flex items-center gap-3 rounded-xl border p-2',
                 reachedConstant ? 'border-primary bg-primary/10' : 'border-border'
               )}
             >
               <NumberTiles digits={step.resultDigits} />
-              {reachedConstant && <Badge>Kaprekar's constant</Badge>}
             </div>
           </div>
+
+          {reachedConstant && (
+            <div className="mt-3 hidden @[800px]:block">
+              <Badge>Kaprekar's constant</Badge>
+            </div>
+          )}
         </div>
       </div>
 

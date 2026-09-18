@@ -200,7 +200,7 @@ export default function App() {
               key={runId}
               className="@container rounded-3xl border border-border p-5 sm:p-7"
             >
-              <p id="steps-legend" className="mb-5 text-xs text-muted-foreground @5xl:hidden">
+              <p id="steps-legend" className="mb-5 text-xs text-muted-foreground @[800px]:hidden">
                 Each round: digits sorted biggest first, minus digits sorted smallest first.
               </p>
               {steps.map((step, index) => (
