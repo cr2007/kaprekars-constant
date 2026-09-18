@@ -14,6 +14,16 @@ only the Claude-specific ones.
 - For a change with more than one concern, split it into more than
   one commit.
 
+## After implementing a change
+
+- Simplify the new code without losing functionality. Remove AI-slop
+  tells: em dashes, emojis, filler comments.
+- Add TSDoc on top of each function and step-level (`Step X.Y`)
+  comments inside multi-step methods.
+- Add regression tests where they make sense.
+- Update `AGENTS.md`, `CLAUDE.md`, and `README.md` if the change makes
+  any of their documented steps or structure stale.
+
 ## Design work
 
 - This project has a `PRODUCT.md`. Read it before design work.
