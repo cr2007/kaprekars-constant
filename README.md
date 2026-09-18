@@ -64,6 +64,7 @@ src/
   App.tsx                 # main layout and state
   components/              # UI components
   components/ui/           # shadcn primitives
+  components/icons/         # one-off icons shadcn/lucide don't ship
   hooks/                    # theme and book-side state
   lib/kaprekar.ts           # the routine itself
   lib/kaprekar.test.ts       # regression tests for the routine
