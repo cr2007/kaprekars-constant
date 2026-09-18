@@ -37,9 +37,9 @@ Open the printed local URL in your browser.
 ## Other commands
 
 ```sh
-bun run build     # type-check and build for production
-bun run lint      # run oxlint
-bun run preview   # preview the production build
+bun --bun run build     # type-check and build for production
+bun --bun run lint      # run oxlint
+bun --bun run preview   # preview the production build
 ```
 
 ## Deployment

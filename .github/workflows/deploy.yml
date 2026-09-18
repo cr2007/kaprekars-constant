@@ -16,5 +16,5 @@ jobs:
       id-token: write
     uses: cr2007/actions/.github/workflows/gh-pages-deploy.yml@v1
     with:
-      build-command: bun run build
+      build-command: bun --bun run build
       output-dir: dist
