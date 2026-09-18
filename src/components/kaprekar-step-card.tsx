@@ -48,13 +48,13 @@ export function KaprekarStepCard({
         <div className="flex-1">
           <div
             id={`step-${index}-equation-compact`}
-            className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 font-heading text-lg font-bold @5xl:hidden"
+            className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 text-lg font-bold @5xl:hidden"
           >
             <span className="flex items-baseline gap-2 whitespace-nowrap">
               <InlineNumber digits={step.descendingDigits} />
-              <span className="text-primary">&minus;</span>
+              <span className="font-chalk text-primary">&minus;</span>
               <InlineNumber digits={step.ascendingDigits} />
-              <span className="text-foreground">=</span>
+              <span className="font-chalk text-foreground">=</span>
               <InlineNumber
                 digits={step.result.toString().padStart(4, '0').split('').map(Number)}
                 className={reachedConstant ? 'text-primary' : undefined}
@@ -76,14 +76,14 @@ export function KaprekarStepCard({
               <NumberTiles digits={step.descendingDigits} />
             </div>
 
-            <span className="pb-2 font-heading text-2xl font-bold text-primary">&minus;</span>
+            <span className="pb-2 font-chalk text-2xl font-bold text-primary">&minus;</span>
 
             <div className="flex flex-col gap-1.5">
               <span className="text-xs text-muted-foreground">Smallest arrangement</span>
               <NumberTiles digits={step.ascendingDigits} />
             </div>
 
-            <span className="pb-2 font-heading text-2xl font-bold text-foreground">=</span>
+            <span className="pb-2 font-chalk text-2xl font-bold text-foreground">=</span>
 
             <div
               id={`step-${index}-result`}

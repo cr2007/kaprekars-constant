@@ -1,4 +1,3 @@
-import { colorForDigit } from '@/lib/digit-colors'
 import { cn } from 'cn'
 
 interface NumberTilesProps {
@@ -15,12 +14,11 @@ export function NumberTiles({ digits, size = 'lg', className }: NumberTilesProps
           <span
             key={index}
             className={cn(
-              'flex items-center justify-center rounded-lg font-heading font-bold shadow-sm',
+              'flex items-center justify-center rounded-lg bg-primary font-chalk font-bold text-primary-foreground shadow-sm',
               size === 'lg'
                 ? 'size-11 text-xl @5xl:size-14 @5xl:text-2xl'
                 : 'size-8 text-sm sm:size-9 sm:text-base'
             )}
-            style={{ backgroundColor: colorForDigit(digit), color: 'var(--tile-text)' }}
           >
             {digit}
           </span>
@@ -37,5 +35,5 @@ interface InlineNumberProps {
 }
 
 export function InlineNumber({ digits, className }: InlineNumberProps) {
-  return <span className={cn('tabular-nums', className)}>{digits.join('')}</span>
+  return <span className={cn('font-chalk tabular-nums', className)}>{digits.join('')}</span>
 }
