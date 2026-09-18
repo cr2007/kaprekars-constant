@@ -1,5 +1,7 @@
+import { ExternalLink, RotateCw } from 'lucide-react'
 import { useState } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
+import { SolidDiceIcon } from '@/components/icons/solid-dice-icon'
 import { KaprekarStepCard } from '@/components/kaprekar-step-card'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -178,9 +180,10 @@ export default function App() {
                 type="button"
                 variant="outline"
                 size="lg"
-                className="h-14 border-0 bg-card px-4 md:h-16 md:text-lg xl:h-20 xl:text-xl"
+                className="h-14 gap-2 border-0 bg-card px-4 md:h-16 md:text-lg xl:h-20 xl:text-xl"
                 onClick={handleRandom}
               >
+                <SolidDiceIcon className="size-4 md:size-5" />
                 Random
               </Button>
             </div>
@@ -220,7 +223,13 @@ export default function App() {
                   <p className="text-sm text-muted-foreground">
                     Curious what happens if you keep going?
                   </p>
-                  <Button type="button" variant="secondary" onClick={handleGoFurther}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="gap-2"
+                    onClick={handleGoFurther}
+                  >
+                    <RotateCw className="size-4" aria-hidden />
                     Do one more round
                   </Button>
                 </div>
@@ -260,9 +269,10 @@ export default function App() {
               href="https://en.wikipedia.org/wiki/6174_(number)"
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-primary underline-offset-4 hover:underline"
             >
               Read more on Wikipedia
+              <ExternalLink className="size-3.5" aria-hidden />
               <span className="sr-only"> (opens in a new tab)</span>
             </a>
           </section>
