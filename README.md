@@ -42,6 +42,19 @@ bun run lint      # run oxlint
 bun run preview   # preview the production build
 ```
 
+## Deployment
+
+Push to `main` to deploy to GitHub Pages. The workflow is at
+`.github/workflows/deploy.yml`. It calls a reusable workflow from
+[cr2007/actions](https://github.com/cr2007/actions).
+
+Set the Pages source to "GitHub Actions" once, in repo settings, under
+Pages.
+
+The Vite `base` path in `vite.config.ts` assumes the repo name
+`kaprekars-constant`. Change it if you rename the repo or use a custom
+domain.
+
 ## Project structure
 
 ```
