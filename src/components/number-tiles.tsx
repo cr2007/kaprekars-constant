@@ -14,16 +14,25 @@ export function NumberTiles({ digits, size = 'lg', className }: NumberTilesProps
         <div
           key={index}
           className={cn(
-            'flex items-center justify-center rounded-lg font-heading font-bold text-white shadow-sm',
+            'flex items-center justify-center rounded-lg font-heading font-bold shadow-sm',
             size === 'lg'
               ? 'size-11 text-xl sm:size-14 sm:text-2xl'
               : 'size-8 text-sm sm:size-9 sm:text-base'
           )}
-          style={{ backgroundColor: colorForDigit(digit) }}
+          style={{ backgroundColor: colorForDigit(digit), color: 'var(--tile-text)' }}
         >
           {digit}
         </div>
       ))}
     </div>
   )
+}
+
+interface InlineNumberProps {
+  digits: number[]
+  className?: string
+}
+
+export function InlineNumber({ digits, className }: InlineNumberProps) {
+  return <span className={cn('tabular-nums', className)}>{digits.join('')}</span>
 }
