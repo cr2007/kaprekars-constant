@@ -4,13 +4,26 @@ import { KAPREKAR_CONSTANT, type KaprekarStep } from '@/lib/kaprekar'
 import { cn } from 'cn'
 
 interface KaprekarStepCardProps {
+  /** The computed step to render. */
   step: KaprekarStep
+  /** Position of this step in the routine, used for its badge number and animation delay. */
   index: number
+  /** Whether this is the first step; suppresses the connecting line above the badge. */
   isFirst: boolean
+  /** Whether this is the last step; suppresses the connecting line below the badge and after it. */
   isLast: boolean
+  /** Whether to play the entrance animation (off when steps are inserted without one, if ever needed). */
   animate: boolean
 }
 
+/**
+ * Renders one round of the routine: the timeline badge, and the equation
+ * itself in two forms. A single-line compact equation is shown below the
+ * `@5xl` container breakpoint, where there isn't room for the full tile
+ * layout to fit without wrapping; a colorful tile equation is shown above
+ * it. Both are always in the DOM so no state is lost switching between
+ * them; only one is visible at a time via CSS.
+ */
 export function KaprekarStepCard({
   step,
   index,
@@ -27,6 +40,10 @@ export function KaprekarStepCard({
       style={animate ? { animationDelay: `${index * 70}ms` } : undefined}
     >
       <div className="flex gap-4">
+        {/* Step 1: the timeline badge. Both connecting-line segments are
+            always rendered, and only colored in when a neighbor exists,
+            so the badge centers against this row's own height instead of
+            sitting flush against whichever end has no neighbor. */}
         <div className="flex shrink-0 flex-col items-center self-stretch">
           <div aria-hidden className={cn('w-px flex-1', !isFirst && 'bg-border')} />
           <div
@@ -47,6 +64,7 @@ export function KaprekarStepCard({
         </div>
 
         <div className="flex-1">
+          {/* Step 2: compact equation, plain text, for narrow containers. */}
           <div
             id={`step-${index}-equation-compact`}
             className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 text-lg font-bold @5xl:hidden"
@@ -57,13 +75,15 @@ export function KaprekarStepCard({
               <InlineNumber digits={step.ascendingDigits} />
               <span className="font-chalk text-foreground">=</span>
               <InlineNumber
-                digits={step.result.toString().padStart(4, '0').split('').map(Number)}
+                digits={step.resultDigits}
                 className={reachedConstant ? 'text-primary' : undefined}
               />
             </span>
             {reachedConstant && <Badge>Kaprekar's constant</Badge>}
           </div>
 
+          {/* Step 3: tile equation, for containers wide enough to fit it
+              on one line (see the component doc comment above). */}
           <div
             id={`step-${index}-equation`}
             className="hidden flex-wrap items-end gap-x-5 gap-y-4 @5xl:flex"
@@ -89,15 +109,15 @@ export function KaprekarStepCard({
                 reachedConstant ? 'border-primary bg-primary/10' : 'border-border'
               )}
             >
-              <NumberTiles
-                digits={step.result.toString().padStart(4, '0').split('').map(Number)}
-              />
+              <NumberTiles digits={step.resultDigits} />
               {reachedConstant && <Badge>Kaprekar's constant</Badge>}
             </div>
           </div>
         </div>
       </div>
 
+      {/* The gap to the next step's badge, kept outside the row above so
+          it doesn't get counted when that row centers its own badge. */}
       {!isLast && <div aria-hidden className="ml-4 h-8 w-px bg-border" />}
     </div>
   )

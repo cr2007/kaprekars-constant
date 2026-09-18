@@ -2,10 +2,18 @@ import { cn } from 'cn'
 
 interface NumberTilesProps {
   digits: number[]
+  /** `lg` for the main step display, `sm` wherever the tiles need to shrink to fit. */
   size?: 'sm' | 'lg'
   className?: string
 }
 
+/**
+ * Renders digits as colored tiles, one per digit.
+ *
+ * The tiles are `aria-hidden`: a screen reader reading them one at a time
+ * would hear "7, 7, 6, 6" instead of "7766". A hidden text node next to
+ * them carries the real number instead.
+ */
 export function NumberTiles({ digits, size = 'lg', className }: NumberTilesProps) {
   return (
     <span className="inline-flex">
@@ -34,6 +42,7 @@ interface InlineNumberProps {
   className?: string
 }
 
+/** Renders digits as plain text, for the compact equation view. */
 export function InlineNumber({ digits, className }: InlineNumberProps) {
   return <span className={cn('font-chalk tabular-nums', className)}>{digits.join('')}</span>
 }

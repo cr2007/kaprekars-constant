@@ -6,6 +6,12 @@ interface BookSideToggleProps {
   toggleSide: () => void
 }
 
+/**
+ * Icon button that swaps which page of the foldable "book" layout holds
+ * the calculation. Hidden by CSS (see `#book-side-toggle` in `index.css`)
+ * until the browser actually reports two viewport segments, so it never
+ * appears on an ordinary single-screen device.
+ */
 export function BookSideToggle({ side, toggleSide }: BookSideToggleProps) {
   return (
     <Button
