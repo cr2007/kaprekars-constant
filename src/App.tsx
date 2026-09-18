@@ -65,7 +65,10 @@ export default function App() {
 
   return (
     <div id="page" className="min-h-svh px-4 py-6 sm:px-6 sm:py-10">
-      <div id="page-content" className="mx-auto flex max-w-2xl flex-col gap-10">
+      <div
+        id="page-content"
+        className="mx-auto flex w-full max-w-2xl flex-col gap-10 md:max-w-3xl lg:max-w-4xl xl:max-w-6xl"
+      >
         <div id="top-bar" className="flex items-center justify-between">
           <span className="font-heading text-sm font-semibold text-muted-foreground">
             Kaprekar's routine
@@ -80,10 +83,10 @@ export default function App() {
           >
             6174
           </span>
-          <h1 className="text-balance font-heading text-4xl font-bold text-foreground sm:text-5xl">
+          <h1 className="text-balance font-heading text-[clamp(1.5rem,9vw,2.25rem)] font-bold text-foreground sm:text-5xl">
             Watch a number become <span className="text-primary">6174</span>
           </h1>
-          <p className="mt-4 text-pretty text-base text-muted-foreground sm:text-lg">
+          <p className="mx-auto mt-4 max-w-prose text-pretty text-base text-muted-foreground sm:text-lg">
             Pick almost any 4-digit number. Sort its digits high to low and low to
             high, subtract, and repeat. Every path ends at the same place, within
             seven steps.
@@ -138,8 +141,12 @@ export default function App() {
         </form>
 
         {steps.length > 0 && (
-          <div id="steps" key={runId} className="rounded-3xl border border-border p-5 sm:p-7">
-            <p id="steps-legend" className="mb-5 text-xs text-muted-foreground sm:hidden">
+          <div
+            id="steps"
+            key={runId}
+            className="@container rounded-3xl border border-border p-5 sm:p-7"
+          >
+            <p id="steps-legend" className="mb-5 text-xs text-muted-foreground @5xl:hidden">
               Each round: digits sorted biggest first, minus digits sorted smallest first.
             </p>
             {steps.map((step, index) => (
@@ -187,7 +194,7 @@ export default function App() {
           <h2 className="font-heading text-lg font-bold text-foreground">
             Where 6174 comes from
           </h2>
-          <p className="text-pretty text-sm text-muted-foreground sm:text-base">
+          <p className="max-w-prose text-pretty text-sm text-muted-foreground sm:text-base">
             The mathematician D. R. Kaprekar discovered this routine in 1949 while
             experimenting with digit arrangements by hand. He noticed that no
             matter which 4-digit number he started with, as long as its digits

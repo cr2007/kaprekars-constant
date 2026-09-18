@@ -16,7 +16,7 @@ export function NumberTiles({ digits, size = 'lg', className }: NumberTilesProps
           className={cn(
             'flex items-center justify-center rounded-lg font-heading font-bold shadow-sm',
             size === 'lg'
-              ? 'size-11 text-xl sm:size-14 sm:text-2xl'
+              ? 'size-11 text-xl @5xl:size-14 @5xl:text-2xl'
               : 'size-8 text-sm sm:size-9 sm:text-base'
           )}
           style={{ backgroundColor: colorForDigit(digit), color: 'var(--tile-text)' }}

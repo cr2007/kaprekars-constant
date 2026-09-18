@@ -168,3 +168,68 @@
     animation: none;
   }
 }
+
+/*
+  Foldable devices: hinge-aware "book" layout.
+
+  These use the CSS Viewport Segments API (`horizontal-viewport-
+  segments` / `vertical-viewport-segments` media features and the
+  matching `env(viewport-segment-*)` values) and the newer Device
+  Posture API (`device-posture`). Support today is limited to a
+  handful of dual-screen/foldable browser builds; everywhere else
+  these media features are simply unrecognized, so the blocks below
+  never match and the normal single-column layout above is untouched.
+  This is pure progressive enhancement, not a requirement to ship.
+*/
+
+/* Unfolded into two side-by-side segments (book/laptop posture,
+   hinge running top-to-bottom): read the intro on the left page,
+   work the problem on the right page. */
+@media (horizontal-viewport-segments: 2) {
+  #page-content {
+    display: grid;
+    grid-template-columns:
+      env(viewport-segment-width 0 0, 1fr)
+      env(viewport-segment-width 1 0, 1fr);
+    column-gap: calc(
+      env(viewport-segment-left 1 0, 2rem) - env(viewport-segment-right 0 0, 0px)
+    );
+    row-gap: 2rem;
+    grid-template-areas:
+      "top-bar top-bar"
+      "hero    form"
+      "hero    steps"
+      "history history";
+    align-items: start;
+    max-width: none;
+  }
+
+  #top-bar {
+    grid-area: top-bar;
+  }
+  #hero {
+    grid-area: hero;
+  }
+  #input-form {
+    grid-area: form;
+  }
+  #steps {
+    grid-area: steps;
+  }
+  #history {
+    grid-area: history;
+  }
+}
+
+/* Folded into a tent/tabletop posture (hinge running left-to-right):
+   the page still scrolls as one column, but the gap between sections
+   is widened by the real hinge measurement so a section is less
+   likely to land straddling the crease. */
+@media (vertical-viewport-segments: 2) {
+  #page-content {
+    row-gap: max(
+      2.5rem,
+      calc(env(viewport-segment-top 0 1, 2.5rem) - env(viewport-segment-bottom 0 0, 0px))
+    );
+  }
+}

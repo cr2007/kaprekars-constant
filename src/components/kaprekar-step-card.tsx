@@ -37,7 +37,7 @@ export function KaprekarStepCard({ step, index, isLast, animate }: KaprekarStepC
       <div className={cn('flex-1 pb-8', isLast && 'pb-0')}>
         <div
           id={`step-${index}-equation-compact`}
-          className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 font-heading text-lg font-bold sm:hidden"
+          className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 font-heading text-lg font-bold @5xl:hidden"
         >
           <span className="flex items-baseline gap-2 whitespace-nowrap">
             <InlineNumber digits={step.descendingDigits} />
@@ -58,7 +58,7 @@ export function KaprekarStepCard({ step, index, isLast, animate }: KaprekarStepC
 
         <div
           id={`step-${index}-equation`}
-          className="hidden flex-wrap items-end gap-x-5 gap-y-4 sm:flex"
+          className="hidden flex-wrap items-end gap-x-5 gap-y-4 @5xl:flex"
         >
           <div className="flex flex-col gap-1.5">
             <span className="text-xs text-muted-foreground">Biggest arrangement</span>
