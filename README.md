@@ -51,9 +51,10 @@ Push to `main` to deploy to GitHub Pages. The workflow is at
 Set the Pages source to "GitHub Actions" once, in repo settings, under
 Pages.
 
-The Vite `base` path in `vite.config.ts` assumes the repo name
-`kaprekars-constant`. Change it if you rename the repo or use a custom
-domain.
+The Vite `base` path in `vite.config.ts` reads the repo name from
+`GITHUB_REPOSITORY`, set by GitHub Actions. It follows a repo rename
+on its own. If you deploy to a custom domain instead, set `base` back
+to `/`.
 
 ## Project structure
 
