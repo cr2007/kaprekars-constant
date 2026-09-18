@@ -124,7 +124,7 @@ export default function App() {
         <main id="main-content" className="contents">
           <header
             id="hero"
-            className="relative min-h-44 overflow-hidden text-center sm:min-h-56"
+            className="relative flex min-h-44 flex-col justify-center overflow-hidden text-center sm:min-h-56"
           >
             <span
               aria-hidden
