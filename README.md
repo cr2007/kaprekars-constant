@@ -39,6 +39,7 @@ Open the printed local URL in your browser.
 ```sh
 bun --bun run build     # type-check and build for production
 bun --bun run lint      # run oxlint
+bun --bun run test      # run the regression tests
 bun --bun run preview   # preview the production build
 ```
 
@@ -65,6 +66,7 @@ src/
   components/ui/           # shadcn primitives
   hooks/                    # theme and book-side state
   lib/kaprekar.ts           # the routine itself
+  lib/kaprekar.test.ts       # regression tests for the routine
 public/
   fonts/                    # the custom heading font
 ```
