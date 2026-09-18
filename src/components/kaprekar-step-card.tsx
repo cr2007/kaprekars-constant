@@ -27,7 +27,7 @@ export function KaprekarStepCard({
     >
       <div className="flex gap-4">
         <div className="flex shrink-0 flex-col items-center self-stretch">
-          {!isFirst && <div aria-hidden className="w-px flex-1 bg-border" />}
+          <div aria-hidden className={cn('w-px flex-1', !isFirst && 'bg-border')} />
           <div
             className={cn(
               'flex size-8 shrink-0 items-center justify-center rounded-full font-heading text-sm font-bold',
@@ -42,7 +42,7 @@ export function KaprekarStepCard({
           >
             {index + 1}
           </div>
-          {!isLast && <div aria-hidden className="w-px flex-1 bg-border" />}
+          <div aria-hidden className={cn('w-px flex-1', !isLast && 'bg-border')} />
         </div>
 
         <div className="flex-1">
