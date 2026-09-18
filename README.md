@@ -1,32 +1,56 @@
-# React + TypeScript + Vite
+# Kaprekar's Constant
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This app shows Kaprekar's routine in action.
 
-Currently, two official plugins are available:
+Type any 4-digit number. Sort its digits high to low. Sort them low to
+high. Subtract. Repeat. Every number with at least two different digits
+reaches 6174 within seven steps.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Live step-by-step calculation, with a compact view on small screens
+  and a tile view on large screens.
+- Light and dark theme, with a toggle.
+- A book-mode layout for foldable devices with two screen segments.
+  A button swaps which side holds the calculation.
+- Full keyboard and screen reader support. Skip link, live status
+  region, and labeled controls.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Stack
 
-## Expanding the Oxlint configuration
+- Vite, React, TypeScript
+- Tailwind CSS v4
+- shadcn/ui (Radix Nova preset)
+- Bun as the runtime and package manager
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Run it
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+Install Bun first: https://bun.sh
+
+```sh
+bun install
+bun --bun dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Open the printed local URL in your browser.
+
+## Other commands
+
+```sh
+bun run build     # type-check and build for production
+bun run lint      # run oxlint
+bun run preview   # preview the production build
+```
+
+## Project structure
+
+```
+src/
+  App.tsx                 # main layout and state
+  components/              # UI components
+  components/ui/           # shadcn primitives
+  hooks/                    # theme and book-side state
+  lib/kaprekar.ts           # the routine itself
+public/
+  fonts/                    # the custom heading font
+```
