@@ -154,6 +154,7 @@ export default function App() {
                 key={index}
                 step={step}
                 index={index}
+                isFirst={index === 0}
                 isLast={index === steps.length - 1}
                 animate
               />

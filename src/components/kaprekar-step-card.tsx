@@ -5,11 +5,18 @@ import { cn } from 'cn'
 interface KaprekarStepCardProps {
   step: KaprekarStep
   index: number
+  isFirst: boolean
   isLast: boolean
   animate: boolean
 }
 
-export function KaprekarStepCard({ step, index, isLast, animate }: KaprekarStepCardProps) {
+export function KaprekarStepCard({
+  step,
+  index,
+  isFirst,
+  isLast,
+  animate,
+}: KaprekarStepCardProps) {
   const reachedConstant = step.result === KAPREKAR_CONSTANT
 
   return (
@@ -18,7 +25,8 @@ export function KaprekarStepCard({ step, index, isLast, animate }: KaprekarStepC
       className={cn('relative flex gap-4', animate && 'animate-step-in')}
       style={animate ? { animationDelay: `${index * 70}ms` } : undefined}
     >
-      <div className="flex flex-col items-center">
+      <div className="flex shrink-0 flex-col items-center">
+        <div aria-hidden className={cn('w-px flex-1', !isFirst && 'bg-border')} />
         <div
           className={cn(
             'flex size-8 shrink-0 items-center justify-center rounded-full font-heading text-sm font-bold',
@@ -31,7 +39,7 @@ export function KaprekarStepCard({ step, index, isLast, animate }: KaprekarStepC
         >
           {index + 1}
         </div>
-        {!isLast && <div aria-hidden className="mt-1 w-px flex-1 bg-border" />}
+        <div aria-hidden className={cn('w-px flex-1', !isLast && 'bg-border')} />
       </div>
 
       <div className={cn('flex-1 pb-8', isLast && 'pb-0')}>
@@ -77,8 +85,8 @@ export function KaprekarStepCard({ step, index, isLast, animate }: KaprekarStepC
           <div
             id={`step-${index}-result`}
             className={cn(
-              'flex flex-wrap items-center gap-3 rounded-xl',
-              reachedConstant && '-m-2 bg-primary/10 p-2'
+              '-m-2 flex flex-wrap items-center gap-3 rounded-xl border p-2',
+              reachedConstant ? 'border-primary bg-primary/10' : 'border-border'
             )}
           >
             <NumberTiles digits={step.result.toString().padStart(4, '0').split('').map(Number)} />
