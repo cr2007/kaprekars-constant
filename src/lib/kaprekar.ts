@@ -59,13 +59,23 @@ export function sanitizeDigitInput(raw: string): string {
  * would only ever produce 0).
  */
 export function validateInput(raw: string): ValidationResult {
-  // Step 1: reject anything that isn't exactly 4 digits.
+  // Step 1: reject anything that isn't digits-only.
   if (raw.length === 0) {
     return { valid: false, message: 'Enter a 4-digit number.' }
   }
   if (!/^\d+$/.test(raw)) {
     return { valid: false, message: 'Use digits only.' }
   }
+
+  // Step 2: reject a leading zero as soon as it's typed. "0123" is not a
+  // 4-digit number, and this is true no matter how many digits follow it,
+  // so check it before the length so the error shows immediately instead
+  // of waiting for the 4th digit.
+  if (raw[0] === '0') {
+    return { valid: false, message: 'The first digit cannot be 0.' }
+  }
+
+  // Step 3: reject anything short of, or past, 4 digits.
   if (raw.length < 4) {
     return { valid: false, message: 'Enter 4 digits.' }
   }
@@ -73,13 +83,9 @@ export function validateInput(raw: string): ValidationResult {
     return { valid: false, message: 'Enter only 4 digits.' }
   }
 
-  // Step 2: reject a leading zero. "0123" is not a 4-digit number.
-  if (raw[0] === '0') {
-    return { valid: false, message: 'The first digit cannot be 0.' }
-  }
-
-  // Step 3: reject repdigits (1111, 2222, ...). Every arrangement of a
+  // Step 4: reject repdigits (1111, 2222, ...). Every arrangement of a
   // repdigit is identical, so descending minus ascending is always 0.
+  // Only decidable once all 4 digits are in.
   if (new Set(raw).size === 1) {
     return {
       valid: false,

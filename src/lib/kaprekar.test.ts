@@ -48,6 +48,12 @@ describe('validateInput', () => {
     expect(validateInput('0123').valid).toBe(false)
   })
 
+  test('rejects a leading zero before 4 digits are typed', () => {
+    const result = validateInput('0')
+    expect(result.valid).toBe(false)
+    expect(result.message).toMatch(/first digit cannot be 0/)
+  })
+
   test('rejects a repdigit', () => {
     const result = validateInput('1111')
     expect(result.valid).toBe(false)
