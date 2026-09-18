@@ -1,9 +1,11 @@
 import { type FormEvent, useState } from 'react'
+import { BookSideToggle } from '@/components/book-side-toggle'
 import { KaprekarStepCard } from '@/components/kaprekar-step-card'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useBookSide } from '@/hooks/use-book-side'
 import {
   KAPREKAR_CONSTANT,
   type KaprekarStep,
@@ -19,6 +21,7 @@ export default function App() {
   const [steps, setSteps] = useState<KaprekarStep[]>([])
   const [wentFurther, setWentFurther] = useState(false)
   const [runId, setRunId] = useState(0)
+  const { side: bookSide, toggleSide: toggleBookSide } = useBookSide()
 
   const reachedConstant = steps.at(-1)?.result === KAPREKAR_CONSTANT
 
@@ -67,13 +70,17 @@ export default function App() {
     <div id="page" className="min-h-svh px-4 py-6 sm:px-6 sm:py-10">
       <div
         id="page-content"
+        data-book-side={bookSide}
         className="mx-auto flex w-full max-w-2xl flex-col gap-10 md:max-w-3xl lg:max-w-4xl xl:max-w-6xl"
       >
         <div id="top-bar" className="flex items-center justify-between">
           <span className="font-heading text-sm font-semibold text-muted-foreground">
             Kaprekar's routine
           </span>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <BookSideToggle side={bookSide} toggleSide={toggleBookSide} />
+            <ThemeToggle />
+          </div>
         </div>
 
         <header id="hero" className="relative overflow-hidden text-center">

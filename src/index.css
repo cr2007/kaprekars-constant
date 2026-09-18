@@ -182,10 +182,24 @@
   This is pure progressive enhancement, not a requirement to ship.
 */
 
+/* The page-swap button only makes sense once two segments actually
+   exist, so it stays hidden until this same media condition is
+   real, rather than guessing support from JavaScript. */
+#book-side-toggle {
+  display: none;
+}
+
 /* Unfolded into two side-by-side segments (book/laptop posture,
-   hinge running top-to-bottom): read the intro on the left page,
-   work the problem on the right page. */
+   hinge running top-to-bottom): the intro, input, and background
+   reading stay on one page; the working calculation fills the
+   other page top to bottom. `data-book-side` on #page-content
+   flips which physical segment holds which (set from JS, since a
+   media query alone can't be user-toggled). */
 @media (horizontal-viewport-segments: 2) {
+  #book-side-toggle {
+    display: inline-flex;
+  }
+
   #page-content {
     display: grid;
     grid-template-columns:
@@ -197,11 +211,19 @@
     row-gap: 2rem;
     grid-template-areas:
       "top-bar top-bar"
-      "hero    form"
       "hero    steps"
-      "history history";
+      "form    steps"
+      "history steps";
     align-items: start;
     max-width: none;
+  }
+
+  #page-content[data-book-side='right'] {
+    grid-template-areas:
+      "top-bar top-bar"
+      "steps   hero"
+      "steps   form"
+      "steps   history";
   }
 
   #top-bar {
@@ -215,6 +237,7 @@
   }
   #steps {
     grid-area: steps;
+    align-self: stretch;
   }
   #history {
     grid-area: history;
