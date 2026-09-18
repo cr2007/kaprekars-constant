@@ -1,4 +1,5 @@
 import { InlineNumber, NumberTiles } from '@/components/number-tiles'
+import { Badge } from '@/components/ui/badge'
 import { KAPREKAR_CONSTANT, type KaprekarStep } from '@/lib/kaprekar'
 import { cn } from 'cn'
 
@@ -60,11 +61,7 @@ export function KaprekarStepCard({
                 className={reachedConstant ? 'text-primary' : undefined}
               />
             </span>
-            {reachedConstant && (
-              <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
-                Kaprekar's constant
-              </span>
-            )}
+            {reachedConstant && <Badge>Kaprekar's constant</Badge>}
           </div>
 
           <div
@@ -95,11 +92,7 @@ export function KaprekarStepCard({
               <NumberTiles
                 digits={step.result.toString().padStart(4, '0').split('').map(Number)}
               />
-              {reachedConstant && (
-                <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-                  Kaprekar's constant
-                </span>
-              )}
+              {reachedConstant && <Badge>Kaprekar's constant</Badge>}
             </div>
           </div>
         </div>

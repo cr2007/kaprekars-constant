@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
 import { KaprekarStepCard } from '@/components/kaprekar-step-card'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -158,9 +159,9 @@ export default function App() {
             </div>
           </div>
           {error && (
-            <p id="input-error" role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
+            <Alert id="input-error" variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
         </form>
 
