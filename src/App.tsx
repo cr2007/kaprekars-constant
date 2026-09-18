@@ -13,6 +13,7 @@ import {
   nextStep,
   randomValidNumber,
   runKaprekarRoutine,
+  sanitizeDigitInput,
   validateInput,
 } from '@/lib/kaprekar'
 
@@ -81,7 +82,7 @@ export default function App() {
    * right away too, instead of waiting for a submit.
    */
   function handleInputChange(value: string) {
-    const digitsOnly = value.replace(/\D/g, '').slice(0, 4)
+    const digitsOnly = sanitizeDigitInput(value)
     setRawInput(digitsOnly)
 
     // Step 1: 4 digits in means there's a full number to run the routine on.

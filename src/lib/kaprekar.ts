@@ -43,6 +43,16 @@ function numberFromDigits(digits: number[]): number {
 }
 
 /**
+ * Strips everything but digits from `raw` and caps the result at 4
+ * characters. Used to keep the number input numeric-only and at most
+ * 4 digits long as the user types, without ever rejecting a keystroke
+ * outright (a dropped 5th digit is less surprising than a blocked one).
+ */
+export function sanitizeDigitInput(raw: string): string {
+  return raw.replace(/\D/g, '').slice(0, 4)
+}
+
+/**
  * Checks whether a raw string is a valid starting point for the routine:
  * exactly 4 digits, no leading zero, and not all digits identical (which
  * would make the biggest and smallest arrangements equal, so the routine

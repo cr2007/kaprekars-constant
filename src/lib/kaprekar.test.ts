@@ -5,8 +5,27 @@ import {
   nextStep,
   randomValidNumber,
   runKaprekarRoutine,
+  sanitizeDigitInput,
   validateInput,
 } from './kaprekar'
+
+describe('sanitizeDigitInput', () => {
+  test('strips non-digit characters', () => {
+    expect(sanitizeDigitInput('3a5b2c4')).toBe('3524')
+  })
+
+  test('caps the result at 4 characters', () => {
+    expect(sanitizeDigitInput('123456')).toBe('1234')
+  })
+
+  test('leaves a short digit string untouched', () => {
+    expect(sanitizeDigitInput('35')).toBe('35')
+  })
+
+  test('returns an empty string for an empty input', () => {
+    expect(sanitizeDigitInput('')).toBe('')
+  })
+})
 
 describe('validateInput', () => {
   test('rejects an empty string', () => {
