@@ -139,6 +139,9 @@ export default function App() {
 
         {steps.length > 0 && (
           <div id="steps" key={runId} className="rounded-3xl border border-border p-5 sm:p-7">
+            <p id="steps-legend" className="mb-5 text-xs text-muted-foreground sm:hidden">
+              Each round: digits sorted biggest first, minus digits sorted smallest first.
+            </p>
             {steps.map((step, index) => (
               <KaprekarStepCard
                 key={index}

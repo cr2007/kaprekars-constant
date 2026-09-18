@@ -37,18 +37,18 @@ export function KaprekarStepCard({ step, index, isLast, animate }: KaprekarStepC
       <div className={cn('flex-1 pb-8', isLast && 'pb-0')}>
         <div
           id={`step-${index}-equation-compact`}
-          className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1 font-heading text-base font-bold sm:hidden"
+          className="flex flex-wrap items-baseline gap-x-2 gap-y-1.5 font-heading text-lg font-bold sm:hidden"
         >
-          <span className="text-xs font-medium text-muted-foreground">Biggest</span>
-          <InlineNumber digits={step.descendingDigits} />
-          <span className="text-primary">&minus;</span>
-          <span className="text-xs font-medium text-muted-foreground">smallest</span>
-          <InlineNumber digits={step.ascendingDigits} />
-          <span className="text-foreground">=</span>
-          <InlineNumber
-            digits={step.result.toString().padStart(4, '0').split('').map(Number)}
-            className={reachedConstant ? 'text-primary' : undefined}
-          />
+          <span className="flex items-baseline gap-2 whitespace-nowrap">
+            <InlineNumber digits={step.descendingDigits} />
+            <span className="text-primary">&minus;</span>
+            <InlineNumber digits={step.ascendingDigits} />
+            <span className="text-foreground">=</span>
+            <InlineNumber
+              digits={step.result.toString().padStart(4, '0').split('').map(Number)}
+              className={reachedConstant ? 'text-primary' : undefined}
+            />
+          </span>
           {reachedConstant && (
             <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground">
               Kaprekar's constant
