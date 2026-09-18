@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react'
+import { useState } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
 import { KaprekarStepCard } from '@/components/kaprekar-step-card'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -36,8 +36,9 @@ export default function App() {
 
   /**
    * Validates `value` and either runs the full routine on it or reports
-   * why it can't be run. Shared by the submit button and the random-number
-   * button, since both need the same validate-then-run sequence.
+   * why it can't be run. Shared by the input's own auto-run and the
+   * random-number button, since both need the same validate-then-run
+   * sequence.
    */
   function runFor(value: string) {
     // Step 1: stop and show a message if the number isn't usable.
@@ -58,12 +59,6 @@ export default function App() {
     setRunId((id) => id + 1)
   }
 
-  /** Form submit handler: runs the routine on whatever is in the input. */
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault()
-    runFor(rawInput)
-  }
-
   /** Fills the input with a random valid number and runs it immediately. */
   function handleRandom() {
     const value = randomValidNumber().toString()
@@ -72,27 +67,40 @@ export default function App() {
   }
 
   /**
-   * Keeps the input numeric and at most 4 digits as the user types. Once
-   * the 4th digit lands, runs the routine immediately rather than making
-   * the user click Calculate; an invalid number then shows its error
-   * right away too, instead of waiting for a submit.
+   * Keeps the input numeric and at most 4 digits as the user types (extra
+   * digits beyond the 4th are dropped, not appended). Once the 4th digit
+   * lands, runs the routine immediately rather than making the user click
+   * Calculate. A number that can never reach 6174, or a still-incomplete
+   * one, shows its error right away too, instead of waiting for a submit.
    */
   function handleInputChange(value: string) {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 4)
     setRawInput(digitsOnly)
 
+    // Step 1: an empty field has nothing to report yet, just clear any
+    // earlier result or error so it doesn't linger next to the input.
+    if (digitsOnly.length === 0) {
+      if (steps.length > 0) {
+        setSteps([])
+        setWentFurther(false)
+      }
+      setError(null)
+      return
+    }
+
+    // Step 2: run the routine once 4 digits are in, otherwise show why
+    // the number typed so far isn't usable (too short, repdigit, etc.).
     if (digitsOnly.length === 4) {
       runFor(digitsOnly)
       return
     }
 
-    // Fewer than 4 digits: nothing to validate yet, just clear any
-    // earlier result or error so it doesn't linger next to the input.
+    const validation = validateInput(digitsOnly)
+    setError(validation.message ?? null)
     if (steps.length > 0) {
       setSteps([])
       setWentFurther(false)
     }
-    setError(null)
   }
 
   /** Appends one more round after reaching 6174, to show it loops back to itself. */
@@ -152,9 +160,8 @@ export default function App() {
             </p>
           </header>
 
-          <form
+          <div
             id="input-form"
-            onSubmit={handleSubmit}
             className="flex flex-col gap-3 rounded-3xl bg-secondary/40 p-5 sm:p-7"
           >
             <Label htmlFor="kaprekar-input" className="text-muted-foreground">
@@ -172,33 +179,23 @@ export default function App() {
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? 'input-error' : undefined}
               />
-              <div id="input-actions" className="flex gap-2">
-                <Button
-                  id="calculate-button"
-                  type="submit"
-                  size="lg"
-                  className="h-14 flex-1 px-5 text-base sm:flex-none md:h-16 md:text-lg xl:h-20 xl:text-xl"
-                >
-                  Calculate
-                </Button>
-                <Button
-                  id="random-button"
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  className="h-14 border-0 bg-card px-4 md:h-16 md:text-lg xl:h-20 xl:text-xl"
-                  onClick={handleRandom}
-                >
-                  Random
-                </Button>
-              </div>
+              <Button
+                id="random-button"
+                type="button"
+                variant="outline"
+                size="lg"
+                className="h-14 border-0 bg-card px-4 md:h-16 md:text-lg xl:h-20 xl:text-xl"
+                onClick={handleRandom}
+              >
+                Random
+              </Button>
             </div>
             {error && (
               <Alert id="input-error" variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-          </form>
+          </div>
 
           {steps.length > 0 && (
             <div
