@@ -1,5 +1,5 @@
 import { ExternalLink, RotateCw } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
 import { SolidDiceIcon } from '@/components/icons/solid-dice-icon'
 import { KaprekarStepCard } from '@/components/kaprekar-step-card'
@@ -30,6 +30,7 @@ export default function App() {
   const [wentFurther, setWentFurther] = useState(false)
   const [runId, setRunId] = useState(0)
   const { side: bookSide, toggleSide: toggleBookSide } = useBookSide()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const reachedConstant = steps.at(-1)?.result === KAPREKAR_CONSTANT
   const statusMessage =
@@ -67,6 +68,9 @@ export default function App() {
     // the entrance animation replays even if the previous run had the
     // same number of steps.
     setRunId((id) => id + 1)
+    // Step 4: drop focus so mobile browsers close the on-screen keyboard,
+    // revealing the calculation instead of leaving the numpad up.
+    inputRef.current?.blur()
   }
 
   /** Fills the input with a random valid number and runs it immediately. */
@@ -166,6 +170,7 @@ export default function App() {
             <div id="input-row" className="flex flex-col gap-3 sm:flex-row">
               <Input
                 id="kaprekar-input"
+                ref={inputRef}
                 inputMode="numeric"
                 autoComplete="off"
                 placeholder="e.g. 3524"
