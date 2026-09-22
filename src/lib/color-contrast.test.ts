@@ -135,4 +135,21 @@ describe('theme tokens in index.css', () => {
       expect(oklchContrastRatio(mutedForeground, card, 0.6)).toBeGreaterThanOrEqual(3)
     }
   )
+
+  test.each([
+    ['light', root, 1.3],
+    ['dark', dark, 1.4],
+  ])(
+    "%s: the secondary button fill (\"Do one more round\") stays visible on the card fill",
+    (_name, block, minRatio) => {
+      // Regression: #steps sits on bg-card; --secondary needs enough
+      // lightness separation from --card on its own, since the button
+      // has no border to fall back on. Dark held the higher bar because
+      // it's the one that actually went invisible (1.14:1) when #steps
+      // first gained its card fill.
+      const card = readOklchVar(block, 'card')
+      const secondary = readOklchVar(block, 'secondary')
+      expect(oklchContrastRatio(secondary, card)).toBeGreaterThanOrEqual(minRatio)
+    }
+  )
 })
