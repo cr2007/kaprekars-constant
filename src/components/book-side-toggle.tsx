@@ -27,7 +27,7 @@ export function BookSideToggle({ side, toggleSide }: BookSideToggleProps) {
       }
       title="Swap book pages"
     >
-      {side === 'left' ? <PanelRight className="size-4" /> : <PanelLeft className="size-4" />}
+      {side === 'left' ? <PanelRight className="size-5" /> : <PanelLeft className="size-5" />}
     </Button>
   )
 }
