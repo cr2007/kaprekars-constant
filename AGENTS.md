@@ -36,12 +36,17 @@ principles.
   `bun --bun run test` after any code change. Fix warnings and failing
   tests before finishing.
 - Follow the existing color token system in `src/index.css`. Add new
-  colors as OKLCH tokens, light and dark, with contrast checked, not
-  as one-off hex values in components.
+  colors as OKLCH tokens, light and dark, with contrast checked using
+  `src/lib/color-contrast.ts`, not as one-off hex values in components.
 - Keep components small and colocated under `src/components/`. Shared
   primitives live in `src/components/ui/` (shadcn).
 - `src/lib/kaprekar.ts` has regression tests in `kaprekar.test.ts`. Add
   a test alongside any behavior change there.
+- `src/lib/color-contrast.ts` has regression tests in
+  `color-contrast.test.ts` that read the actual OKLCH values out of
+  `src/index.css` and assert WCAG contrast minimums. Run
+  `bun --bun run test` after any `index.css` token change, and add a
+  case there for a new token pair that needs a guaranteed ratio.
 
 ## Commands
 
@@ -65,6 +70,8 @@ src/
   hooks/                    # theme and book-side state
   lib/kaprekar.ts           # the routine itself
   lib/kaprekar.test.ts       # regression tests for the routine
+  lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
+  lib/color-contrast.test.ts # regression tests reading index.css tokens
 public/
   fonts/                    # the custom heading font
 .github/workflows/          # GitHub Pages deploy

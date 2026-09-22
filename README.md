@@ -10,7 +10,9 @@ reaches 6174 within seven steps.
 
 - Live step-by-step calculation, with a compact view on small screens
   and a tile view on large screens.
-- Light and dark theme, with a toggle.
+- Light and dark theme, with a toggle. Both meet WCAG AA contrast, and
+  both get a stronger color scheme when the OS "increase contrast"
+  setting is on.
 - A book-mode layout for foldable devices with two screen segments.
   A button swaps which side holds the calculation.
 - Full keyboard and screen reader support. Skip link, live status
@@ -68,6 +70,8 @@ src/
   hooks/                    # theme and book-side state
   lib/kaprekar.ts           # the routine itself
   lib/kaprekar.test.ts       # regression tests for the routine
+  lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
+  lib/color-contrast.test.ts # regression tests reading index.css tokens
 public/
   fonts/                    # the custom heading font
 ```
