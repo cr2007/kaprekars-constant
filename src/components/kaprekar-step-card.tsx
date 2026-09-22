@@ -56,12 +56,16 @@ export function KaprekarStepCard({
             sitting flush against whichever end has no neighbor. */}
         <div className="flex shrink-0 flex-col items-center self-stretch">
           <div aria-hidden className={cn('w-px flex-1', !isFirst && 'bg-border')} />
+          {/* The non-reached badge's border keeps it a legible circle
+              against #steps's card background, since bg-muted alone sits
+              too close in lightness to bg-card to read as a shape on its
+              own (see color-contrast.test.ts for the checked ratio). */}
           <div
             className={cn(
-              'flex size-8 shrink-0 items-center justify-center rounded-full font-heading text-sm font-bold',
+              'flex size-8 shrink-0 items-center justify-center rounded-full border font-heading text-sm font-bold',
               reachedConstant
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground',
+                ? 'border-transparent bg-primary text-primary-foreground'
+                : 'border-muted-foreground/60 bg-muted text-muted-foreground',
               animate && reachedConstant && 'animate-constant-pulse'
             )}
             style={
@@ -120,7 +124,7 @@ export function KaprekarStepCard({
               id={`step-${index}-result`}
               className={cn(
                 '-m-2 flex items-center gap-3 rounded-xl border p-2',
-                reachedConstant ? 'border-primary bg-primary/10' : 'border-border'
+                reachedConstant ? 'border-primary bg-primary/10' : 'border-border bg-card'
               )}
             >
               <NumberTiles digits={step.resultDigits} />
