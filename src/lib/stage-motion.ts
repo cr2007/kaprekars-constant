@@ -1,6 +1,12 @@
 /** Strong ease-out for things that enter or respond to the user. */
 export const EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)'
 
+/** Strong ease-in-out for things that move from one place to another on screen. */
+export const EASE_IN_OUT = 'cubic-bezier(0.77, 0, 0.175, 1)'
+
+/** The last result moves up into the input row over this time. */
+const HANDOFF_MS = 300
+
 /** One row fades in over this time. */
 const FADE_MS = 200
 /** From the start of one row's fade to the start of the next. */
@@ -36,17 +42,24 @@ export interface StepTimeline {
   end: number
 }
 
-/** The rows of one step appear in order: the input, line 2, line 3, then the difference. */
-export function stepTimeline(): StepTimeline {
-  const descAt = ROW_GAP_MS
+/**
+ * The rows of one step appear in order: the input, line 2, line 3, then
+ * the difference. With `handoff`, line 2 waits until the last result has
+ * moved into the input row.
+ */
+export function stepTimeline(handoff: boolean): StepTimeline {
+  const descAt = handoff ? HANDOFF_MS : ROW_GAP_MS
   const ascAt = descAt + ROW_GAP_MS
   const resultAt = ascAt + ROW_GAP_MS
   return { descAt, ascAt, resultAt, end: resultAt + RESULT_MS }
 }
 
-/** How long one step moves when it plays. Autoplay waits this long before the next step. */
-export function stepMotionMs(): number {
-  return stepTimeline().end
+/**
+ * How long step `index` moves when autoplay arrives at it: step 1 starts
+ * a run, every later step arrives by the handoff. Autoplay waits this long.
+ */
+export function stepMotionMs(index: number): number {
+  return stepTimeline(index > 0 && !reducedMotion()).end
 }
 
 /** The stage parts that move. Each tile row wraps one `NumberTiles`. */
@@ -72,23 +85,47 @@ function fadeIn(el: HTMLElement, delay: number, duration = FADE_MS): Animation {
 }
 
 /**
- * Plays one step on the stage: the input, line 2 and line 3 fade in one
- * after another, then the difference rises into place. Reduced motion:
- * the same order, opacity only. Returns the time in ms at which the step
- * is at rest.
+ * FLIP: animates `el` from a rect measured before a DOM change (`first`)
+ * to where it sits now. Returns null when nothing moved.
  */
-export function playStep(root: HTMLElement, rows: StageRows): number {
-  // Step 1: stop every running animation, so a fast click never leaves a row half shown.
-  root.getAnimations({ subtree: true }).forEach((a) => a.cancel())
-  const plan = stepTimeline()
+export function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Animation | null {
+  const last = el.getBoundingClientRect()
+  const dx = first.left - last.left
+  const dy = first.top - last.top
+  if (dx === 0 && dy === 0) return null
+  return el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], {
+    duration,
+    easing: EASE_IN_OUT,
+    fill: 'backwards',
+  })
+}
 
-  // Step 2: the three tile rows, in reading order.
-  fadeIn(rows.input, 0)
+/**
+ * Plays one step on the stage. With `handoff`, the last result moves up
+ * into the input row, so the eye sees it become the next input; otherwise
+ * the input fades in. Then line 2 and line 3 fade in, and the difference
+ * rises into place. Reduced motion: the same order, opacity only. Returns
+ * the time in ms at which the step is at rest.
+ */
+export function playStep(root: HTMLElement, rows: StageRows, handoff: boolean): number {
+  // Step 1: stop every running animation first, so the rect below is the
+  // real layout and a fast click never leaves a row half shown.
+  root.getAnimations({ subtree: true }).forEach((a) => a.cancel())
+  const reduced = reducedMotion()
+  const moves = handoff && !reduced
+  const plan = stepTimeline(moves)
+
+  // Step 2: the input. The old result still shows the last step's number,
+  // so measure it before React's new rows move anything.
+  if (moves) flipFrom(rows.input, rows.result.getBoundingClientRect(), HANDOFF_MS)
+  else fadeIn(rows.input, 0)
+
+  // Step 3: lines 2 and 3, in reading order.
   fadeIn(rows.desc, plan.descAt)
   fadeIn(rows.asc, plan.ascAt)
 
-  // Step 3: the difference lands last. Reduced motion drops the rise.
-  if (reducedMotion()) {
+  // Step 4: the difference lands last. Reduced motion drops the rise.
+  if (reduced) {
     fadeIn(rows.resultBox, plan.resultAt, RESULT_MS)
   } else {
     rows.resultBox.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], {
