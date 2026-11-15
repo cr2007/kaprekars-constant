@@ -267,89 +267,134 @@ html[data-theme-flip] *::after {
 }
 
 /*
-  Foldable devices: hinge-aware "book" layout.
+  Foldable devices: two segments make two pages with two roles.
 
-  These use the CSS Viewport Segments API (`horizontal-viewport-
-  segments` / `vertical-viewport-segments` media features and the
-  matching `env(viewport-segment-*)` values) and the newer Device
-  Posture API (`device-posture`). Support today is limited to a
-  handful of dual-screen/foldable browser builds; everywhere else
-  these media features are simply unrecognized, so the blocks below
-  never match and the normal single-column layout above is untouched.
-  This is pure progressive enhancement, not a requirement to ship.
+  These rules use the CSS Viewport Segments API (`horizontal-viewport-
+  segments` / `vertical-viewport-segments` and `env(viewport-segment-*)`).
+  Chrome and Samsung Internet support it; elsewhere the media features
+  are unknown, the blocks never match, and the normal layout stays. A
+  foldable that lies flat reports one segment and gets the normal layout.
+  Nothing spans the fold, and no control sits on it.
 */
 
-/* The page-swap button only makes sense once two segments actually
-   exist, so it stays hidden until this same media condition is
-   real, rather than guessing support from JavaScript. */
+/* The page-swap button only makes sense once two side-by-side segments exist. */
 #book-side-toggle {
   display: none;
 }
 
-/* Unfolded into two side-by-side segments (book/laptop posture,
-   hinge running top-to-bottom): the intro, input, and background
-   reading stay on one page; the working calculation fills the
-   other page top to bottom. `data-book-side` on #page-content
-   flips which physical segment holds which (set from JS, since a
-   media query alone can't be user-toggled). */
+/*
+  Book posture (fold runs top to bottom). One page is the show: the stage
+  card, the trail and the playback bar. It stays in view and scrolls on
+  its own. The other page holds the input, the end panel and the reading,
+  and scrolls with the document. `data-book-side` names the page that
+  holds the input; the stage takes the other one.
+*/
 @media (horizontal-viewport-segments: 2) {
   #book-side-toggle {
     display: inline-flex;
   }
 
-  #page-content {
+  #page {
     display: grid;
+    max-width: none;
+    padding-inline: 0;
+    padding-top: 0;
     grid-template-columns:
       env(viewport-segment-width 0 0, 1fr)
       env(viewport-segment-width 1 0, 1fr);
-    column-gap: calc(
-      env(viewport-segment-left 1 0, 2rem) - env(viewport-segment-right 0 0, 0px)
-    );
-    row-gap: 2rem;
+    column-gap: calc(env(viewport-segment-left 1 0, 2rem) - env(viewport-segment-right 0 0, 0px));
+    grid-template-rows: auto auto auto 1fr;
     grid-template-areas:
-      "top-bar top-bar"
-      "hero    steps"
-      "form    steps"
-      "history steps";
-    align-items: start;
-    max-width: none;
+      "header  stage"
+      "end     stage"
+      "steps   stage"
+      "footer  stage";
+    align-content: start;
   }
 
-  #page-content[data-book-side='right'] {
+  #page[data-book-side='right'] {
     grid-template-areas:
-      "top-bar top-bar"
-      "steps   hero"
-      "steps   form"
-      "steps   history";
+      "stage header"
+      "stage end"
+      "stage steps"
+      "stage footer";
   }
 
-  #top-bar {
-    grid-area: top-bar;
+  #main-content {
+    display: contents;
   }
-  #hero {
-    grid-area: hero;
+
+  #page-header,
+  #end-panel,
+  #all-steps,
+  #page-footer {
+    margin-inline: 1rem;
   }
-  #input-form {
-    grid-area: form;
+
+  #page-header {
+    grid-area: header;
+    padding-top: max(1rem, env(safe-area-inset-top));
   }
-  #steps {
+  #end-panel {
+    grid-area: end;
+  }
+  #all-steps {
     grid-area: steps;
-    align-self: stretch;
   }
-  #history {
-    grid-area: history;
+  #page-footer {
+    grid-area: footer;
+  }
+
+  #stage-block {
+    grid-area: stage;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100dvh;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 
-/* Folded into a tent/tabletop posture (hinge running left-to-right):
-   the page still scrolls as one column, but the gap between sections
-   is widened by the real hinge measurement so a section is less
-   likely to land straddling the crease. */
+/*
+  Tabletop posture (fold runs left to right). The top page is for
+  looking: the stage card and the trail, pinned, with no scroll. It also
+  covers the hinge, so nothing scrolls across the fold. The bottom page is
+  for the hands: the playback bar first, then the input, the end panel
+  and the reading, which scroll under the top page.
+*/
 @media (vertical-viewport-segments: 2) {
-  #page-content {
-    row-gap: max(
-      2.5rem,
-      calc(env(viewport-segment-top 0 1, 2.5rem) - env(viewport-segment-bottom 0 0, 0px))
-    );
+  #page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    padding-top: 0;
+  }
+
+  #main-content,
+  #stage-block {
+    display: contents;
+  }
+
+  #stage-view {
+    order: -2;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: env(viewport-segment-top 0 1, 50dvh);
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: calc(env(viewport-segment-top 0 1, 0px) - env(viewport-segment-bottom 0 0, 0px) + 0.5rem);
+    justify-content: center;
+    overflow: hidden;
+    background: var(--background);
+  }
+
+  /* The bar stays at the top of the bottom page while the rest scrolls under it. */
+  #playback-bar {
+    order: -1;
+    position: sticky;
+    top: env(viewport-segment-top 0 1, 50dvh);
+    z-index: 10;
   }
 }

@@ -52,7 +52,7 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
   }
 
   return (
-    <div className="grid content-start *:col-start-1 *:row-start-1">
+    <div id="end-panel" className="grid content-start *:col-start-1 *:row-start-1">
       <div inert={arrived} className={cn('flex flex-col gap-3', arrived && hiddenLayer)}>
         <p className={cn('font-heading text-lg font-bold text-foreground', remaining <= 0 && 'invisible')}>
           <span className="font-mono">{remaining}</span> more round{remaining === 1 ? '' : 's'} to{' '}

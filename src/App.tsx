@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, RotateCcw } from 'lucide-react'
 import { useDeferredValue, useEffect, useRef, useState } from 'react'
+import { BookSideToggle } from '@/components/book-side-toggle'
 import { EndPanel, HowItWorks } from '@/components/end-panel'
 import { SolidDiceIcon } from '@/components/icons/solid-dice-icon'
 import { StageStep } from '@/components/stage-step'
@@ -9,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useBookSide } from '@/hooks/use-book-side'
 import { pad4, usePlayback } from '@/hooks/use-playback'
 import { useRun } from '@/hooks/use-run'
 import { KAPREKAR_CONSTANT, sanitizeDigitInput } from '@/lib/kaprekar'
@@ -44,6 +46,7 @@ export default function App() {
   const inputRef = useRef<HTMLInputElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [allOpen, setAllOpen] = useState(false)
+  const book = useBookSide()
 
   const hasRun = steps.length > 0
   const last = steps.length - 1
@@ -81,6 +84,8 @@ export default function App() {
 
   return (
     <div
+      id="page"
+      data-book-side={book.side}
       className={`mx-auto flex min-h-svh max-w-5xl flex-col gap-4 pt-[max(1rem,env(safe-area-inset-top))] lg:gap-5 lg:pt-8 ${GUTTERS}`}
     >
       <a
@@ -91,11 +96,14 @@ export default function App() {
       </a>
 
       {/* Step 1 of the story: the number goes in, right above where it plays. */}
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
+      <header id="page-header" className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
         <h1 className="text-balance font-heading text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
           Watch a number become <span className="font-mono text-primary">6174</span>
         </h1>
-        <ThemeToggle />
+        <div className="flex">
+          <BookSideToggle side={book.side} toggleSide={book.toggleSide} />
+          <ThemeToggle />
+        </div>
         <div className="col-span-2 flex flex-col gap-1.5">
           <Label htmlFor="number-input" className="sr-only text-muted-foreground lg:not-sr-only">
             Your 4-digit number
@@ -132,49 +140,53 @@ export default function App() {
         </div>
       </header>
 
-      <main id="main-content" className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-x-10 lg:gap-y-5">
+      <main id="main-content" className="grid gap-4 min-[840px]:grid-cols-[minmax(0,1fr)_21rem] min-[840px]:gap-x-8 min-[840px]:gap-y-5 lg:gap-x-10">
         <output className="sr-only">{play.message}</output>
 
         {/* Step 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
-        <div ref={stageRef} className="flex min-w-0 scroll-mt-4 flex-col gap-3">
-          <StageStep
-            step={steps[play.index] ?? null}
-            index={play.index}
-            total={steps.length}
-            runId={runId}
-            arrival={play.index === arrivalIndex}
-            animate={play.animate}
-            empty={
-              <div className="flex max-w-sm flex-col gap-4 text-left">
-                {showAlert ? (
-                  <Alert id="input-note" variant="destructive" className="text-base">
-                    <AlertDescription>{run.error}</AlertDescription>
-                  </Alert>
-                ) : (
-                  <p id="input-note" className="text-pretty font-heading text-lg font-bold text-foreground">
-                    {partial ? (
-                      <>
-                        <span className="font-mono">{4 - run.rawInput.length}</span> more digit
-                        {run.rawInput.length === 3 ? '' : 's'}.
-                      </>
-                    ) : (
-                      <>
-                        Type a <span className="font-mono">4</span>-digit number, or press Random.
-                      </>
-                    )}
-                  </p>
-                )}
-                <HowItWorks />
-              </div>
-            }
-          />
+        <div id="stage-block" ref={stageRef} className="flex min-w-0 scroll-mt-4 flex-col gap-3">
+          <div id="stage-view" className="flex min-w-0 flex-col gap-3">
+            <StageStep
+              step={steps[play.index] ?? null}
+              index={play.index}
+              total={steps.length}
+              runId={runId}
+              arrival={play.index === arrivalIndex}
+              animate={play.animate}
+              empty={
+                <div className="flex max-w-sm flex-col gap-4 text-left">
+                  {showAlert ? (
+                    <Alert id="input-note" variant="destructive" className="text-base">
+                      <AlertDescription>{run.error}</AlertDescription>
+                    </Alert>
+                  ) : (
+                    <p id="input-note" className="text-pretty font-heading text-lg font-bold text-foreground">
+                      {partial ? (
+                        <>
+                          <span className="font-mono">{4 - run.rawInput.length}</span> more digit
+                          {run.rawInput.length === 3 ? '' : 's'}.
+                        </>
+                      ) : (
+                        <>
+                          Type a <span className="font-mono">4</span>-digit number, or press Random.
+                        </>
+                      )}
+                    </p>
+                  )}
+                  <HowItWorks />
+                </div>
+              }
+            />
+
+            {hasRun && (
+              <Trail steps={steps} index={play.index} reached={play.reached} arrived={arrived} onPick={play.go} />
+            )}
+          </div>
 
           {hasRun && (
             <>
-              <Trail steps={steps} index={play.index} reached={play.reached} arrived={arrived} onPick={play.go} />
-
               {/* In flow, not sticky: on a short screen a stuck bar covered the lower rows of the stage. */}
-              <div>
+              <div id="playback-bar">
                 <fieldset className="mx-auto flex w-fit items-center gap-1 rounded-full border border-border bg-card p-1.5 shadow-sm">
                   <legend className="sr-only">Playback</legend>
                   {/* aria-disabled, not disabled: the button keeps focus when it ends the run. */}
@@ -216,7 +228,7 @@ export default function App() {
         )}
 
         {hasRun && (
-          <details className={cn(DISCLOSURE, 'lg:col-span-2')} onToggle={(event) => setAllOpen(event.currentTarget.open)}>
+          <details id="all-steps" className={cn(DISCLOSURE, 'min-[840px]:col-span-2')} onToggle={(event) => setAllOpen(event.currentTarget.open)}>
             <summary id="all-steps-summary" className={SUMMARY}>
               <ChevronRight className={CHEVRON} aria-hidden />
               See all steps
@@ -240,7 +252,7 @@ export default function App() {
         )}
       </main>
 
-      <footer>
+      <footer id="page-footer">
         <details className={DISCLOSURE}>
           <summary className={SUMMARY}>
             <ChevronRight className={CHEVRON} aria-hidden />
