@@ -4,12 +4,18 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // GITHUB_REPOSITORY is "owner/repo", set by GitHub Actions on every run.
-const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1]
+const [owner, repoName] = process.env.GITHUB_REPOSITORY?.split('/') ?? []
+// The GitHub Pages address, for og:url in index.html.
+const siteUrl = repoName ? `https://${owner}.github.io/${repoName}/` : 'http://localhost:5173/'
 
 // https://vite.dev/config/
 export default defineConfig({
   base: repoName ? `/${repoName}/` : '/',
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    { name: 'site-url', transformIndexHtml: (html) => html.replaceAll('__SITE_URL__', siteUrl) },
+  ],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
