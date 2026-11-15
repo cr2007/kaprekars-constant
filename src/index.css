@@ -85,6 +85,8 @@
     --border: oklch(0.88 0.03 168);
     --input: oklch(0.88 0.03 168);
     --ring: oklch(0.42 0.14 168);
+    /* Graph-paper lines on the page: --primary at about 9% on --background. */
+    --grid: oklch(0.92 0.025 168);
     --radius: 0.625rem;
 }
 
@@ -110,6 +112,7 @@
     --border: oklch(0.32 0.03 168);
     --input: oklch(0.32 0.03 168);
     --ring: oklch(0.68 0.15 168);
+    --grid: oklch(0.21 0.03 168);
 }
 
 /*
@@ -139,6 +142,11 @@
     }
   body {
     @apply bg-background text-foreground;
+    /* Graph paper on the page only: cards and tiles are opaque and cover it. */
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 22px 22px;
     }
   html {
     @apply font-sans;

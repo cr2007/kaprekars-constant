@@ -152,4 +152,19 @@ describe('theme tokens in index.css', () => {
       expect(oklchContrastRatio(secondary, card)).toBeGreaterThanOrEqual(minRatio)
     }
   )
+
+  test.each([
+    ['light', root],
+    ['dark', dark],
+  ])('%s: the graph-paper grid stays faint and never weakens text on it', (_name, block) => {
+    // The grid lines sit under page text, so muted text must stay readable on
+    // a line, and the line must stay a faint texture, not a pattern that competes.
+    const background = readOklchVar(block, 'background')
+    const grid = readOklchVar(block, 'grid')
+    const mutedForeground = readOklchVar(block, 'muted-foreground')
+    expect(oklchContrastRatio(mutedForeground, grid)).toBeGreaterThanOrEqual(4.5)
+    const lineRatio = oklchContrastRatio(grid, background)
+    expect(lineRatio).toBeGreaterThan(1.05)
+    expect(lineRatio).toBeLessThan(1.25)
+  })
 })
