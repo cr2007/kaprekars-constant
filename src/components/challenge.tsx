@@ -1,4 +1,4 @@
-import { Lightbulb } from 'lucide-react'
+import { Puzzle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { countWithSteps } from '@/lib/stats'
@@ -32,7 +32,7 @@ export function Challenge({ current, stepCount }: ChallengeProps) {
     <div className="flex flex-col gap-2">
       <p className="flex items-start gap-2 text-sm text-muted-foreground sm:text-base">
         {/* The margin centers the 16 px icon on the first line: 20 px line height, then 24 px from sm. */}
-        <Lightbulb className="mt-0.5 size-4 shrink-0 text-primary sm:mt-1" aria-hidden />
+        <Puzzle className="mt-0.5 size-4 shrink-0 text-primary sm:mt-1" aria-hidden />
         <span>
           {found ? (
             <>
