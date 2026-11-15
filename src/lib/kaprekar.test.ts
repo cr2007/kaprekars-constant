@@ -6,6 +6,7 @@ import {
   randomValidNumber,
   runKaprekarRoutine,
   sanitizeDigitInput,
+  stepsToConstant,
   validateInput,
 } from './kaprekar'
 
@@ -147,5 +148,20 @@ describe('randomValidNumber', () => {
       expect(candidate).toBeLessThanOrEqual(9999)
       expect(validateInput(String(candidate)).valid).toBe(true)
     }
+  })
+})
+
+describe('stepsToConstant', () => {
+  test('counts the steps up to the first 6174', () => {
+    expect(stepsToConstant(runKaprekarRoutine(3524))).toBe(3)
+  })
+
+  test('leaves out the extra round after 6174', () => {
+    const steps = runKaprekarRoutine(3524)
+    expect(stepsToConstant([...steps, computeStep(KAPREKAR_CONSTANT)])).toBe(3)
+  })
+
+  test('is 0 for no steps', () => {
+    expect(stepsToConstant([])).toBe(0)
   })
 })

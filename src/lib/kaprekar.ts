@@ -158,6 +158,15 @@ export function nextStep(afterResult: number): KaprekarStep {
   return computeStep(afterResult)
 }
 
+/**
+ * How many steps `steps` took to first reach {@link KAPREKAR_CONSTANT}.
+ * The extra round after 6174 does not count. Returns 0 when no step
+ * reaches it.
+ */
+export function stepsToConstant(steps: KaprekarStep[]): number {
+  return steps.findIndex((step) => step.result === KAPREKAR_CONSTANT) + 1
+}
+
 /** Picks a random 4-digit number that {@link validateInput} accepts. */
 export function randomValidNumber(): number {
   let candidate: number
