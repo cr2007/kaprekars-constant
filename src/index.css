@@ -152,6 +152,23 @@ html[data-theme-flip] *::after {
   transition: none !important;
 }
 
+/* A step joins the trail with an opacity fade only, because people scan the trail often. */
+@keyframes stage-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.stage-fade-in {
+  animation: stage-fade-in 150ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-fade-in {
+    animation: none;
+  }
+}
+
 @keyframes step-in {
   from {
     opacity: 0;
