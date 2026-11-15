@@ -22,10 +22,13 @@ interface EndPanelProps {
 /** Hides a layer but keeps its height, so the page does not jump when it shows. */
 const hiddenLayer = 'invisible opacity-0'
 
-/** The routine in the words of the stage's own row labels, so a first run maps onto it. */
-export function HowItWorks() {
+/**
+ * The routine in the words of the stage's own row labels, so a first run maps onto it.
+ * It renders in two places, so each caller gives its own `id`.
+ */
+export function HowItWorks({ id }: { id: string }) {
   return (
-    <ol className="flex list-decimal flex-col gap-1 pl-5 text-pretty text-muted-foreground marker:font-mono marker:text-primary">
+    <ol id={id} className="flex list-decimal flex-col gap-1 pl-5 text-pretty text-muted-foreground marker:font-mono marker:text-primary">
       <li>Sort the digits biggest first.</li>
       <li>Sort them smallest first.</li>
       <li>Subtract to get the difference.</li>
@@ -53,16 +56,17 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
 
   return (
     <div id="end-panel" className="grid content-start *:col-start-1 *:row-start-1">
-      <div inert={arrived} className={cn('flex flex-col gap-3', arrived && hiddenLayer)}>
-        <p className={cn('font-heading text-lg font-bold text-foreground', remaining <= 0 && 'invisible')}>
+      <div id="end-progress" inert={arrived} className={cn('flex flex-col gap-3', arrived && hiddenLayer)}>
+        <p id="rounds-left" className={cn('font-heading text-lg font-bold text-foreground', remaining <= 0 && 'invisible')}>
           <span className="font-mono">{remaining}</span> more round{remaining === 1 ? '' : 's'} to{' '}
           <span className="font-mono">6174</span>.
         </p>
-        <HowItWorks />
+        <HowItWorks id="how-it-works" />
       </div>
 
       {/* The delay waits for the 6174 step's motion and its hop, so the answer never shows early. */}
       <div
+        id="end-result"
         inert={!arrived}
         className={cn(
           'flex flex-col gap-5 transition-[opacity,visibility] duration-300 ease-out',
@@ -75,6 +79,7 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
           <div className="flex flex-wrap items-start gap-2">
             <div className="grid *:col-start-1 *:row-start-1">
               <Button
+                id="one-more-button"
                 type="button"
                 variant="secondary"
                 inert={run.wentFurther}
@@ -86,6 +91,7 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
               </Button>
               {/* Visibility flips at once, so focus can land; the fade waits 150 ms for the new step. */}
               <p
+                id="loop-note"
                 ref={loopNote}
                 tabIndex={-1}
                 className={cn(
@@ -106,7 +112,7 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
           </h2>
           {/* Phones: one row of chips that scrolls sideways and fades at the edge it hides.
               Inline-size containment stops the unwrapped row from widening the page. */}
-          <div className="chip-scroller -mx-1 overflow-x-auto px-1 py-1 [contain:inline-size] max-sm:[&_li]:shrink-0 max-sm:[&>ul]:flex-nowrap">
+          <div id="quick-picks" className="chip-scroller -mx-1 overflow-x-auto px-1 py-1 [contain:inline-size] max-sm:[&_li]:shrink-0 max-sm:[&>ul]:flex-nowrap">
             <QuickPicks onPick={run.runNumber} />
           </div>
           <Challenge current={Number(run.rawInput)} stepCount={run.stepCount} />

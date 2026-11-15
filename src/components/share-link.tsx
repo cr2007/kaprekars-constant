@@ -27,13 +27,13 @@ export function ShareLink({ value }: ShareLinkProps) {
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <Button type="button" variant="outline" className="h-11 w-fit gap-2" onClick={copy}>
+    <div id="share-link" className="flex flex-col gap-1">
+      <Button id="share-button" type="button" variant="outline" className="h-11 w-fit gap-2" onClick={copy}>
         {state === 'copied' ? <Check className="size-4" aria-hidden /> : <Link2 className="size-4" aria-hidden />}
         Share <span className="font-mono">{value}</span>
       </Button>
       {/* Monospace: Endless draws I and l the same, and people may retype a URL. */}
-      {state === 'failed' && <p className="font-mono text-xs break-all text-muted-foreground">{shareUrl(value)}</p>}
+      {state === 'failed' && <p id="share-url" className="font-mono text-xs break-all text-muted-foreground">{shareUrl(value)}</p>}
       <output className="sr-only">{state === 'copied' ? 'Link copied.' : ''}</output>
     </div>
   )

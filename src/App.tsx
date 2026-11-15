@@ -89,6 +89,7 @@ export default function App() {
       className={`mx-auto flex min-h-svh max-w-5xl flex-col gap-4 pt-[max(1rem,env(safe-area-inset-top))] lg:gap-5 lg:pt-8 ${GUTTERS}`}
     >
       <a
+        id="skip-link"
         href="#main-content"
         className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-lg focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-primary-foreground focus-visible:shadow-lg"
       >
@@ -97,7 +98,7 @@ export default function App() {
 
       {/* Step 1 of the story: the number goes in, right above where it plays. */}
       <header id="page-header" className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
-        <h1 className="text-balance font-heading text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
+        <h1 id="page-title" className="text-balance font-heading text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
           Watch a number become <span className="font-mono text-primary">6174</span>
         </h1>
         <div className="flex">
@@ -105,7 +106,7 @@ export default function App() {
           <ThemeToggle />
         </div>
         <div className="col-span-2 flex flex-col gap-1.5">
-          <Label htmlFor="number-input" className="sr-only text-muted-foreground lg:not-sr-only">
+          <Label id="number-label" htmlFor="number-input" className="sr-only text-muted-foreground lg:not-sr-only">
             Your 4-digit number
           </Label>
           <div className="flex gap-2">
@@ -141,7 +142,7 @@ export default function App() {
       </header>
 
       <main id="main-content" className="grid gap-4 min-[840px]:grid-cols-[minmax(0,1fr)_21rem] min-[840px]:gap-x-8 min-[840px]:gap-y-5 lg:gap-x-10">
-        <output className="sr-only">{play.message}</output>
+        <output id="playback-status" className="sr-only">{play.message}</output>
 
         {/* Step 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
         <div id="stage-block" ref={stageRef} className="flex min-w-0 scroll-mt-4 flex-col gap-3">
@@ -173,7 +174,7 @@ export default function App() {
                       )}
                     </p>
                   )}
-                  <HowItWorks />
+                  <HowItWorks id="how-it-works-intro" />
                 </div>
               }
             />
@@ -191,6 +192,7 @@ export default function App() {
                   <legend className="sr-only">Playback</legend>
                   {/* aria-disabled, not disabled: the button keeps focus when it ends the run. */}
                   <button
+                    id="back-button"
                     type="button"
                     className={BAR_BUTTON}
                     aria-disabled={play.index === 0}
@@ -200,6 +202,7 @@ export default function App() {
                     Back
                   </button>
                   <button
+                    id="play-button"
                     type="button"
                     className={cn(BAR_BUTTON, 'min-w-28 bg-primary text-primary-foreground hover:bg-primary/85')}
                     onClick={play.toggle}
@@ -208,6 +211,7 @@ export default function App() {
                     {playLabel}
                   </button>
                   <button
+                    id="next-button"
                     type="button"
                     className={BAR_BUTTON}
                     aria-disabled={play.index >= last}
@@ -234,7 +238,7 @@ export default function App() {
               See all steps
             </summary>
             {allOpen && (
-              <ol aria-labelledby="all-steps-summary" className="flex flex-col gap-1 font-mono text-lg tabular-nums">
+              <ol id="all-steps-list" aria-labelledby="all-steps-summary" className="flex flex-col gap-1 font-mono text-lg tabular-nums">
                 {steps.map((s, i) => (
                   <li key={i}>
                     <span className="font-sans text-sm text-muted-foreground">
@@ -253,12 +257,12 @@ export default function App() {
       </main>
 
       <footer id="page-footer">
-        <details className={DISCLOSURE}>
-          <summary className={SUMMARY}>
+        <details id="origin-details" className={DISCLOSURE}>
+          <summary id="origin-summary" className={SUMMARY}>
             <ChevronRight className={CHEVRON} aria-hidden />
             Where <span className="font-mono">6174</span> comes from
           </summary>
-          <p className="max-w-prose text-pretty text-sm text-muted-foreground sm:text-base">
+          <p id="origin-text" className="max-w-prose text-pretty text-sm text-muted-foreground sm:text-base">
             The mathematician D. R. Kaprekar found this routine in <span className="font-mono">1949</span>,
             working with digits by hand. From any <span className="font-mono">4</span>-digit number with at
             least two different digits, sorting and subtracting always arrived at{' '}
@@ -267,6 +271,7 @@ export default function App() {
             name.
           </p>
           <a
+            id="wikipedia-link"
             href="https://en.wikipedia.org/wiki/6174_(number)"
             target="_blank"
             rel="noreferrer"

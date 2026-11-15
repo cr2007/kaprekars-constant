@@ -84,7 +84,7 @@ export function HandCircle({ show, delay, animate, children }: HandCircleProps) 
         {children}
       </span>
       {show && (
-        <svg ref={sketch} aria-hidden className="hand-circle" preserveAspectRatio="none">
+        <svg id="hand-circle" ref={sketch} aria-hidden className="hand-circle" preserveAspectRatio="none">
           <path pathLength={1} />
           <path pathLength={1} />
         </svg>

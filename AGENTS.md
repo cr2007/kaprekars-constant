@@ -90,6 +90,72 @@ public/
 .github/workflows/           # GitHub Pages deploy
 ```
 
+## Element ids
+
+Use these ids to name a page area in a chat or a test. Each id is
+unique on the page in every state. Some show only in one state (a run,
+6174, an error). Add new ones to this list, and keep it in sync. Do not
+put a fixed id in a component that renders twice: pass it as a prop.
+
+```
+page                 # the whole page; data-book-side lives here
+skip-link            # "Skip to main content"
+page-header          # title, toggles and the number input
+page-title           # the h1
+book-side-toggle     # swaps book pages (two-screen devices only)
+theme-toggle         # light or dark theme
+number-label         # "Your 4-digit number"
+number-input         # the 4-digit field
+random-button        # "Random"
+random-dice-icon     # the dice on the Random button
+main-content         # <main>
+playback-status      # screen-reader status of the playback
+stage-block          # the stage, the trail and the playback bar
+stage-view           # the stage and the trail
+stage-card           # the stage card
+stage-heading        # "Step 1 of 3"
+constant-badge       # "Kaprekar's constant", shown at 6174
+stage-sum            # the column sum
+sum-start            # line: Start with
+sum-biggest          # line: Biggest first
+sum-smallest         # line: Smallest first
+sum-difference       # line: Difference
+hand-circle          # the drawn circle around 6174
+stage-empty          # the empty stage before a run
+input-note           # hint, digits left, or the input error
+how-it-works-intro   # the routine list in the empty stage
+trail                # the step trail
+trail-goal           # the 6174 goal at the end of the trail
+playback-bar         # Back, Play and Next
+back-button          # Back
+play-button          # Play, Pause or Replay
+next-button          # Next
+end-panel            # the panel beside or under the stage
+end-progress         # before 6174: rounds left and the routine
+rounds-left          # "2 more rounds to 6174."
+how-it-works         # the routine list in the end panel
+end-result           # after 6174: fact, actions, try another
+step-fact            # the step count fact and its chart
+step-chart           # the 7-bar chart
+one-more-button      # "Do one more round"
+loop-note            # "6174 leads straight back to itself."
+share-link           # the share button and its fallback text
+share-button         # "Share 1234"
+share-url            # the link as text, if the clipboard fails
+try-another          # "Try another number" heading
+quick-picks          # the quick-pick chips
+challenge            # the step-count challenge
+next-challenge       # "Next challenge"
+all-steps            # "See all steps" disclosure
+all-steps-summary    # its summary
+all-steps-list       # its list of steps
+page-footer          # the footer
+origin-details       # "Where 6174 comes from" disclosure
+origin-summary       # its summary
+origin-text          # its paragraph
+wikipedia-link       # "Read more on Wikipedia"
+```
+
 ## Verification
 
 `src/lib/` and `src/hooks/` have regression tests for their pure

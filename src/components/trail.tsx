@@ -23,7 +23,7 @@ interface TrailProps {
 export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   // scroll-mb: a focused option scrolls clear of the playback bar under it.
   return (
-    <div className="flex min-h-13 scroll-mb-24 items-center gap-1.5 max-sm:-mx-1">
+    <div id="trail" className="flex min-h-13 scroll-mb-24 items-center gap-1.5 max-sm:-mx-1">
       <fieldset className="flex min-w-0 flex-1 gap-1 rounded-full border border-border bg-card p-1 shadow-sm">
         <legend className="sr-only">Steps from {pad4(steps[0].input)}</legend>
         {steps.map((s, i) => (
@@ -59,6 +59,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
       </fieldset>
       <ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground max-sm:hidden" />
       <span
+        id="trail-goal"
         className={cn(
           'font-mono text-base tabular-nums max-sm:hidden sm:text-lg',
           arrived ? 'font-bold text-primary' : 'text-muted-foreground'

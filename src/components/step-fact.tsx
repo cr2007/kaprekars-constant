@@ -30,7 +30,7 @@ export function StepFact({ stepCount }: StepFactProps) {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <figure className="flex flex-col gap-3">
+    <figure id="step-fact" className="flex flex-col gap-3">
       <figcaption className="text-pretty text-sm text-muted-foreground sm:text-base">
         <span className="font-semibold text-foreground">
           <span className="font-mono">{stepCount}</span> step{stepCount === 1 ? '' : 's'}.

@@ -29,7 +29,7 @@ export function Challenge({ current, stepCount }: ChallengeProps) {
   )
 
   return (
-    <div className="flex flex-col gap-2">
+    <div id="challenge" className="flex flex-col gap-2">
       <p className="flex items-start gap-2 text-sm text-muted-foreground sm:text-base">
         {/* The margin centers the 16 px icon on the first line: 20 px line height, then 24 px from sm. */}
         <Puzzle className="mt-0.5 size-4 shrink-0 text-primary sm:mt-1" aria-hidden />
@@ -48,7 +48,7 @@ export function Challenge({ current, stepCount }: ChallengeProps) {
         </span>
       </p>
       {found && (
-        <Button type="button" variant="secondary" className="h-11 w-fit" onClick={() => setTargetIndex((i) => i + 1)}>
+        <Button id="next-challenge" type="button" variant="secondary" className="h-11 w-fit" onClick={() => setTargetIndex((i) => i + 1)}>
           Next challenge
         </Button>
       )}

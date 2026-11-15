@@ -102,6 +102,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
 
   return (
     <section
+      id="stage-card"
       aria-labelledby="stage-heading"
       className="grid rounded-3xl border border-border bg-card p-3 sm:p-6 *:col-start-1 *:row-start-1"
     >
@@ -110,27 +111,27 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
           <h2 id="stage-heading" className="font-heading text-lg font-bold text-foreground md:text-xl">
             Step <span className="font-mono">{index + 1}</span> of <span className="font-mono">{total}</span>
           </h2>
-          <Badge ref={badge} className={cn(!isConstant && 'invisible')}>
+          <Badge id="constant-badge" ref={badge} className={cn(!isConstant && 'invisible')}>
             Kaprekar&apos;s constant
           </Badge>
         </div>
 
-        <dl className="grid grid-cols-[minmax(0,auto)_1.5rem_auto] items-center justify-center gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-3">
-          <div className={LINE}>
+        <dl id="stage-sum" className="grid grid-cols-[minmax(0,auto)_1.5rem_auto] items-center justify-center gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-3">
+          <div id="sum-start" className={LINE}>
             <dt className={label}>Start with</dt>
             <dd ref={input} className="col-start-3">
               <NumberTiles digits={shownStep.digits} className={TILE_SIZE} />
             </dd>
           </div>
 
-          <div className={LINE}>
+          <div id="sum-biggest" className={LINE}>
             <dt className={label}>Biggest first</dt>
             <dd ref={desc} className="col-start-3">
               <NumberTiles digits={shownStep.descendingDigits} className={TILE_SIZE} />
             </dd>
           </div>
 
-          <div className={LINE}>
+          <div id="sum-smallest" className={LINE}>
             <dt className={label}>Smallest first</dt>
             <dd className="col-span-2 grid grid-cols-subgrid items-center">
               <span className={cn(op, 'text-primary')}>&minus;</span>
@@ -141,7 +142,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
           </div>
 
           {/* The rule above the difference sits in the extra top margin, clear of the circle's 8 px pad. */}
-          <div className={cn(LINE, 'mt-3.5')}>
+          <div id="sum-difference" className={cn(LINE, 'mt-3.5')}>
             <dt className={label}>Difference</dt>
             <dd className="relative col-span-2 grid grid-cols-subgrid items-center before:absolute before:inset-x-0 before:-top-3.5 before:h-0.5 before:rounded-full before:bg-border">
               <span className={cn(op, 'text-foreground')}>=</span>
@@ -157,7 +158,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
         </dl>
       </div>
 
-      {!step && <div className="flex items-center justify-center p-2 text-center">{empty}</div>}
+      {!step && <div id="stage-empty" className="flex items-center justify-center p-2 text-center">{empty}</div>}
     </section>
   )
 }
