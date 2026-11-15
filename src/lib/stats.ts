@@ -1,4 +1,4 @@
-import { runKaprekarRoutine, validateInput } from '@/lib/kaprekar'
+import { KAPREKAR_CONSTANT, computeStep, validateInput } from '@/lib/kaprekar'
 
 /** Step counts over every valid 4-digit input. Built once, on first use. */
 export interface Distribution {
@@ -11,16 +11,29 @@ export interface Distribution {
 let cache: Distribution | null = null
 
 /**
- * Runs the routine on all 9,000 four-digit numbers once and groups the
- * valid ones by step count. It costs a few milliseconds; the result is cached.
+ * Groups all 9,000 four-digit numbers by step count, once, and caches it.
+ * A number takes one step more than its difference, so each number runs
+ * one step only. A full run per number made a 200 ms long task on a
+ * throttled phone (Lighthouse mobile).
  */
 export function distribution(): Distribution {
   if (cache) return cache
+  // Step 1: steps to 6174 from each number, filled in as the loop reaches it. 0 means not known yet.
+  const stepsFrom = new Int8Array(10000)
+  const count = (n: number): number => {
+    if (!stepsFrom[n]) {
+      const result = computeStep(n).result
+      stepsFrom[n] = result === KAPREKAR_CONSTANT ? 1 : 1 + count(result)
+    }
+    return stepsFrom[n]
+  }
+
+  // Step 2: group the valid inputs by their count.
   const byCount: number[][] = Array.from({ length: 8 }, () => [])
   let total = 0
   for (let n = 1000; n <= 9999; n++) {
     if (!validateInput(String(n)).valid) continue
-    byCount[runKaprekarRoutine(n).length].push(n)
+    byCount[count(n)].push(n)
     total++
   }
   cache = { byCount, total }

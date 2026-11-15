@@ -16,6 +16,13 @@ describe('distribution', () => {
   test('puts 3524 with the 3-step numbers', () => {
     expect(distribution().byCount[3]).toContain(3524)
   })
+
+  test('agrees with a full run of the routine for every input', () => {
+    const wrong = distribution().byCount.flatMap((group, steps) =>
+      group.filter((n) => runKaprekarRoutine(n).length !== steps)
+    )
+    expect(wrong).toEqual([])
+  })
 })
 
 describe('countWithSteps', () => {
