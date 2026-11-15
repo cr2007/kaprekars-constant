@@ -107,12 +107,26 @@ describe('runKaprekarRoutine', () => {
     expect(steps[0].result).toBe(KAPREKAR_CONSTANT)
   })
 
-  test('every 4-digit number with at least two different digits converges', () => {
-    for (let n = 1000; n <= 9999; n += 37) {
+  test('every valid 4-digit input reaches 6174 in at most 7 steps', () => {
+    // Step 1: run the routine on all 8,991 valid inputs and count steps.
+    const stepCounts: Record<number, number> = {}
+    for (let n = 1000; n <= 9999; n++) {
       if (!validateInput(String(n)).valid) continue
       const steps = runKaprekarRoutine(n)
       expect(steps.at(-1)?.result).toBe(KAPREKAR_CONSTANT)
+      stepCounts[steps.length] = (stepCounts[steps.length] ?? 0) + 1
     }
+
+    // Step 2: compare with the known distribution (6174 itself is 1 step).
+    expect(stepCounts).toEqual({
+      1: 357,
+      2: 519,
+      3: 2124,
+      4: 1124,
+      5: 1379,
+      6: 1508,
+      7: 1980,
+    })
   })
 })
 
