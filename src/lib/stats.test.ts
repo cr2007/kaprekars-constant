@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { runKaprekarRoutine } from './kaprekar'
-import { countWithSteps, distribution, randomWithSteps } from './stats'
+import { countWithSteps, distribution, randomWithSteps, shareWithSteps } from './stats'
 
 describe('distribution', () => {
   test('counts 8,991 valid inputs', () => {
@@ -30,5 +30,13 @@ describe('randomWithSteps', () => {
     for (const steps of [1, 4, 7]) {
       expect(runKaprekarRoutine(randomWithSteps(steps))).toHaveLength(steps)
     }
+  })
+})
+
+describe('shareWithSteps', () => {
+  test('gives the count, the total and the percent for a step count', () => {
+    const share = shareWithSteps(3)
+    expect(share).toMatchObject({ count: 2124, total: 8991 })
+    expect(share.percent.toFixed(1)).toBe('23.6')
   })
 })

@@ -161,4 +161,13 @@ describe('theme tokens in index.css', () => {
     const mark = readOklchVar(block, 'mark')
     expect(oklchContrastRatio(mark, card)).toBeGreaterThanOrEqual(3)
   })
+
+  test.each([
+    ['light', root],
+    ['dark', dark],
+  ])('%s: the chart tooltip (background text on a foreground fill) clears 4.5:1', (_name, block) => {
+    const background = readOklchVar(block, 'background')
+    const foreground = readOklchVar(block, 'foreground')
+    expect(oklchContrastRatio(background, foreground)).toBeGreaterThanOrEqual(4.5)
+  })
 })

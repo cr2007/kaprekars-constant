@@ -37,3 +37,10 @@ export function randomWithSteps(steps: number): number {
   const pool = distribution().byCount[steps] ?? []
   return pool[Math.floor(Math.random() * pool.length)]
 }
+
+/** How many valid inputs take exactly `steps` steps, out of all of them, and that share in percent. */
+export function shareWithSteps(steps: number): { count: number; total: number; percent: number } {
+  const count = countWithSteps(steps)
+  const { total } = distribution()
+  return { count, total, percent: (count / total) * 100 }
+}
