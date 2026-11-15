@@ -6,7 +6,8 @@ Instructions for any AI coding agent working in this repository.
 
 A small web app. It shows Kaprekar's routine: sort a 4-digit number's
 digits high to low and low to high, subtract, repeat, until it reaches
-6174. See `PRODUCT.md` for the product register, audience, and design
+6174. The layout is the "Stage": one step at a time, played step by
+step. See `PRODUCT.md` for the product register, audience, and design
 principles.
 
 ## Stack
@@ -36,6 +37,11 @@ principles.
 - Run `bun --bun run build`, `bun --bun run lint`, and
   `bun --bun run test` after any code change. Fix warnings and failing
   tests before finishing.
+- Use the `font-mono` utility for every digit, and the default fonts
+  for words.
+- Every `el.animate()` path must check `reducedMotion()` from
+  `src/lib/stage-motion.ts`: CSS media rules do not stop the Web
+  Animations API.
 - Follow the existing color token system in `src/index.css`. Add new
   colors as OKLCH tokens, light and dark, with contrast checked using
   `src/lib/color-contrast.ts`, not as one-off hex values in components.
@@ -64,24 +70,30 @@ bun --bun run preview     # preview the production build
 
 ```
 src/
-  App.tsx                 # main layout and state
-  components/              # UI components
-  components/ui/           # shadcn primitives
-  components/icons/         # one-off icons shadcn/lucide don't ship
-  hooks/                    # theme and book-side state
-  lib/kaprekar.ts           # the routine itself
-  lib/kaprekar.test.ts       # regression tests for the routine
+  App.tsx                    # the Stage layout
+  components/                # UI components (stage step, trail, end panel)
+  components/ui/             # shadcn primitives
+  components/icons/          # one-off icons shadcn/lucide don't ship
+  hooks/use-run.ts           # run state, synced with ?n=
+  hooks/use-playback.ts      # which step the stage shows, autoplay
+  hooks/                     # also theme and book-side state
+  lib/kaprekar.ts            # the routine itself
+  lib/stage-motion.ts        # step, handoff and 6174 arrival motion
+  lib/stats.ts               # step counts over all valid inputs
+  lib/url.ts                 # ?n= read, write and share link
+  lib/rough-circle.ts        # seeded hand-drawn circle (MIT port)
   lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
-  lib/color-contrast.test.ts # regression tests reading index.css tokens
+  lib/*.test.ts              # regression tests (bun:test)
 public/
-  fonts/                    # Endless, the custom text font
-.github/workflows/          # GitHub Pages deploy
+  fonts/                     # Endless, the custom text font
+  favicon.ico                # 16 and 32 px tab icon frames
+.github/workflows/           # GitHub Pages deploy
 ```
 
 ## Verification
 
-`src/lib/kaprekar.ts` has regression tests; run them with
-`bun --bun run test`. The UI has no test suite. Before calling a UI
+`src/lib/` and `src/hooks/` have regression tests for their pure
+logic; run them with `bun --bun run test`. The UI has no test suite. Before calling a UI
 change done:
 
 1. Type-check, lint, and run the tests (see above).
