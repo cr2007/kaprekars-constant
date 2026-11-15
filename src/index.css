@@ -145,6 +145,13 @@
     }
 }
 
+/* A theme flip turns transitions off for one style flush (see use-theme.ts). */
+html[data-theme-flip] *,
+html[data-theme-flip] *::before,
+html[data-theme-flip] *::after {
+  transition: none !important;
+}
+
 @keyframes step-in {
   from {
     opacity: 0;

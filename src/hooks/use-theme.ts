@@ -28,7 +28,9 @@ function getSystemTheme(): Theme {
  * picks one with {@link toggleTheme}. Only that pick goes to `localStorage`.
  *
  * A blocking script in `index.html` applies the same class before React
- * mounts, so there is no flash of the wrong theme on load.
+ * mounts, so there is no flash of the wrong theme on load. A flip turns
+ * transitions off for one style flush, so every color changes in the
+ * same frame.
  */
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => getStoredTheme() ?? getSystemTheme())
@@ -36,7 +38,14 @@ export function useTheme() {
   const userPicked = useRef(getStoredTheme() !== null)
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
+    // Step 1: turn transitions off, so no color fades after the page has switched.
+    const root = document.documentElement
+    root.dataset.themeFlip = ''
+    root.classList.toggle('dark', theme === 'dark')
+
+    // Step 2: flush styles once with the new colors, then turn transitions back on.
+    void root.offsetHeight
+    delete root.dataset.themeFlip
   }, [theme])
 
   useEffect(() => {
