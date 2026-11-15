@@ -30,8 +30,9 @@ principles.
   `bun --bun node_modules/vite/bin/vite.js`, instead of the bare
   command name. The `dev`, `build`, and `preview` scripts in
   `package.json` already do this; keep new scripts consistent with
-  them. `oxlint` and `bun test` are unaffected: `oxlint` ships a real
-  native binary, and `bun test` never leaves Bun.
+  them. `oxlint`, `bun check`, and `bun test` are unaffected: `oxlint`
+  ships a real native binary, and `bun check` and `bun test` never
+  leave Bun. The `build` script type-checks with `bun check -b`.
 - Run `bun --bun run build`, `bun --bun run lint`, and
   `bun --bun run test` after any code change. Fix warnings and failing
   tests before finishing.
