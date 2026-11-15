@@ -22,7 +22,7 @@ export function NumberTiles({ digits, size = 'lg', className }: NumberTilesProps
           <span
             key={index}
             className={cn(
-              'flex items-center justify-center rounded-lg bg-primary font-chalk font-bold text-primary-foreground shadow-sm',
+              'flex items-center justify-center rounded-lg bg-primary font-mono font-bold text-primary-foreground shadow-sm',
               size === 'lg'
                 ? 'size-11 text-xl @5xl:size-14 @5xl:text-2xl'
                 : 'size-8 text-sm sm:size-9 sm:text-base'
@@ -44,5 +44,5 @@ interface InlineNumberProps {
 
 /** Renders digits as plain text, for the compact equation view. */
 export function InlineNumber({ digits, className }: InlineNumberProps) {
-  return <span className={cn('font-chalk tabular-nums', className)}>{digits.join('')}</span>
+  return <span className={cn('font-mono tabular-nums', className)}>{digits.join('')}</span>
 }

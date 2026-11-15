@@ -85,9 +85,9 @@ export function KaprekarStepCard({
           >
             <span className="flex items-baseline gap-2 whitespace-nowrap">
               <InlineNumber digits={step.descendingDigits} />
-              <span className="font-chalk text-primary">&minus;</span>
+              <span className="font-mono text-primary">&minus;</span>
               <InlineNumber digits={step.ascendingDigits} />
-              <span className="font-chalk text-foreground">=</span>
+              <span className="font-mono text-foreground">=</span>
               <InlineNumber
                 digits={step.resultDigits}
                 className={reachedConstant ? 'text-primary' : undefined}
@@ -111,14 +111,14 @@ export function KaprekarStepCard({
               <NumberTiles digits={step.descendingDigits} />
             </div>
 
-            <span className="pb-2 font-chalk text-2xl font-bold text-primary">&minus;</span>
+            <span className="pb-2 font-mono text-2xl font-bold text-primary">&minus;</span>
 
             <div className="flex flex-col gap-1.5">
               <span className="text-xs text-muted-foreground">Smallest arrangement</span>
               <NumberTiles digits={step.ascendingDigits} />
             </div>
 
-            <span className="pb-2 font-chalk text-2xl font-bold text-foreground">=</span>
+            <span className="pb-2 font-mono text-2xl font-bold text-foreground">=</span>
 
             <div
               id={`step-${index}-result`}

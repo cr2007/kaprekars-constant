@@ -176,7 +176,7 @@ export default function App() {
                 placeholder="e.g. 3524"
                 value={rawInput}
                 onChange={(event) => handleInputChange(event.target.value)}
-                className="h-14 border-0 bg-card text-center text-2xl font-bold tracking-[0.3em] shadow-sm sm:text-3xl md:h-16 md:text-4xl xl:h-20 xl:text-5xl"
+                className="h-14 border-0 bg-card text-center font-mono text-2xl font-bold tracking-[0.3em] shadow-sm sm:text-3xl md:h-16 md:text-4xl xl:h-20 xl:text-5xl"
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? 'input-error' : undefined}
               />

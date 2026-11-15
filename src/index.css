@@ -5,6 +5,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/atkinson-hyperlegible-mono";
 @import "@fontsource/kalam/700.css";
 
 @font-face {
@@ -21,6 +22,7 @@
     --font-heading: 'Endless', var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
     --font-chalk: 'Kalam', 'Comic Sans MS', cursive;
+    --font-mono: 'Atkinson Hyperlegible Mono Variable', ui-monospace, monospace;
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
