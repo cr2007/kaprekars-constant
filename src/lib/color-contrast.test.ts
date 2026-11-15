@@ -167,4 +167,13 @@ describe('theme tokens in index.css', () => {
     expect(lineRatio).toBeGreaterThan(1.05)
     expect(lineRatio).toBeLessThan(1.25)
   })
+
+  test.each([
+    ['light', root],
+    ['dark', dark],
+  ])('%s: the hand-drawn mark clears the 3:1 non-text minimum on the card', (_name, block) => {
+    const card = readOklchVar(block, 'card')
+    const mark = readOklchVar(block, 'mark')
+    expect(oklchContrastRatio(mark, card)).toBeGreaterThanOrEqual(3)
+  })
 })

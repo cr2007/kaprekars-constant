@@ -87,6 +87,8 @@
     --ring: oklch(0.42 0.14 168);
     /* Graph-paper lines on the page: --primary at about 9% on --background. */
     --grid: oklch(0.92 0.025 168);
+    /* The hand-drawn circle around 6174: a warm marker on the teal tiles. */
+    --mark: oklch(0.56 0.18 45);
     --radius: 0.625rem;
 }
 
@@ -113,6 +115,7 @@
     --input: oklch(0.32 0.03 168);
     --ring: oklch(0.68 0.15 168);
     --grid: oklch(0.21 0.03 168);
+    --mark: oklch(0.78 0.14 55);
 }
 
 /*
@@ -164,6 +167,26 @@ html[data-theme-flip] *,
 html[data-theme-flip] *::before,
 html[data-theme-flip] *::after {
   transition: none !important;
+}
+
+/*
+  The hand-drawn circle (hand-circle.tsx). Its viewBox is the box size in
+  px, so the 2 px line stays pen sized. An SVG is a replaced element: left
+  plus right does not stretch it, so it gets a width.
+*/
+.hand-circle {
+  position: absolute;
+  top: -8px;
+  left: -11px;
+  width: calc(100% + 22px);
+  height: calc(100% + 16px);
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: var(--mark);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* A step joins the trail with an opacity fade only, because people scan the trail often. */

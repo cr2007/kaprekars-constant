@@ -1,4 +1,5 @@
-import { type ReactNode, useLayoutEffect, useRef } from 'react'
+import { type ReactNode, useLayoutEffect, useRef, useState } from 'react'
+import { HandCircle } from '@/components/hand-circle'
 import { NumberTiles } from '@/components/number-tiles'
 import { Badge } from '@/components/ui/badge'
 import { KAPREKAR_CONSTANT, type KaprekarStep, computeStep } from '@/lib/kaprekar'
@@ -16,6 +17,9 @@ const LINE = 'col-span-3 grid grid-cols-subgrid items-center'
 
 /** A step shown at rest lands its 6174 hop this long after it paints. */
 const AT_REST_LANDED_MS = 300
+
+/** The circle starts this long after the difference lands, with the badge. */
+const CIRCLE_DELAY_MS = 250
 
 interface StageStepProps {
   /** The step to show, or null before a run. */
@@ -51,6 +55,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
   const celebrated = useRef<number | null>(null)
   const shownStep = step ?? PLACEHOLDER
   const isConstant = step?.result === KAPREKAR_CONSTANT
+  // When the circle around 6174 starts, in ms. Null hides it. Set where the step's motion is planned.
+  const [circleAt, setCircleAt] = useState<number | null>(null)
 
   useLayoutEffect(() => {
     const rows = {
@@ -81,7 +87,10 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
     }
     firstPaint.current = false
 
-    // Step 2: the 6174 arrival plays once per run.
+    // Step 2: the circle starts 250 ms after the difference lands, with the badge.
+    if (!same) setCircleAt(arrival ? landedAt + CIRCLE_DELAY_MS : null)
+
+    // Step 3: the 6174 arrival plays once per run.
     if (arrival && celebrated.current !== runId) {
       celebrated.current = runId
       playArrival(rows as StageRows, landedAt)
@@ -131,20 +140,16 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
             </dd>
           </div>
 
-          {/* The rule above the difference sits in the extra top margin: 2 px plus one row gap. */}
-          <div className={cn(LINE, 'mt-2 md:mt-3.5')}>
+          {/* The rule above the difference sits in the extra top margin, clear of the circle's 8 px pad. */}
+          <div className={cn(LINE, 'mt-3.5')}>
             <dt className={label}>Difference</dt>
-            <dd className="relative col-span-2 grid grid-cols-subgrid items-center before:absolute before:inset-x-0 before:-top-2 before:h-0.5 before:rounded-full before:bg-border md:before:-top-3.5">
+            <dd className="relative col-span-2 grid grid-cols-subgrid items-center before:absolute before:inset-x-0 before:-top-3.5 before:h-0.5 before:rounded-full before:bg-border">
               <span className={cn(op, 'text-foreground')}>=</span>
-              <div
-                ref={resultBox}
-                className={cn(
-                  '-m-1.5 w-fit rounded-xl border-2 p-1.5',
-                  isConstant ? 'border-primary bg-primary/15' : 'border-transparent'
-                )}
-              >
+              <div ref={resultBox} className="w-fit">
                 <div ref={result}>
-                  <NumberTiles digits={shownStep.resultDigits} className={TILE_SIZE} />
+                  <HandCircle show={circleAt !== null} delay={circleAt ?? 0} animate={animate}>
+                    <NumberTiles digits={shownStep.resultDigits} className={TILE_SIZE} />
+                  </HandCircle>
                 </div>
               </div>
             </dd>
