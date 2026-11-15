@@ -2,8 +2,7 @@ import { cn } from 'cn'
 
 interface NumberTilesProps {
   digits: number[]
-  /** `lg` for the main step display, `sm` wherever the tiles need to shrink to fit. */
-  size?: 'sm' | 'lg'
+  /** Classes for the tile row. `*:` variants reach each tile, e.g. `md:*:size-14`. */
   className?: string
 }
 
@@ -14,19 +13,14 @@ interface NumberTilesProps {
  * would hear "7, 7, 6, 6" instead of "7766". A hidden text node next to
  * them carries the real number instead.
  */
-export function NumberTiles({ digits, size = 'lg', className }: NumberTilesProps) {
+export function NumberTiles({ digits, className }: NumberTilesProps) {
   return (
     <span className="inline-flex">
       <span aria-hidden="true" className={cn('flex gap-1.5 sm:gap-2', className)}>
         {digits.map((digit, index) => (
           <span
             key={index}
-            className={cn(
-              'flex items-center justify-center rounded-lg bg-primary font-mono font-bold text-primary-foreground shadow-sm',
-              size === 'lg'
-                ? 'size-11 text-xl @5xl:size-14 @5xl:text-2xl'
-                : 'size-8 text-sm sm:size-9 sm:text-base'
-            )}
+            className="flex size-11 items-center justify-center rounded-lg bg-primary font-mono text-xl font-bold text-primary-foreground shadow-sm"
           >
             {digit}
           </span>
@@ -35,14 +29,4 @@ export function NumberTiles({ digits, size = 'lg', className }: NumberTilesProps
       <span className="sr-only">{digits.join('')}</span>
     </span>
   )
-}
-
-interface InlineNumberProps {
-  digits: number[]
-  className?: string
-}
-
-/** Renders digits as plain text, for the compact equation view. */
-export function InlineNumber({ digits, className }: InlineNumberProps) {
-  return <span className={cn('font-mono tabular-nums', className)}>{digits.join('')}</span>
 }

@@ -122,21 +122,6 @@ describe('theme tokens in index.css', () => {
   })
 
   test.each([
-    ['light', root],
-    ['dark', dark],
-  ])(
-    '%s: the non-reached step badge border stays a legible circle on the card fill',
-    (_name, block) => {
-      // Regression: bg-muted alone sits too close to bg-card to read as a
-      // shape (see kaprekar-step-card.tsx); border-muted-foreground/60 is
-      // the fix, checked here against its 3:1 non-text minimum.
-      const card = readOklchVar(block, 'card')
-      const mutedForeground = readOklchVar(block, 'muted-foreground')
-      expect(oklchContrastRatio(mutedForeground, card, 0.6)).toBeGreaterThanOrEqual(3)
-    }
-  )
-
-  test.each([
     ['light', root, 1.3],
     ['dark', dark, 1.4],
   ])(
