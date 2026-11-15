@@ -73,5 +73,5 @@ src/
   lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
   lib/color-contrast.test.ts # regression tests reading index.css tokens
 public/
-  fonts/                    # the custom heading font
+  fonts/                    # Endless, the custom text font
 ```

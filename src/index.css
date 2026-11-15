@@ -7,19 +7,36 @@
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/atkinson-hyperlegible-mono";
 
+/*
+  Words are set in Endless, digits in Atkinson Hyperlegible Mono. Endless
+  has no digit-safe shapes (its 0 matches O), and it covers printable ASCII
+  only. So the stack takes letters and ASCII marks from Endless, digits from
+  Atkinson, and anything else (curly quotes, the minus sign) from Geist.
+*/
 @font-face {
     font-family: 'Endless';
     src: url('/fonts/endless-regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
+    unicode-range: U+0020-002F, U+003A-007E;
+}
+
+@font-face {
+    font-family: 'Atkinson Digits';
+    src: url('@fontsource-variable/atkinson-hyperlegible-mono/files/atkinson-hyperlegible-mono-latin-wght-normal.woff2')
+        format('woff2-variations');
+    font-weight: 200 800;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0030-0039;
 }
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: 'Endless', var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-heading: var(--font-sans);
+    --font-sans: 'Endless', 'Atkinson Digits', 'Geist Variable', sans-serif;
     --font-mono: 'Atkinson Hyperlegible Mono Variable', ui-monospace, monospace;
     --color-ring: var(--ring);
     --color-input: var(--input);
