@@ -4,7 +4,12 @@ type BookSide = 'left' | 'right'
 
 /** Reads which side held the calculation last time, defaulting to the left page. */
 function getInitialSide(): BookSide {
-  return window.localStorage.getItem('book-side') === 'right' ? 'right' : 'left'
+  try {
+    return window.localStorage.getItem('book-side') === 'right' ? 'right' : 'left'
+  } catch {
+    // Storage is blocked (privacy settings, sandboxed frame): use the default.
+    return 'left'
+  }
 }
 
 /**
@@ -18,7 +23,11 @@ export function useBookSide() {
   const [side, setSide] = useState<BookSide>(getInitialSide)
 
   useEffect(() => {
-    window.localStorage.setItem('book-side', side)
+    try {
+      window.localStorage.setItem('book-side', side)
+    } catch {
+      // Storage is blocked: the choice lasts for this page load only.
+    }
   }, [side])
 
   function toggleSide() {

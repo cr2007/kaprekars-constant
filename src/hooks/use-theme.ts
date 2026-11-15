@@ -4,8 +4,12 @@ type Theme = 'light' | 'dark'
 
 /** Reads the stored theme, falling back to the OS preference on first visit. */
 function getInitialTheme(): Theme {
-  const stored = window.localStorage.getItem('theme')
-  if (stored === 'light' || stored === 'dark') return stored
+  try {
+    const stored = window.localStorage.getItem('theme')
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch {
+    // Storage is blocked (privacy settings, sandboxed frame): use the OS theme.
+  }
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
@@ -21,7 +25,11 @@ export function useTheme() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
-    window.localStorage.setItem('theme', theme)
+    try {
+      window.localStorage.setItem('theme', theme)
+    } catch {
+      // Storage is blocked: the theme lasts for this page load only.
+    }
   }, [theme])
 
   function toggleTheme() {
