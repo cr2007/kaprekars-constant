@@ -151,6 +151,12 @@
   html {
     @apply font-sans;
     }
+  /* No double-tap zoom delay on the things people tap. */
+  button,
+  summary,
+  label {
+    touch-action: manipulation;
+  }
 }
 
 /* A theme flip turns transitions off for one style flush (see use-theme.ts). */

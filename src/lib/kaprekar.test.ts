@@ -19,6 +19,12 @@ describe('sanitizeDigitInput', () => {
     expect(sanitizeDigitInput('123456')).toBe('1234')
   })
 
+  test('keeps all 4 digits of a pasted number with a separator', () => {
+    // Regression (B-12): the field has no maxLength, which would cut "1,234" to "1,23" first.
+    expect(sanitizeDigitInput('1,234')).toBe('1234')
+    expect(sanitizeDigitInput(' 3 524 ')).toBe('3524')
+  })
+
   test('leaves a short digit string untouched', () => {
     expect(sanitizeDigitInput('35')).toBe('35')
   })

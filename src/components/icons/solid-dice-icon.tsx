@@ -1,6 +1,8 @@
 import { useId } from 'react'
 
 interface SolidDiceIconProps {
+  /** An id for the svg element, so tests and styles can find it. */
+  id?: string
   className?: string
 }
 
@@ -15,13 +17,13 @@ interface SolidDiceIconProps {
  * background. The back die is a rotated copy of the same shape, drawn
  * first so the front die naturally overlaps it.
  */
-export function SolidDiceIcon({ className }: SolidDiceIconProps) {
-  const id = useId()
-  const backMaskId = `${id}-back`
-  const frontMaskId = `${id}-front`
+export function SolidDiceIcon({ id, className }: SolidDiceIconProps) {
+  const maskId = useId()
+  const backMaskId = `${maskId}-back`
+  const frontMaskId = `${maskId}-front`
 
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden focusable="false">
+    <svg id={id} viewBox="0 0 24 24" className={className} aria-hidden focusable="false">
       <mask id={backMaskId} maskUnits="userSpaceOnUse">
         <rect x="9" y="1" width="11" height="11" rx="2.2" fill="white" />
         <circle cx="11.6" cy="3.6" r="1.15" fill="black" />
