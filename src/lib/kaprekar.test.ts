@@ -2,7 +2,6 @@ import { describe, expect, test } from 'bun:test'
 import {
   KAPREKAR_CONSTANT,
   computeStep,
-  nextStep,
   randomValidNumber,
   runKaprekarRoutine,
   sanitizeDigitInput,
@@ -134,15 +133,6 @@ describe('runKaprekarRoutine', () => {
       6: 1508,
       7: 1980,
     })
-  })
-})
-
-describe('nextStep', () => {
-  test('shows that 6174 loops back to itself', () => {
-    const step = nextStep(KAPREKAR_CONSTANT)
-    expect(step.descendingDigits).toEqual([7, 6, 4, 1])
-    expect(step.ascendingDigits).toEqual([1, 4, 6, 7])
-    expect(step.result).toBe(KAPREKAR_CONSTANT)
   })
 })
 

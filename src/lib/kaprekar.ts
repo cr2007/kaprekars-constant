@@ -150,15 +150,6 @@ export function runKaprekarRoutine(start: number): KaprekarStep[] {
 }
 
 /**
- * Computes one more step after the routine has already reached
- * {@link KAPREKAR_CONSTANT}, to show that it loops back to itself
- * (7641 - 1467 = 6174).
- */
-export function nextStep(afterResult: number): KaprekarStep {
-  return computeStep(afterResult)
-}
-
-/**
  * How many steps `steps` took to first reach {@link KAPREKAR_CONSTANT}.
  * The extra round after 6174 does not count. Returns 0 when no step
  * reaches it.
