@@ -44,9 +44,10 @@ principles.
 - Every `el.animate()` path must check `reducedMotion()` from
   `src/lib/stage-motion.ts`: CSS media rules do not stop the Web
   Animations API.
-- Keep motion math out of components: put it in `src/lib/` as plain
-  functions (`stage-motion.ts`, `pill-motion.ts`), so unit tests can
-  check it with no DOM. Components only measure and call them.
+- Put new motion math in `src/lib/` as plain functions
+  (`stage-motion.ts`, `pill-motion.ts`), so unit tests can check it
+  with no DOM. Components only measure and call them. The dice icon
+  still keeps its own pose math; move it only when you change it.
 - Export a constant or a helper from `src/lib/`, not from a component
   file: a component file that exports other things breaks fast refresh
   (oxlint `only-export-components`).
