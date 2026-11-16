@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import { type CSSProperties, type PointerEvent, useLayoutEffect, useRef, useState } from 'react'
 import { pad4 } from '@/hooks/use-playback'
 import type { KaprekarStep } from '@/lib/kaprekar'
+import { fromKeyboard, glide, LIFT, paintedX, type PillParts, place } from '@/lib/pill-motion'
 import { reducedMotion } from '@/lib/stage-motion'
 import { cn } from 'cn'
 
@@ -15,83 +16,8 @@ interface TrailProps {
   onPick: (index: number) => void
 }
 
-/**
- * A spring as CSS `linear()`: stiffness 170, damping 22, mass 1 (damping
- * ratio 0.84). It is half way at 119 ms, so a tap answers at once, then it
- * eases in with 0.7% overshoot and settles within 0.5% at about 530 ms.
- */
-function spring(stiffness: number, damping: number): { easing: string; ms: number } {
-  const w0 = Math.sqrt(stiffness)
-  const zeta = damping / (2 * w0)
-  const wd = w0 * Math.sqrt(1 - zeta * zeta)
-  const x = (t: number) => 1 - Math.exp(-zeta * w0 * t) * (Math.cos(wd * t) + ((zeta * w0) / wd) * Math.sin(wd * t))
-  // Step 1: the time to settle within 0.5%, found once at load.
-  let settle = 0
-  for (let t = 0; t < 2; t += 0.001) if (Math.abs(1 - x(t)) > 0.005) settle = t
-  // Step 2: 40 samples over that time; the last one is exactly 1.
-  const points = Array.from({ length: 40 }, (_, i) => (i === 39 ? 1 : x((settle * i) / 39)).toFixed(4))
-  return { easing: `linear(${points.join(', ')})`, ms: Math.round(settle * 1000) }
-}
-const GLIDE = spring(170, 22)
-/** The lift during a tap's glide: up fast as the pill leaves, then down with the settle. */
-const LIFT = '1.04 1.1'
 /** A press must travel this many px before it counts as a drag, not a tap. */
 const DRAG_SLOP = 4
-
-/**
- * A pill move this soon after a key press or release comes from the
- * keyboard (radio arrows, the stage's arrow keys, Enter or Space on Back
- * and Next). It jumps: keyboard actions get no motion.
- */
-const KEY_MS = 250
-let lastKeyAt = -Infinity
-for (const type of ['keydown', 'keyup']) {
-  window.addEventListener(type, (event) => (lastKeyAt = event.timeStamp), true)
-}
-
-/** The pill's horizontal offset in px as painted now, including a running animation. */
-function paintedX(el: HTMLElement): number {
-  return new DOMMatrixReadOnly(getComputedStyle(el).transform).m41
-}
-
-/**
- * The pill and the step numbers it carries. The numbers move the other
- * way, so they stay on top of the numbers of the track and only the part
- * inside the pill shows: a digit turns to the pill's text color at the
- * exact edge of the pill, not when the pill is nearest.
- */
-interface PillParts {
-  pill: HTMLElement
-  copy: HTMLElement
-}
-
-/** Puts the pill at `x` px, or hands it back to CSS with null. */
-function place({ pill, copy }: PillParts, x: number | null) {
-  pill.style.transform = x === null ? '' : `translateX(${x}px)`
-  copy.style.transform = x === null ? '' : `translateX(${-x}px)`
-}
-
-/**
- * Animates the pill from `from` to `to` (px) on the spring, or stops at
- * once under reduced motion. With `sheen`, the glide carries the lift in
- * the same motion: the pill rises in the first 30% from `lift` (its scale
- * now) and settles back to rest as it lands. Returns the pill's animation.
- */
-function glide({ pill, copy }: PillParts, from: number, to: number, sheen?: HTMLElement, lift = '1 1'): Animation | null {
-  for (const el of [pill, copy, sheen]) el?.getAnimations().forEach((a) => a.cancel())
-  if (from === to || reducedMotion()) return null
-  const options = { duration: GLIDE.ms, easing: GLIDE.easing }
-  copy.animate([{ transform: `translateX(${-from}px)` }, { transform: `translateX(${-to}px)` }], options)
-  sheen?.animate(
-    [
-      { scale: lift, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
-      { scale: LIFT, offset: 0.3, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' },
-      { scale: '1 1' },
-    ],
-    { duration: GLIDE.ms }
-  )
-  return pill.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], options)
-}
 
 /**
  * The run as a scrubber: one native radio per step, labelled with the
@@ -146,7 +72,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
     const lift = liftFrom.current
     liftFrom.current = undefined
     shownIndex.current = index
-    if (performance.now() - lastKeyAt < KEY_MS) glide(p, to, to)
+    if (fromKeyboard()) glide(p, to, to)
     else if (byUser) liftGlide(p, from, to, lift)
     else glide(p, from, to)
   }, [index])
