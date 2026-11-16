@@ -8,7 +8,9 @@ interface InputNoteProps {
   error: string | null
 }
 
-const SLOT = 'flex size-11 items-center justify-center rounded-lg font-mono text-xl font-bold'
+/** A slot: 44 px, or smaller when 4 slots do not fit the note's width (a narrow screen, or large text). */
+const SLOT =
+  'flex size-[min(2.75rem,calc((100cqi_-_1.125rem)/4))] items-center justify-center rounded-lg font-mono text-[length:min(1.25rem,calc((100cqi_-_1.125rem)/9))] font-bold'
 
 /**
  * What the empty stage says about the field. Four slots mirror the field:
@@ -57,7 +59,7 @@ export function InputNote({ raw, error }: InputNoteProps) {
 
   // Step 2: the slots, then the text. The live region reads each change once.
   return (
-    <div id="input-note" aria-live="polite" className="flex flex-col gap-3">
+    <div id="input-note" aria-live="polite" className="@container flex flex-col gap-3">
       <span id="input-note-slots" aria-hidden="true" className="flex gap-1.5 sm:gap-2">
         {Array.from({ length: 4 }, (_, i) => {
           const digit = raw[i]

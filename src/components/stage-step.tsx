@@ -9,11 +9,19 @@ import { cn } from 'cn'
 /** Holds the stage's height before the first run. It is never shown. */
 const PLACEHOLDER = computeStep(3524)
 
-/** Bigger tiles from `md` up. `NumberTiles` puts this class on the tile row. */
-const TILE_SIZE = 'md:*:size-14 md:*:text-2xl'
+/**
+ * Bigger tiles from `md` up. In a narrow card (below 19rem: a 280 to 320 px
+ * screen, or large text) the tiles size to the card instead, so 4 always fit
+ * beside the operator column. `NumberTiles` puts this class on the tile row.
+ */
+const TILE_SIZE =
+  'md:*:size-14 md:*:text-2xl @max-[19rem]:*:size-[min(2.75rem,calc((100cqi_-_3.5rem)/4))] @max-[19rem]:*:text-[length:min(1.25rem,calc((100cqi_-_3.5rem)/9))]'
+
+/** In a narrow card, each label takes its own row above its tiles (HIG: a stacked layout at large text sizes). */
+const STACK = '@max-[19rem]:col-span-2'
 
 /** One line of the sum: a term and its value, on the parent's three columns. */
-const LINE = 'col-span-3 grid grid-cols-subgrid items-center'
+const LINE = `col-span-3 grid grid-cols-subgrid items-center ${STACK}`
 
 /** On the loop step, the result's circle starts this long after the start's: the 550 ms draw, then a beat. */
 const LOOP_SECOND_CIRCLE_MS = 650
@@ -114,7 +122,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
     }
   }, [step, index, runId, arrival, loop, animate, take])
 
-  const label = 'text-sm text-muted-foreground sm:text-base'
+  const label = `text-sm text-muted-foreground sm:text-base ${STACK}`
   const op = 'text-center font-mono text-2xl font-bold md:text-3xl'
 
   return (
@@ -123,7 +131,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
       aria-labelledby="stage-heading"
       className="grid rounded-3xl border border-border bg-card p-3 sm:p-6 *:col-start-1 *:row-start-1"
     >
-      <div ref={root} className={cn('flex flex-col gap-3 md:gap-4', !step && 'invisible')}>
+      <div ref={root} className={cn('@container flex flex-col gap-3 md:gap-4', !step && 'invisible')}>
         <div className="flex min-h-7 flex-wrap items-center justify-between gap-2">
           <h2 id="stage-heading" className="font-heading text-lg font-bold text-foreground md:text-xl">
             Step <span className="font-mono">{index + 1}</span> of <span className="font-mono">{total}</span>
@@ -133,7 +141,10 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
           </Badge>
         </div>
 
-        <dl id="stage-sum" className="grid grid-cols-[minmax(0,auto)_1.5rem_auto] items-center justify-center gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-3">
+        <dl
+          id="stage-sum"
+          className="grid grid-cols-[minmax(0,auto)_1.5rem_auto] items-center justify-center gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-3 @max-[19rem]:grid-cols-[1.5rem_auto]"
+        >
           {/* Extra room under the start number, so it reads as the input, not as a line of the subtraction.
               A thin dashed line sits half way in that room (18 px, 28 px from md): dashed and 1 px, so it
               reads as a divider, not as the solid 2 px bar of the subtraction. */}
@@ -145,7 +156,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
             )}
           >
             <dt className={label}>Start with</dt>
-            <dd ref={input} className="col-start-3">
+            <dd ref={input} className="col-start-3 @max-[19rem]:col-start-2">
               <HandCircle id="hand-circle-start" show={startCircleAt !== null} delay={startCircleAt ?? 0} animate={animate}>
                 <NumberTiles digits={shownStep.digits} tone="outline" className={TILE_SIZE} />
               </HandCircle>
@@ -154,7 +165,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
 
           <div id="sum-biggest" className={LINE}>
             <dt className={label}>Biggest first</dt>
-            <dd ref={desc} className="col-start-3">
+            <dd ref={desc} className="col-start-3 @max-[19rem]:col-start-2">
               <NumberTiles digits={shownStep.descendingDigits} className={TILE_SIZE} />
             </dd>
           </div>
@@ -170,9 +181,16 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
           </div>
 
           {/* The rule above the difference sits in the extra top margin, clear of the circle's 8 px pad. */}
-          <div id="sum-difference" className={cn(LINE, 'mt-3.5')}>
+          {/* The rule above the difference. Stacked, the label sits above the tiles, so the row draws the rule. */}
+          <div
+            id="sum-difference"
+            className={cn(
+              LINE,
+              'relative mt-3.5 @max-[19rem]:before:absolute @max-[19rem]:before:inset-x-0 @max-[19rem]:before:-top-2.5 @max-[19rem]:before:h-0.5 @max-[19rem]:before:rounded-full @max-[19rem]:before:bg-border'
+            )}
+          >
             <dt className={label}>Difference</dt>
-            <dd className="relative col-span-2 grid grid-cols-subgrid items-center before:absolute before:inset-x-0 before:-top-3.5 before:h-0.5 before:rounded-full before:bg-border">
+            <dd className="relative col-span-2 grid grid-cols-subgrid items-center before:absolute before:inset-x-0 before:-top-3.5 before:h-0.5 before:rounded-full before:bg-border @max-[19rem]:before:hidden">
               <span className={cn(op, 'text-foreground')}>=</span>
               <div ref={resultBox} className="w-fit">
                 <div ref={result}>

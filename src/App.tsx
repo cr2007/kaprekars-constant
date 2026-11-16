@@ -95,11 +95,12 @@ export default function App() {
           <BookSideToggle side={book.side} toggleSide={book.toggleSide} />
           <ThemeToggle />
         </div>
-        <div className="col-span-2 flex flex-col gap-1.5">
+        {/* A container: below 19rem (a 280 to 320 px screen, or large text) the field and Random stack. */}
+        <div className="@container col-span-2 flex flex-col gap-1.5">
           <Label id="number-label" htmlFor="number-input" className="sr-only text-muted-foreground lg:not-sr-only">
             Your 4-digit number
           </Label>
-          <div className="flex gap-2">
+          <div className="flex gap-2 @max-[19rem]:flex-col">
             {/* No maxLength: it would cut a pasted "1,234" to "1,23" before the sanitizer keeps 4 digits. */}
             <Input
               id="number-input"
@@ -131,7 +132,8 @@ export default function App() {
         </div>
       </header>
 
-      <main id="main-content" className="grid gap-4 min-[840px]:grid-cols-[minmax(0,1fr)_21rem] min-[840px]:gap-x-8 min-[840px]:gap-y-5 lg:gap-x-10">
+      {/* minmax(0, 1fr): one column on phones that its content can never widen past the screen. */}
+      <main id="main-content" className="grid grid-cols-[minmax(0,1fr)] gap-4 min-[840px]:grid-cols-[minmax(0,1fr)_21rem] min-[840px]:gap-x-8 min-[840px]:gap-y-5 lg:gap-x-10">
         <output id="playback-status" className="sr-only">{play.message}</output>
 
         {/* Step 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
