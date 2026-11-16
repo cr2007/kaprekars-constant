@@ -245,13 +245,16 @@ export default function App() {
             {allOpen && (
               <ol id="all-steps-list" aria-labelledby="all-steps-summary" className="flex flex-col gap-1 font-mono text-lg tabular-nums">
                 {steps.map((s, i) => (
-                  <li key={i}>
+                  // A flex row centres the small label on the larger digits; on the baseline it hung 2.8 px low.
+                  <li key={i} className="flex items-center gap-2">
                     <span className="font-sans text-sm text-muted-foreground">
-                      Step <span className="font-mono">{i + 1}</span>:{' '}
+                      Step <span className="font-mono">{i + 1}</span>:
                     </span>
-                    {pad4(s.descendingNumber)} &minus; {pad4(s.ascendingNumber)} ={' '}
-                    <span className={cn(s.result === KAPREKAR_CONSTANT && 'font-bold text-primary')}>
-                      {pad4(s.result)}
+                    <span>
+                      {pad4(s.descendingNumber)} &minus; {pad4(s.ascendingNumber)} ={' '}
+                      <span className={cn(s.result === KAPREKAR_CONSTANT && 'font-bold text-primary')}>
+                        {pad4(s.result)}
+                      </span>
                     </span>
                   </li>
                 ))}
