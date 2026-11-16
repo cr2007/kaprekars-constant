@@ -37,27 +37,47 @@ function paintedX(el: HTMLElement): number {
   return new DOMMatrixReadOnly(getComputedStyle(el).transform).m41
 }
 
+/**
+ * The pill and the step numbers it carries. The numbers move the other
+ * way, so they stay on top of the numbers of the track and only the part
+ * inside the pill shows: a digit turns to the pill's text color at the
+ * exact edge of the pill, not when the pill is nearest.
+ */
+interface PillParts {
+  pill: HTMLElement
+  copy: HTMLElement
+}
+
+/** Puts the pill at `x` px, or hands it back to CSS with null. */
+function place({ pill, copy }: PillParts, x: number | null) {
+  pill.style.transform = x === null ? '' : `translateX(${x}px)`
+  copy.style.transform = x === null ? '' : `translateX(${-x}px)`
+}
+
 /** Animates the pill from `from` to `to` (px), or stops at once under reduced motion. */
-function glide(pill: HTMLElement, from: number, to: number) {
-  pill.getAnimations().forEach((a) => a.cancel())
+function glide({ pill, copy }: PillParts, from: number, to: number) {
+  for (const el of [pill, copy]) el.getAnimations().forEach((a) => a.cancel())
   if (from === to || reducedMotion()) return
-  pill.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], {
-    duration: SNAP_MS,
-    easing: SNAP_EASE,
-  })
+  const options = { duration: SNAP_MS, easing: SNAP_EASE }
+  pill.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], options)
+  copy.animate([{ transform: `translateX(${-from}px)` }, { transform: `translateX(${-to}px)` }], options)
 }
 
 /**
  * The run as a scrubber: one native radio per step, labelled with the
  * number that step starts from, then the goal, 6174. A pill sits behind
  * the shown step. Tap a step, or press the pill and drag it: it follows
- * the pointer 1:1 and snaps to the nearest step on release. A tap on the
+ * the pointer 1:1, lifts a little, and snaps to the nearest step on release. A tap on the
  * shown step stops autoplay there. Arrow keys move between steps as in
  * any radio group. Phones drop the goal label, so 8 steps keep a 44 px
  * target each. Render it only with a run: it reads `steps[0]`.
  */
 export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   const pillRef = useRef<HTMLSpanElement>(null)
+  const copyRef = useRef<HTMLSpanElement>(null)
+  /** The pill and its numbers, once both are mounted. */
+  const parts = (): PillParts | null =>
+    pillRef.current && copyRef.current ? { pill: pillRef.current, copy: copyRef.current } : null
   const optionEls = useRef<(HTMLLabelElement | null)[]>([])
   const drag = useRef<{ id: number; startX: number; from: number; moved: boolean } | null>(null)
   const glideFrom = useRef<number | null>(null)
@@ -65,17 +85,16 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   const swallowClick = useRef(false)
   // The step nearest the pill during a drag. Null when no drag is in progress.
   const [hot, setHot] = useState<number | null>(null)
-  const active = hot ?? index
 
   // Glide the pill to the new step after every change, unless a key moved it.
   useLayoutEffect(() => {
-    const pill = pillRef.current
-    if (!pill) return
-    const to = index * pill.offsetWidth
-    const from = glideFrom.current ?? shownIndex.current * pill.offsetWidth
+    const p = parts()
+    if (!p) return
+    const to = index * p.pill.offsetWidth
+    const from = glideFrom.current ?? shownIndex.current * p.pill.offsetWidth
     glideFrom.current = null
     shownIndex.current = index
-    glide(pill, performance.now() - lastKeyAt < KEY_MS ? to : from, to)
+    glide(p, performance.now() - lastKeyAt < KEY_MS ? to : from, to)
   }, [index])
 
   /** Shows step `i`, and glides from where the pill is painted now. */
@@ -100,8 +119,8 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   /** Moves the pill 1:1 with the pointer, inside the track. */
   function onPointerMove(event: PointerEvent<HTMLFieldSetElement>) {
     const d = drag.current
-    const pill = pillRef.current
-    if (!d || !pill || d.id !== event.pointerId) return
+    const p = parts()
+    if (!d || !p || d.id !== event.pointerId) return
 
     // Step 1: ignore jitter until the press travels past the slop.
     const dx = event.clientX - d.startX
@@ -109,45 +128,58 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
     if (!d.moved) {
       // Keep this pointer only once it drags: a capture from the press would send a tap's click to the fieldset, not the step.
       event.currentTarget.setPointerCapture(event.pointerId)
-      pill.getAnimations().forEach((a) => a.cancel())
+      for (const el of [p.pill, p.copy]) el.getAnimations().forEach((a) => a.cancel())
       d.moved = true
     }
 
     // Step 2: follow the pointer, clamped to the track, and mark the nearest step.
-    const width = pill.offsetWidth
+    const width = p.pill.offsetWidth
     const x = Math.min((steps.length - 1) * width, Math.max(0, d.from + dx))
-    pill.style.transform = `translateX(${x}px)`
+    place(p, x)
     setHot(Math.round(x / width))
   }
 
   /** Ends a drag: snaps to the nearest step, or back to the shown one when cancelled. */
   function endDrag(event: PointerEvent<HTMLFieldSetElement>, cancelled: boolean) {
     const d = drag.current
-    const pill = pillRef.current
-    if (!d || !pill || d.id !== event.pointerId) return
+    const p = parts()
+    if (!d || !p || d.id !== event.pointerId) return
 
     // Step 1: clear the drag state. A tap ends here, and its click picks the step.
     drag.current = null
     if (!d.moved) return
-    const x = paintedX(pill)
-    pill.style.transform = ''
+    const x = paintedX(p.pill)
+    place(p, null)
     setHot(null)
 
     // Step 2: a drag is not also a click on the step under the pointer.
     swallowClick.current = true
 
     // Step 3: snap, and show that step at rest. A new step glides from the layout effect; the same one glides here.
-    const target = cancelled ? index : Math.round(x / pill.offsetWidth)
-    if (target === index) glide(pill, x, index * pill.offsetWidth)
+    const target = cancelled ? index : Math.round(x / p.pill.offsetWidth)
+    if (target === index) glide(p, x, index * p.pill.offsetWidth)
     else glideFrom.current = x
     if (!cancelled) onPick(target)
   }
+
+  /** The text of step `i`, or dots before the run reaches it. On the pill, the dots take the pill's text color. */
+  const number = (s: KaprekarStep, i: number, onPill = false) =>
+    i <= reached ? (
+      <span key="shown" className="stage-fade-in font-mono text-sm tabular-nums sm:text-lg">
+        {pad4(s.input)}
+      </span>
+    ) : (
+      <span key="hidden" aria-hidden className={onPill ? undefined : 'text-muted-foreground'}>
+        ····
+      </span>
+    )
+  const lifted = hot !== null
 
   // scroll-mb: a focused step scrolls clear of the playback bar under it.
   return (
     <div id="trail" className="flex min-h-13 scroll-mb-24 items-center gap-1.5 max-sm:-mx-1">
       <fieldset
-        className="relative grid min-w-0 flex-1 touch-pan-y rounded-full border border-border bg-card p-1 shadow-sm select-none"
+        className="glass-track relative grid min-w-0 flex-1 touch-pan-y rounded-full p-1 select-none"
         style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -155,15 +187,6 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
         onPointerCancel={(event) => endDrag(event, true)}
       >
         <legend className="sr-only">Steps from {pad4(steps[0].input)}</legend>
-        {/* The pill rests at `--i` step widths from the start. A drag writes an inline px transform over it. */}
-        <span
-          ref={pillRef}
-          aria-hidden
-          className="pointer-events-none absolute inset-y-1 left-1 [transform:translateX(calc(var(--i)*100%))]"
-          style={{ width: `calc((100% - 0.5rem) / ${steps.length})`, '--i': index } as CSSProperties}
-        >
-          <span className="block size-full rounded-full bg-primary shadow-sm" />
-        </span>
         {steps.map((s, i) => (
           <label
             key={i}
@@ -177,10 +200,8 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
               swallowClick.current = false
               event.preventDefault()
             }}
-            className={cn(
-              'relative flex min-h-11 min-w-0 cursor-pointer touch-manipulation items-center justify-center rounded-full px-1 transition-colors duration-200 has-focus-visible:ring-2 has-focus-visible:ring-ring motion-reduce:transition-none',
-              i === active ? 'text-primary-foreground' : 'text-foreground hover:bg-muted'
-            )}
+            // An outline with an offset: the pill sits above the labels, and it would hide a ring inside the label.
+            className="flex min-h-11 min-w-0 cursor-pointer touch-manipulation items-center justify-center rounded-full px-1 text-foreground outline-ring hover:bg-muted has-focus-visible:outline-2 has-focus-visible:outline-offset-2"
           >
             {/* onClick also fires for the checked radio, where onChange does not: a tap on the shown step stops there. */}
             <input
@@ -191,21 +212,38 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
               onChange={() => select(i)}
               onClick={() => i === index && onPick(i)}
             />
-            {i <= reached ? (
-              <span key="shown" className="stage-fade-in font-mono text-sm tabular-nums sm:text-lg">
-                <span className="sr-only">Step {i + 1}, from </span>
-                {pad4(s.input)}
-              </span>
-            ) : (
-              <span key="hidden">
-                <span className="sr-only">Step {i + 1}, not shown yet</span>
-                <span aria-hidden className={i === active ? undefined : 'text-muted-foreground'}>
-                  ····
-                </span>
-              </span>
-            )}
+            <span className="sr-only">{i <= reached ? `Step ${i + 1}, from ` : `Step ${i + 1}, not shown yet`}</span>
+            {number(s, i)}
           </label>
         ))}
+        {/* The pill rests at `--i` step widths from the start. A drag writes inline px transforms over it.
+            It sits above the labels and lets every pointer through. Its numbers move the other way, so they
+            line up with the track's numbers and show only inside the pill. */}
+        <span
+          ref={pillRef}
+          aria-hidden
+          className="pointer-events-none absolute inset-y-1 left-1 [transform:translateX(calc(var(--i)*100%))]"
+          style={{ width: `calc((100% - 0.5rem) / ${steps.length})`, '--i': index } as CSSProperties}
+        >
+          <span
+            data-lifted={lifted || undefined}
+            className="glass-sheen absolute inset-0 rounded-full bg-primary transition-[scale] duration-200 ease-out motion-reduce:transition-none"
+            style={lifted && !reducedMotion() ? { scale: '1.04 1.1' } : undefined}
+          />
+          <span className="absolute inset-0 overflow-hidden rounded-full text-primary-foreground">
+            <span
+              ref={copyRef}
+              className="absolute inset-y-0 left-0 grid [transform:translateX(calc(var(--i)*-100%/var(--n)))]"
+              style={{ width: `${steps.length * 100}%`, gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))`, '--n': steps.length } as CSSProperties}
+            >
+              {steps.map((s, i) => (
+                <span key={i} className="flex min-w-0 items-center justify-center px-1">
+                  {number(s, i, true)}
+                </span>
+              ))}
+            </span>
+          </span>
+        </span>
       </fieldset>
       <ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground max-sm:hidden" />
       <span
