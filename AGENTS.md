@@ -35,13 +35,21 @@ principles.
   ships a real native binary, and `bun check` and `bun test` never
   leave Bun. The `build` script type-checks with `bun check -b`.
 - Run `bun --bun run build`, `bun --bun run lint`, and
-  `bun --bun run test` after any code change. Fix warnings and failing
-  tests before finishing.
+  `bun --bun run test` after any code change. Run
+  `bun --bun run test:e2e` too after a change to the UI, motion, or
+  playback. Fix warnings and failing tests before finishing. Do not
+  change a test to make it pass: find why it fails.
 - Use the `font-mono` utility for every digit, and the default fonts
   for words.
 - Every `el.animate()` path must check `reducedMotion()` from
   `src/lib/stage-motion.ts`: CSS media rules do not stop the Web
   Animations API.
+- Keep motion math out of components: put it in `src/lib/` as plain
+  functions (`stage-motion.ts`, `pill-motion.ts`), so unit tests can
+  check it with no DOM. Components only measure and call them.
+- Export a constant or a helper from `src/lib/`, not from a component
+  file: a component file that exports other things breaks fast refresh
+  (oxlint `only-export-components`).
 - Follow the existing color token system in `src/index.css`. Add new
   colors as OKLCH tokens, light and dark, with contrast checked using
   `src/lib/color-contrast.ts`, not as one-off hex values in components.
@@ -62,7 +70,8 @@ bun install
 bun --bun run dev         # start the dev server
 bun --bun run build       # type-check and build
 bun --bun run lint        # oxlint
-bun --bun run test        # regression tests (bun:test)
+bun --bun run test        # unit tests in src/ (bun:test)
+bun --bun run test:e2e    # build, then browser tests in e2e/ (playwright-core)
 bun --bun run preview     # preview the production build
 ```
 
@@ -70,20 +79,30 @@ bun --bun run preview     # preview the production build
 
 ```
 src/
-  App.tsx                    # the Stage layout
-  components/                # UI components (stage step, trail, end panel)
+  App.tsx                    # the Stage layout: header, field, stage, panels
+  components/hero.tsx        # title, subline and the 6174 watermark
+  components/stage-step.tsx  # the column sum of one step, and its circles
+  components/trail.tsx       # the step trail with the draggable pill
+  components/playback-bar.tsx # Back, Play and Next
+  components/input-note.tsx  # the empty stage: slots, hint, input errors
+  components/end-panel.tsx   # rounds left, then the result and next number
+  components/disclosures.tsx # "See all steps" and "Where 6174 comes from"
+  components/                # also the smaller parts (challenge, quick picks)
   components/ui/             # shadcn primitives
-  components/icons/          # one-off icons shadcn/lucide don't ship
+  components/icons/          # the dice icon that rolls on hover
   hooks/use-run.ts           # run state, synced with ?n=
-  hooks/use-playback.ts      # which step the stage shows, autoplay
+  hooks/use-playback.ts      # which step the stage shows, autoplay, Play
   hooks/                     # also theme and book-side state
   lib/kaprekar.ts            # the routine itself
-  lib/stage-motion.ts        # step, handoff and 6174 arrival motion
+  lib/stage-motion.ts        # the sort, the slot flight, handoff and 6174 arrival
+  lib/pill-motion.ts         # the trail pill's spring, glide and lift
+  lib/tile-tone.ts           # solid and outline tile looks
   lib/stats.ts               # step counts over all valid inputs
   lib/url.ts                 # ?n= read, write and share link
   lib/rough-circle.ts        # seeded hand-drawn circle (MIT port)
   lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
-  lib/*.test.ts              # regression tests (bun:test)
+  lib/*.test.ts              # unit tests (bun:test)
+e2e/app.test.ts              # browser regression tests on the production build
 public/
   fonts/                     # Endless, the custom text font
   favicon.ico                # 16 and 32 px tab icon frames
@@ -167,11 +186,16 @@ wikipedia-link       # "Read more on Wikipedia"
 
 ## Verification
 
-`src/lib/` and `src/hooks/` have regression tests for their pure
-logic; run them with `bun --bun run test`. The UI has no test suite. Before calling a UI
-change done:
+`src/lib/` and `src/hooks/` have unit tests for their pure logic; run
+them with `bun --bun run test`. `e2e/app.test.ts` runs the production
+build in Chromium for what unit tests cannot reach: playback, the
+trail's clicks and drags, focus, the input note, the end panel timing.
+It needs a Chromium at `/snap/bin/chromium`, or set `CHROMIUM_PATH`.
+Add an e2e test for a fixed UI bug, so it cannot come back. Keep each
+test on one behavior; wait for a condition, not a fixed time, where
+you can. Before calling a UI change done:
 
-1. Type-check, lint, and run the tests (see above).
+1. Type-check, lint, and run the unit and e2e tests (see above).
 2. Check it in the browser, at a mobile width and a desktop width, in
    both light and dark mode.
 3. If a fix targets a specific reported bug, confirm the fix with a

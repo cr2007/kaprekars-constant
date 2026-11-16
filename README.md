@@ -47,7 +47,8 @@ Open the printed local URL in your browser.
 ```sh
 bun --bun run build     # type-check and build for production
 bun --bun run lint      # run oxlint
-bun --bun run test      # run the regression tests
+bun --bun run test      # run the unit tests
+bun --bun run test:e2e  # build, then run the browser tests (needs Chromium)
 bun --bun run preview   # preview the production build
 ```
 
