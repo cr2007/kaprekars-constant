@@ -29,6 +29,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
         {steps.map((s, i) => (
           <label
             key={i}
+            id={`trail-step-${i + 1}`}
             className={cn(
               'flex min-h-11 min-w-0 flex-1 cursor-pointer touch-manipulation items-center justify-center rounded-full px-1 select-none has-focus-visible:ring-2 has-focus-visible:ring-ring',
               i === index ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'
@@ -40,6 +41,8 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
               className="sr-only"
               checked={i === index}
               onChange={() => onPick(i)}
+              // onClick also fires for the checked radio, where onChange does not: a click on the shown step stops there.
+              onClick={() => i === index && onPick(i)}
             />
             {i <= reached ? (
               <span key="shown" className="stage-fade-in font-mono text-sm tabular-nums sm:text-lg">
