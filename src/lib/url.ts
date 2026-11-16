@@ -1,14 +1,19 @@
-import { validateInput } from '@/lib/kaprekar'
+import { sanitizeDigitInput } from '@/lib/kaprekar'
 
-/** Reads `n` from a query string. Returns it only when it is a valid start number. */
-export function parseNumberParam(search: string): string | null {
+/**
+ * Reads `n` from a query string as the field would hold it if it were
+ * typed: digits only, at most 4. So `?n=12345` gives "1234" and `?n=abcd`
+ * gives "". Null when there is no `n`. The caller validates it, so an
+ * unusable link shows the same note as typing it would.
+ */
+export function parseInputParam(search: string): string | null {
   const n = new URLSearchParams(search).get('n')
-  return n !== null && validateInput(n).valid ? n : null
+  return n === null ? null : sanitizeDigitInput(n)
 }
 
 /** Reads `?n=` from the page URL. */
-export function readNumberParam(): string | null {
-  return parseNumberParam(window.location.search)
+export function readInputParam(): string | null {
+  return parseInputParam(window.location.search)
 }
 
 /**

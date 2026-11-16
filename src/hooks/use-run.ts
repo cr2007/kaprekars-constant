@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   type KaprekarStep,
   computeStep,
@@ -8,7 +8,7 @@ import {
   stepsToConstant,
   validateInput,
 } from '@/lib/kaprekar'
-import { readNumberParam, writeNumberParam } from '@/lib/url'
+import { readInputParam, writeNumberParam } from '@/lib/url'
 
 /** Everything the page needs to show one run of the routine. */
 export interface Run {
@@ -39,14 +39,21 @@ export interface Run {
  * starts from `?n=` and keeps `?n=` in sync with the run.
  */
 export function useRun(): Run {
-  const [rawInput, setRawInput] = useState(() => readNumberParam() ?? '')
-  const [error, setError] = useState<string | null>(null)
-  const [steps, setSteps] = useState<KaprekarStep[]>(() => {
-    const start = readNumberParam()
-    return start ? runKaprekarRoutine(Number(start)) : []
-  })
+  // Step 1: a ?n= link fills the field as if it were typed. A valid number runs; another one shows why it cannot.
+  const [start] = useState(readInputParam)
+  const startsValid = start !== null && validateInput(start).valid
+  const [rawInput, setRawInput] = useState(start ?? '')
+  const [error, setError] = useState<string | null>(() =>
+    start && !startsValid ? (validateInput(start).message ?? null) : null
+  )
+  const [steps, setSteps] = useState<KaprekarStep[]>(() => (startsValid ? runKaprekarRoutine(Number(start)) : []))
   const [wentFurther, setWentFurther] = useState(false)
   const [runId, setRunId] = useState(0)
+
+  // Step 2: the address holds only a link that runs: the cleaned number (?n=12345 becomes ?n=1234), or no n.
+  useEffect(() => {
+    if (start !== null) writeNumberParam(startsValid ? start : null)
+  }, [start, startsValid])
 
   /** Clears the result without touching the input or the error. */
   function clearRun() {

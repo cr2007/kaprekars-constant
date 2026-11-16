@@ -1,18 +1,21 @@
 import { describe, expect, test } from 'bun:test'
-import { parseNumberParam } from './url'
+import { parseInputParam } from './url'
 
-describe('parseNumberParam', () => {
-  test('reads a valid start number', () => {
-    expect(parseNumberParam('?n=1004')).toBe('1004')
+describe('parseInputParam', () => {
+  test('reads n as the field would hold it if typed: digits only, at most 4', () => {
+    expect(parseInputParam('?n=1004')).toBe('1004')
+    expect(parseInputParam('?n=12345')).toBe('1234')
+    expect(parseInputParam('?n=1,234')).toBe('1234')
+    expect(parseInputParam('?n=abcd')).toBe('')
   })
 
-  test('ignores a missing, short, repdigit or leading-zero value', () => {
-    for (const search of ['', '?n=', '?n=123', '?n=1111', '?n=0123', '?n=12345', '?n=12a4']) {
-      expect(parseNumberParam(search)).toBeNull()
-    }
+  test('keeps an unusable number, so the page can say why it cannot run', () => {
+    expect(parseInputParam('?n=1111')).toBe('1111')
+    expect(parseInputParam('?n=0999')).toBe('0999')
   })
 
-  test('keeps other params out of the way', () => {
-    expect(parseNumberParam('?utm=x&n=3524')).toBe('3524')
+  test('is null with no n, and ignores other params', () => {
+    expect(parseInputParam('')).toBeNull()
+    expect(parseInputParam('?utm=x&n=3524')).toBe('3524')
   })
 })
