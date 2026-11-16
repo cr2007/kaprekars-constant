@@ -130,7 +130,7 @@ input-note           # the empty stage: slots, hint, digits left, or the input e
   input-note-title   # what to do next, or why the number cannot run
   input-note-detail  # the reason, for a leading 0 or four equal digits
 how-it-works-intro   # the routine list in the empty stage
-trail                # the step trail
+trail                # the step trail: tap a step, or drag the pill
   trail-step-N       # step N in the trail (trail-step-1, trail-step-2, ...)
 trail-goal           # the 6174 goal at the end of the trail
 playback-bar         # Back, Play and Next
