@@ -23,6 +23,8 @@ const DRAW: Keyframe[] = [
 ]
 
 interface HandCircleProps {
+  /** The svg's id. Each circle on the page needs its own. */
+  id: string
   /** Draws the circle. */
   show: boolean
   /** Wait in ms before the line starts, so it follows other motion. */
@@ -37,7 +39,7 @@ interface HandCircleProps {
  * loops from a fixed seed. It is decoration only: aria-hidden, absolutely
  * placed, so it takes no layout space. Reduced motion shows it at rest.
  */
-export function HandCircle({ show, delay, animate, children }: HandCircleProps) {
+export function HandCircle({ id, show, delay, animate, children }: HandCircleProps) {
   const target = useRef<HTMLSpanElement>(null)
   const sketch = useRef<SVGSVGElement>(null)
 
@@ -84,7 +86,7 @@ export function HandCircle({ show, delay, animate, children }: HandCircleProps) 
         {children}
       </span>
       {show && (
-        <svg id="hand-circle" ref={sketch} aria-hidden className="hand-circle" preserveAspectRatio="none">
+        <svg id={id} ref={sketch} aria-hidden className="hand-circle" preserveAspectRatio="none">
           <path pathLength={1} />
           <path pathLength={1} />
         </svg>

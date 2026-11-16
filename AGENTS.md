@@ -123,7 +123,8 @@ sum-start            # line: Start with
 sum-biggest          # line: Biggest first
 sum-smallest         # line: Smallest first
 sum-difference       # line: Difference
-hand-circle          # the drawn circle around 6174
+hand-circle          # the drawn circle around the 6174 result
+hand-circle-start    # the drawn circle around the start 6174, on the loop step only
 stage-empty          # the empty stage before a run
 input-note           # the empty stage: slots, hint, digits left, or the input error
   input-note-slots   # four slots that mirror the field

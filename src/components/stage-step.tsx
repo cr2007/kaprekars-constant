@@ -15,6 +15,9 @@ const TILE_SIZE = 'md:*:size-14 md:*:text-2xl'
 /** One line of the sum: a term and its value, on the parent's three columns. */
 const LINE = 'col-span-3 grid grid-cols-subgrid items-center'
 
+/** On the loop step, the result's circle starts this long after the start's: the 550 ms draw, then a beat. */
+const LOOP_SECOND_CIRCLE_MS = 650
+
 interface StageStepProps {
   /** The step to show, or null before a run. */
   step: KaprekarStep | null
@@ -52,6 +55,9 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
   const isConstant = step?.result === KAPREKAR_CONSTANT
   // When the circle around 6174 starts, in ms. Null hides it. Set where the step's motion is planned.
   const [circleAt, setCircleAt] = useState<number | null>(null)
+  // On the loop step ("Do one more round", from 6174), the start 6174 is circled first, then the result.
+  const [startCircleAt, setStartCircleAt] = useState<number | null>(null)
+  const loop = step?.input === KAPREKAR_CONSTANT
   const emptyBox = useRef<HTMLDivElement>(null)
   /** Where the field's slots sat in the empty stage, and the scroll then, so a new run's digits can fly from them. */
   const slots = useRef<{ rects: DOMRect[]; scrollY: number } | null>(null)
@@ -95,14 +101,18 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
     }
 
     // Step 2: the circle starts 250 ms after the difference lands, with the badge.
-    if (!same) setCircleAt(arrival ? landedAt + CIRCLE_DELAY_MS : null)
+    // On the loop step, the start 6174 is circled first; the result's circle follows once that one is drawn.
+    if (!same) {
+      setStartCircleAt(loop ? landedAt + CIRCLE_DELAY_MS : null)
+      setCircleAt(arrival || loop ? landedAt + CIRCLE_DELAY_MS + (loop ? LOOP_SECOND_CIRCLE_MS : 0) : null)
+    }
 
     // Step 3: the 6174 arrival plays once per run.
     if (arrival && celebrated.current !== runId) {
       celebrated.current = runId
       playArrival(rows as StageRows, landedAt)
     }
-  }, [step, index, runId, arrival, animate, take])
+  }, [step, index, runId, arrival, loop, animate, take])
 
   const label = 'text-sm text-muted-foreground sm:text-base'
   const op = 'text-center font-mono text-2xl font-bold md:text-3xl'
@@ -136,7 +146,9 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
           >
             <dt className={label}>Start with</dt>
             <dd ref={input} className="col-start-3">
-              <NumberTiles digits={shownStep.digits} className={TILE_SIZE} />
+              <HandCircle id="hand-circle-start" show={startCircleAt !== null} delay={startCircleAt ?? 0} animate={animate}>
+                <NumberTiles digits={shownStep.digits} className={TILE_SIZE} />
+              </HandCircle>
             </dd>
           </div>
 
@@ -164,7 +176,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
               <span className={cn(op, 'text-foreground')}>=</span>
               <div ref={resultBox} className="w-fit">
                 <div ref={result}>
-                  <HandCircle show={circleAt !== null} delay={circleAt ?? 0} animate={animate}>
+                  <HandCircle id="hand-circle" show={circleAt !== null} delay={circleAt ?? 0} animate={animate}>
                     <NumberTiles digits={shownStep.resultDigits} className={TILE_SIZE} />
                   </HandCircle>
                 </div>
