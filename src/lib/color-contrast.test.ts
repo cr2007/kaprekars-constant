@@ -107,6 +107,13 @@ describe('theme tokens in index.css', () => {
     expect(oklchContrastRatio(primary, under)).toBeGreaterThanOrEqual(3)
   })
 
+  test.each([
+    ['light', root],
+    ['dark', dark],
+  ])('%s: primary digits on the card (the outlined start tiles) clear 4.5:1', (_name, block) => {
+    expect(oklchContrastRatio(readOklchVar(block, 'primary'), readOklchVar(block, 'card'))).toBeGreaterThanOrEqual(4.5)
+  })
+
   test('dark card reads as a distinct, brighter elevated surface above the page', () => {
     const background = readOklchVar(dark, 'background')
     const card = readOklchVar(dark, 'card')

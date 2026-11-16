@@ -1,3 +1,4 @@
+import { TILE_TONE } from '@/lib/tile-tone'
 import { cn } from 'cn'
 
 interface InputNoteProps {
@@ -69,7 +70,7 @@ export function InputNote({ raw, error }: InputNoteProps) {
                 SLOT,
                 bad
                   ? 'border-2 border-destructive text-destructive'
-                  : 'bg-primary text-primary-foreground shadow-sm'
+                  : TILE_TONE.outline
               )}
             >
               {digit}

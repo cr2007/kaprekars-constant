@@ -147,7 +147,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
             <dt className={label}>Start with</dt>
             <dd ref={input} className="col-start-3">
               <HandCircle id="hand-circle-start" show={startCircleAt !== null} delay={startCircleAt ?? 0} animate={animate}>
-                <NumberTiles digits={shownStep.digits} className={TILE_SIZE} />
+                <NumberTiles digits={shownStep.digits} tone="outline" className={TILE_SIZE} />
               </HandCircle>
             </dd>
           </div>
