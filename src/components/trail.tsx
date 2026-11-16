@@ -233,7 +233,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
           <span
             ref={sheenRef}
             data-lifted={lifted || undefined}
-            className="glass-sheen absolute inset-0 rounded-full bg-primary transition-[scale] duration-200 ease-out motion-reduce:transition-none"
+            className="glass-sheen absolute inset-0 rounded-full bg-primary transition-[scale] duration-200 ease-out motion-reduce:transition-none forced-colors:outline-2 forced-colors:outline-offset-[-2px] forced-colors:outline-[Highlight] forced-colors:outline-solid"
             style={held && !reducedMotion() ? { scale: LIFT } : undefined}
           />
           <span className="absolute inset-0 overflow-hidden rounded-full text-primary-foreground">
