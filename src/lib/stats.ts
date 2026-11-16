@@ -1,7 +1,7 @@
 import { KAPREKAR_CONSTANT, computeStep, validateInput } from '@/lib/kaprekar'
 
 /** Step counts over every valid 4-digit input. Built once, on first use. */
-export interface Distribution {
+interface Distribution {
   /** `byCount[k]` lists every valid input that first reaches 6174 in `k` steps (1 to 7). */
   byCount: number[][]
   /** How many valid inputs exist (8,991). */
@@ -20,6 +20,7 @@ export function distribution(): Distribution {
   if (cache) return cache
   // Step 1: steps to 6174 from each number, filled in as the loop reaches it. 0 means not known yet.
   const stepsFrom = new Int8Array(10000)
+  /** Steps to 6174 from `n`, memoized in `stepsFrom`; a result reuses the count of the number it leads to. */
   const count = (n: number): number => {
     if (!stepsFrom[n]) {
       const result = computeStep(n).result

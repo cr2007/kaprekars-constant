@@ -57,6 +57,7 @@ export function useTheme() {
     return () => query.removeEventListener('change', followSystem)
   }, [])
 
+  /** Flips the theme and marks it as the user's pick, so the OS theme no longer drives it. */
   function toggleTheme() {
     const next = theme === 'dark' ? 'light' : 'dark'
     userPicked.current = true

@@ -4,14 +4,14 @@ import { type Pair, REST_PAIR, rollPair } from '@/lib/dice-roll'
 import { EASE_OUT, reducedMotion } from '@/lib/stage-motion'
 
 /** Swap times in ms, both on EASE_OUT. Enter answers the user; leave is not slower. */
-export const ENTER_MS = 200
-export const LEAVE_MS = 180
+const ENTER_MS = 200
+const LEAVE_MS = 180
 
 /**
  * A leave commits only after this many ms with no new enter. S Pen hover
  * flickers enter and leave every 30 to 50 ms at the button edge.
  */
-export const LEAVE_DELAY_MS = 120
+const LEAVE_DELAY_MS = 120
 
 /**
  * The pointer events that start and end the hover, per `pointerType`. A

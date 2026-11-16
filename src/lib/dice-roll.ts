@@ -7,6 +7,7 @@ export const REST_PAIR: Pair = [2, 3]
 /** The faces a roll can show. Face 6 has its own pip layout, so it stays legible at 20 px. */
 export const ROLL_FACES: readonly number[] = [1, 2, 3, 4, 5, 6]
 
+/** True when two pairs show the same faces. */
 const same = (a: Pair, b: Pair) => a[0] === b[0] && a[1] === b[1]
 
 /**

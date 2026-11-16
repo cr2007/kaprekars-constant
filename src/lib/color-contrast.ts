@@ -6,10 +6,12 @@ export type Oklch = readonly [l: number, c: number, h: number]
  * OKLab reference (https://bottosson.github.io/posts/oklab/).
  */
 function oklchToLinearSrgb([l, c, hDeg]: Oklch): [number, number, number] {
+  // Step 1: polar OKLCH to OKLab.
   const h = (hDeg * Math.PI) / 180
   const a = c * Math.cos(h)
   const b = c * Math.sin(h)
 
+  // Step 2: OKLab to the cube roots of LMS, then cube them.
   const l_ = l + 0.3963377774 * a + 0.2158037573 * b
   const m_ = l - 0.1055613458 * a - 0.0638541728 * b
   const s_ = l - 0.0894841775 * a - 1.291485548 * b
@@ -18,6 +20,7 @@ function oklchToLinearSrgb([l, c, hDeg]: Oklch): [number, number, number] {
   const m3 = m_ ** 3
   const s3 = s_ ** 3
 
+  // Step 3: LMS to linear sRGB.
   return [
     +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3,
     -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3,
@@ -34,6 +37,7 @@ function linearChannelToSrgb255(value: number): number {
 
 /** WCAG relative luminance of an sRGB color (each channel 0-255). */
 function relativeLuminance([r, g, b]: [number, number, number]): number {
+  /** One 0-255 channel to linear light, by the WCAG sRGB curve. */
   const linearize = (channel255: number) => {
     const channel = channel255 / 255
     return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4

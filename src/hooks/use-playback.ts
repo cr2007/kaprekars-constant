@@ -3,7 +3,7 @@ import { type KaprekarStep, stepsToConstant } from '@/lib/kaprekar'
 import { stepMotionMs } from '@/lib/stage-motion'
 
 /** Time on a step at rest, after its motion, before autoplay moves on. */
-export const HOLD_MS = 250
+const HOLD_MS = 250
 
 /** Writes a number with its leading zeros, as the tiles show it. */
 export const pad4 = (n: number) => String(n).padStart(4, '0')

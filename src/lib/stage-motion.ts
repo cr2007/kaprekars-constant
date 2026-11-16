@@ -2,7 +2,7 @@
 export const EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)'
 
 /** Strong ease-in-out for things that move from one place to another on screen. */
-export const EASE_IN_OUT = 'cubic-bezier(0.77, 0, 0.175, 1)'
+const EASE_IN_OUT = 'cubic-bezier(0.77, 0, 0.175, 1)'
 
 /** The last result moves up into the input row over this time. */
 const HANDOFF_MS = 300
@@ -27,8 +27,6 @@ const ARRIVE_MS = 450
 const ARRIVE_STAGGER_MS = 40
 /** The badge comes in this long after the hop starts. */
 const BADGE_DELAY_MS = 250
-/** The 6174 arrival from its start until the last tile lands. */
-export const ARRIVAL_MS = ARRIVE_MS + 3 * ARRIVE_STAGGER_MS
 /** A step shown at rest lands its 6174 hop this long after it paints. */
 export const AT_REST_LANDED_MS = 300
 /** The hand-drawn circle starts this long after the difference lands, with the badge. */
@@ -42,28 +40,12 @@ export function reducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/** When each row of one step starts, in ms from the step's start. */
-export interface StepTimeline {
-  /** Line 2, biggest first. */
-  descAt: number
-  /** Line 3, smallest first. */
-  ascAt: number
-  /** The difference starts to land. */
-  resultAt: number
-  /** The whole step is at rest. */
-  end: number
-}
-
-/**
- * The rows of one step appear in order: the input, line 2, line 3, then
- * the difference. With `handoff`, line 2 waits until the last result has
- * moved into the input row.
- */
-export function stepTimeline(handoff: boolean): StepTimeline {
-  const descAt = handoff ? HANDOFF_MS : ROW_GAP_MS
-  const ascAt = descAt + ROW_GAP_MS
-  const resultAt = ascAt + ROW_GAP_MS
-  return { descAt, ascAt, resultAt, end: resultAt + RESULT_MS }
+/** Reduced motion: when each row of a step fades in, in reading order, in ms from the step's start. */
+const REDUCED = {
+  descAt: ROW_GAP_MS,
+  ascAt: 2 * ROW_GAP_MS,
+  resultAt: 3 * ROW_GAP_MS,
+  end: 3 * ROW_GAP_MS + RESULT_MS,
 }
 
 /**
@@ -73,7 +55,7 @@ export function stepTimeline(handoff: boolean): StepTimeline {
  * later step arrives by the handoff. Autoplay waits this long.
  */
 export function stepMotionMs(digits: number[], index: number): number {
-  if (reducedMotion()) return stepTimeline(false).end
+  if (reducedMotion()) return REDUCED.end
   return sortTimeline(digits, index === 0, index > 0 ? HANDOFF_MS : SLOTS_IN_MS).end
 }
 
@@ -122,14 +104,14 @@ function bezier(x1: number, y1: number, x2: number, y2: number): Ease {
 }
 
 /** A tile pose at time `t`: `x` in places (0 to 3), `s` the scale. */
-export interface TrackPoint {
+interface TrackPoint {
   t: number
   x: number
   s: number
 }
 
 /** One sorted line. Arrays are per final place. */
-export interface SortLine {
+interface SortLine {
   /** The input slot of the digit in each final place. */
   order: number[]
   /** When the copy of the source row drops into this line. */
@@ -144,7 +126,7 @@ export interface SortLine {
   end: number
 }
 
-export interface SortTimeline {
+interface SortTimeline {
   copyMs: number
   desc: SortLine
   asc: SortLine
@@ -161,10 +143,12 @@ function sortLine(digits: number[], desc: boolean, copyAt: number, t0: number, k
   const order = stableOrder(digits, desc)
   const line: SortLine = { order, copyAt, tracks: [], fillAt: [], drainAt: [], fillMs: k * FILL_MS, end: t0 }
   order.forEach((slot, i) => {
+    // Step 1: the digit in place i, and its rank. Equal digits share one rank, so they start together and never pass.
     const d = digits[slot]
-    // Equal digits share one rank, so they start together and never pass each other.
     const r = order.findIndex((other) => digits[other] === d)
     const slideAt = t0 + k * (SLIDE_AT_MS + r * RANK_MS)
+
+    // Step 2: the slide from its input slot to place i, sampled about every 16 ms. A tile already in place stays.
     // The bigger digit grows a little as it passes, the smaller one shrinks: +6% for a 9, -14% for a 0.
     const bump = -0.14 + (0.2 * d) / 9
     const n = Math.round((k * SLIDE_MS) / 16)
@@ -176,6 +160,8 @@ function sortLine(digits: number[], desc: boolean, copyAt: number, t0: number, k
             return { t: slideAt + q * k * SLIDE_MS, x: slot + (i - slot) * EMPHASIZED(q), s: 1 + 4 * bump * q * (1 - q) }
           })
     )
+
+    // Step 3: the fill rises first, drains 60 ms after the slide; the line rests when the last fill is gone.
     line.fillAt.push(t0 + k * r * RANK_MS)
     line.drainAt.push(slideAt + k * (SLIDE_MS + DRAIN_AT_MS))
     line.end = Math.max(line.end, slideAt + k * (SLIDE_MS + DRAIN_AT_MS + FILL_MS))
@@ -246,15 +232,20 @@ function playLine(tiles: HTMLElement[], rest: DOMRect[], sources: DOMRect[], lin
  * its own style back, when the fill ends or is cancelled.
  */
 function fillTile(tile: HTMLElement, at: number, drainAt: number, ms: number) {
+  // Step 1: set the tile up as the fill's stacking context, and keep its own style to give back.
   const d = Number(tile.textContent)
   const saved = tile.style.cssText
   tile.style.position = 'relative'
   tile.style.isolation = 'isolate'
   tile.style.overflow = 'hidden'
   tile.style.zIndex = String(d)
+
+  // Step 2: the fill, behind the digit, at scaleY(0).
   const fill = document.createElement('span')
   fill.style.cssText = `position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--foreground);opacity:${FILL_OPACITY};transform-origin:bottom;transform:scaleY(0)`
   tile.append(fill)
+
+  // Step 3: rise to d / 9, hold while the tiles slide, drain. Then remove the fill and give the style back.
   const total = drainAt + ms - at
   const level = `scaleY(${d / 9})`
   fill
@@ -287,7 +278,7 @@ export interface StageRows {
 }
 
 /** The colored tiles that `NumberTiles` draws inside a row. */
-export function tilesOf(row: HTMLElement): HTMLElement[] {
+function tilesOf(row: HTMLElement): HTMLElement[] {
   return [...row.querySelectorAll<HTMLElement>('[aria-hidden="true"] > span')]
 }
 
@@ -300,7 +291,7 @@ function fadeIn(el: HTMLElement, delay: number, duration = FADE_MS): Animation {
  * FLIP: animates `el` from a rect measured before a DOM change (`first`)
  * to where it sits now. Returns null when nothing moved.
  */
-export function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Animation | null {
+function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Animation | null {
   const last = el.getBoundingClientRect()
   const dx = first.left - last.left
   const dy = first.top - last.top
@@ -318,8 +309,9 @@ export function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Ani
  * element move, so the typed digits become the run.
  */
 function flyFromSlots(tiles: HTMLElement[], slots: DOMRect[]) {
-  // The tile at the front of the move leaves first, so no tile passes over one that has landed.
+  // Step 1: the direction of the move. The tile at the front leaves first, so no tile passes one that has landed.
   const right = slots[0] && tiles[0] ? tiles[0].getBoundingClientRect().left > slots[0].left : true
+  // Step 2: each tile starts on its slot (FLIP: its first rect, inverted) and settles into place.
   tiles.forEach((tile, i) => {
     const first = slots[i]
     const last = tile.getBoundingClientRect()
@@ -359,7 +351,7 @@ export function playStep(
 
   // Step 2: reduced motion fades the rows in reading order.
   if (reducedMotion()) {
-    const plan = stepTimeline(false)
+    const plan = REDUCED
     fadeIn(rows.input, 0)
     fadeIn(rows.desc, plan.descAt)
     fadeIn(rows.asc, plan.ascAt)
@@ -399,10 +391,13 @@ export function playStep(
  * in and nothing scales.
  */
 export function playArrival(rows: StageRows, delay: number) {
+  // Step 1: reduced motion shows the badge only.
   if (reducedMotion()) {
     fadeIn(rows.badge, delay + BADGE_DELAY_MS)
     return
   }
+
+  // Step 2: the 6174 tiles hop one after another, from their bottom edge.
   const origin = '50% 100%'
   tilesOf(rows.result).forEach((tile, i) => {
     tile.animate(
@@ -415,6 +410,7 @@ export function playArrival(rows: StageRows, delay: number) {
       { duration: ARRIVE_MS, delay: delay + i * ARRIVE_STAGGER_MS }
     )
   })
+  // Step 3: the badge comes in as the hops land.
   rows.badge.animate([{ opacity: 0, transform: 'scale(0.95)' }, { opacity: 1, transform: 'none' }], {
     duration: FADE_MS,
     delay: delay + BADGE_DELAY_MS,

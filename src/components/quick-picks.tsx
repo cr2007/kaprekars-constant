@@ -17,6 +17,7 @@ export function QuickPicks({ onPick }: QuickPicksProps) {
   const [now] = useState(() => new Date())
   const year = now.getFullYear()
   const today = dateNumber(now)
+  /** A number in the digit font, inside a chip label. */
   const mono = (n: number) => <span className="font-mono">{n}</span>
   const chips: { key: string; label: ReactNode; pick: () => number }[] = [
     ...(today ? [{ key: 'today', label: <>Today, {mono(today)}</>, pick: () => today }] : []),

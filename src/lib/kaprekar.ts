@@ -22,7 +22,7 @@ export interface KaprekarStep {
 }
 
 /** The outcome of checking whether a string is a usable 4-digit number. */
-export interface ValidationResult {
+interface ValidationResult {
   valid: boolean
   /** Present when `valid` is false; explains why, for display to the user. */
   message?: string
