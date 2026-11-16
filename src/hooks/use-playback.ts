@@ -33,6 +33,8 @@ export interface Playback {
   playing: boolean
   /** False after Back, Next, an arrow key, or a trail pick: the stage shows that step at rest. */
   animate: boolean
+  /** Goes up each time Play starts, so the stage plays the shown step again before autoplay moves on. */
+  take: number
   /** Text for the one polite live region. */
   message: string
   /** Shows step `i`, pauses, and announces its equation. */
@@ -54,6 +56,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   const [playing, setPlaying] = useState(steps.length > 1)
   const [animate, setAnimate] = useState(true)
   const [message, setMessage] = useState(() => (steps.length === 1 ? endSentence(steps) : ''))
+  const [take, setTake] = useState(0)
   const [seen, setSeen] = useState({ runId, length: steps.length })
   /** The step on the stage and the time its motion ends. */
   const motion = useRef({ key: '', end: 0 })
@@ -79,7 +82,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   // Step 2: note when the stage's motion for a newly shown step ends. The
   // stage starts it in the same commit. A step shown at rest has none.
   useEffect(() => {
-    const key = `${runId}:${index}`
+    const key = `${runId}:${index}:${take}`
     if (motion.current.key === key) return
     motion.current = { key, end: animate && steps[index] ? performance.now() + stepMotionMs(steps[index].digits, index) : 0 }
   })
@@ -110,7 +113,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
     setMessage(stepSentence(steps, i))
   }
 
-  /** Pauses, or plays from here (from step 1 at the end). */
+  /** Pauses, or plays from here (from step 1 at the end). The shown step plays again first. */
   function toggle() {
     if (last < 0) return
     if (playing) {
@@ -118,6 +121,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
       return
     }
     if (index >= last) setIndex(0)
+    setTake((t) => t + 1)
     setAnimate(true)
     setMessage('')
     setPlaying(true)
@@ -137,5 +141,5 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
     return () => window.removeEventListener('keydown', onKey)
   })
 
-  return { index, reached, playing, animate, message, go, toggle }
+  return { index, reached, playing, animate, take, message, go, toggle }
 }

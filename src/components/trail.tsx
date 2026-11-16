@@ -179,6 +179,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   return (
     <div id="trail" className="flex min-h-13 scroll-mb-24 items-center gap-1.5 max-sm:-mx-1">
       <fieldset
+        id="trail-steps"
         className="glass-track relative grid min-w-0 flex-1 touch-pan-y rounded-full p-1 select-none"
         style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
         onPointerDown={onPointerDown}

@@ -173,6 +173,7 @@ export default function App() {
               runId={runId}
               arrival={play.index === arrivalIndex}
               animate={play.animate}
+              take={play.take}
               empty={
                 <div className="flex max-w-sm flex-col gap-4 text-left">
                   <InputNote raw={run.rawInput} error={partial ? null : run.error} />

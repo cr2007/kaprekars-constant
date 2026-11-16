@@ -25,6 +25,8 @@ interface StageStepProps {
   arrival: boolean
   /** False shows a new step at rest, for Back, Next and trail picks. */
   animate: boolean
+  /** A new value plays the same step again (Play on a step shown at rest). */
+  take: number
   /** Shown over the empty stage before a run: a hint or the input error. */
   empty: ReactNode
 }
@@ -36,7 +38,7 @@ interface StageStepProps {
  * number. The layout is the same for every step, so the page never
  * changes height between steps.
  */
-export function StageStep({ step, index, total, runId, arrival, animate, empty }: StageStepProps) {
+export function StageStep({ step, index, total, runId, arrival, animate, take, empty }: StageStepProps) {
   const root = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLElement>(null)
   const desc = useRef<HTMLElement>(null)
@@ -44,7 +46,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
   const result = useRef<HTMLDivElement>(null)
   const resultBox = useRef<HTMLDivElement>(null)
   const badge = useRef<HTMLSpanElement>(null)
-  const shown = useRef<{ runId: number; index: number } | null>(null)
+  const shown = useRef<{ runId: number; index: number; take: number } | null>(null)
   const celebrated = useRef<number | null>(null)
   const shownStep = step ?? PLACEHOLDER
   const isConstant = step?.result === KAPREKAR_CONSTANT
@@ -66,8 +68,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
     // paints at rest at once. A run plays, also from `?n=`. The same step
     // again (StrictMode runs effects twice) does nothing new.
     const prev = shown.current
-    shown.current = { runId, index }
-    const same = prev?.runId === runId && prev.index === index
+    shown.current = { runId, index, take }
+    const same = prev?.runId === runId && prev.index === index && prev.take === take
     let landedAt = AT_REST_LANDED_MS
     if (!same && !animate) {
       root.current.getAnimations({ subtree: true }).forEach((a) => a.cancel())
@@ -84,7 +86,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
       celebrated.current = runId
       playArrival(rows as StageRows, landedAt)
     }
-  }, [step, index, runId, arrival, animate])
+  }, [step, index, runId, arrival, animate, take])
 
   const label = 'text-sm text-muted-foreground sm:text-base'
   const op = 'text-center font-mono text-2xl font-bold md:text-3xl'
