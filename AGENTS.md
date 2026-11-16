@@ -148,6 +148,7 @@ loop-note            # "6174 leads straight back to itself."
 share-link           # the share button and its fallback text
 share-button         # "Share 1234"
 share-url            # the link as text, if the clipboard fails
+try-another-section  # quick picks and the challenge, under its heading
 try-another          # "Try another number" heading
 quick-picks          # the quick-pick chips
 challenge            # the step-count challenge

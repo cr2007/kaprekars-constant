@@ -21,6 +21,10 @@ const ARRIVE_STAGGER_MS = 40
 const BADGE_DELAY_MS = 250
 /** The 6174 arrival from its start until the last tile lands. */
 export const ARRIVAL_MS = ARRIVE_MS + 3 * ARRIVE_STAGGER_MS
+/** A step shown at rest lands its 6174 hop this long after it paints. */
+export const AT_REST_LANDED_MS = 300
+/** The hand-drawn circle starts this long after the difference lands, with the badge. */
+export const CIRCLE_DELAY_MS = 250
 
 /**
  * True when the OS asks for reduced motion. CSS `@media` rules do not

@@ -14,7 +14,7 @@ import { useBookSide } from '@/hooks/use-book-side'
 import { pad4, usePlayback } from '@/hooks/use-playback'
 import { useRun } from '@/hooks/use-run'
 import { KAPREKAR_CONSTANT, sanitizeDigitInput } from '@/lib/kaprekar'
-import { ARRIVAL_MS, reducedMotion, stepMotionMs } from '@/lib/stage-motion'
+import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, reducedMotion, stepMotionMs } from '@/lib/stage-motion'
 import { distribution } from '@/lib/stats'
 import { cn } from 'cn'
 
@@ -27,9 +27,6 @@ const DISCLOSURE = 'group rounded-2xl bg-muted/60 px-4 open:pb-4'
 const SUMMARY =
   'flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden'
 const CHEVRON = 'size-4 shrink-0 transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none'
-/** A step shown at rest lands its 6174 hop this long after it paints. */
-const AT_REST_LANDED_MS = 300
-
 /**
  * The Stage: one step at a time, large. The page reads in the order of
  * the story: type a number, watch the stage, see 6174, try another. Each
@@ -51,8 +48,8 @@ export default function App() {
   const hasRun = steps.length > 0
   const last = steps.length - 1
   const arrivalIndex = steps.findIndex((s) => s.result === KAPREKAR_CONSTANT)
-  // The result panel waits for the 6174 step's motion and its hop.
-  const revealMs = (play.animate && arrivalIndex >= 0 ? stepMotionMs(arrivalIndex) : AT_REST_LANDED_MS) + ARRIVAL_MS
+  // The steps beside the stage stay until the circle starts around 6174, then the result takes their place.
+  const circleMs = (play.animate && arrivalIndex >= 0 ? stepMotionMs(arrivalIndex) : AT_REST_LANDED_MS) + CIRCLE_DELAY_MS
   const arrived = arrivalIndex >= 0 && play.reached >= arrivalIndex
   const partial = run.rawInput.length > 0 && run.rawInput.length < 4 && run.rawInput[0] !== '0'
   const invalid = run.error !== null && !partial
@@ -224,7 +221,7 @@ export default function App() {
 
         {/* Steps 3 and 4: how far to 6174, then the result and the next number. */}
         {hasRun && (
-          <EndPanel key={runId} run={run} arrived={arrived} remaining={arrivalIndex - play.index} revealMs={revealMs} />
+          <EndPanel key={runId} run={run} arrived={arrived} remaining={arrivalIndex - play.index} circleMs={circleMs} />
         )}
 
         {hasRun && (

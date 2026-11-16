@@ -15,9 +15,12 @@ interface EndPanelProps {
   arrived: boolean
   /** Rounds left after the step on the stage, before 6174. */
   remaining: number
-  /** When the result layer starts to fade in, in ms after `arrived`. */
-  revealMs: number
+  /** When the circle starts around 6174, in ms after `arrived`. The steps fade out then, and the result fades in after them. */
+  circleMs: number
 }
+
+/** The steps fade out in this many ms, then the result fades in. */
+const SWAP_MS = 200
 
 /** Hides a layer but keeps its height, so the page does not jump when it shows. */
 const hiddenLayer = 'invisible opacity-0'
@@ -45,7 +48,7 @@ export function HowItWorks({ id }: { id: string }) {
  * keeps the taller one's height. Key it by run id, so each run reveals
  * its result again.
  */
-export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
+export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
   const loopNote = useRef<HTMLParagraphElement>(null)
 
   /** Adds the loop round, then moves focus to the note that replaces the button. */
@@ -56,7 +59,12 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
 
   return (
     <div id="end-panel" className="grid content-start *:col-start-1 *:row-start-1">
-      <div id="end-progress" inert={arrived} className={cn('flex flex-col gap-3', arrived && hiddenLayer)}>
+      <div
+        id="end-progress"
+        inert={arrived}
+        className={cn('flex flex-col gap-3', arrived && cn(hiddenLayer, 'transition-[opacity,visibility] duration-200 ease-out'))}
+        style={arrived ? { transitionDelay: `${circleMs}ms` } : undefined}
+      >
         <p id="rounds-left" className={cn('font-heading text-lg font-bold text-foreground', remaining <= 0 && 'invisible')}>
           <span className="font-mono">{remaining}</span> more round{remaining === 1 ? '' : 's'} to{' '}
           <span className="font-mono">6174</span>.
@@ -64,7 +72,7 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
         <HowItWorks id="how-it-works" />
       </div>
 
-      {/* The delay waits for the 6174 step's motion and its hop, so the answer never shows early. */}
+      {/* The delay waits for the steps to fade out, so the answer never shows early and the panel is never empty. */}
       <div
         id="end-result"
         inert={!arrived}
@@ -72,7 +80,7 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
           'flex flex-col gap-5 transition-[opacity,visibility] duration-300 ease-out',
           arrived ? 'starting:opacity-0' : hiddenLayer
         )}
-        style={arrived ? { transitionDelay: `${revealMs}ms` } : undefined}
+        style={arrived ? { transitionDelay: `${circleMs + SWAP_MS}ms` } : undefined}
       >
         <div className="flex flex-col gap-3">
           <StepFact stepCount={Math.max(1, run.stepCount)} />
@@ -106,7 +114,7 @@ export function EndPanel({ run, arrived, remaining, revealMs }: EndPanelProps) {
           </div>
         </div>
 
-        <section aria-labelledby="try-another" className="flex min-w-0 flex-col gap-2">
+        <section id="try-another-section" aria-labelledby="try-another" className="flex min-w-0 flex-col gap-2">
           <h2 id="try-another" className="font-heading text-lg font-bold text-foreground">
             Try another number
           </h2>

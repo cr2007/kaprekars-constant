@@ -3,7 +3,7 @@ import { HandCircle } from '@/components/hand-circle'
 import { NumberTiles } from '@/components/number-tiles'
 import { Badge } from '@/components/ui/badge'
 import { KAPREKAR_CONSTANT, type KaprekarStep, computeStep } from '@/lib/kaprekar'
-import { playArrival, playStep, type StageRows } from '@/lib/stage-motion'
+import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, playArrival, playStep, type StageRows } from '@/lib/stage-motion'
 import { cn } from 'cn'
 
 /** Holds the stage's height before the first run. It is never shown. */
@@ -14,12 +14,6 @@ const TILE_SIZE = 'md:*:size-14 md:*:text-2xl'
 
 /** One line of the sum: a term and its value, on the parent's three columns. */
 const LINE = 'col-span-3 grid grid-cols-subgrid items-center'
-
-/** A step shown at rest lands its 6174 hop this long after it paints. */
-const AT_REST_LANDED_MS = 300
-
-/** The circle starts this long after the difference lands, with the badge. */
-const CIRCLE_DELAY_MS = 250
 
 interface StageStepProps {
   /** The step to show, or null before a run. */
