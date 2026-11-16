@@ -122,7 +122,10 @@ sum-smallest         # line: Smallest first
 sum-difference       # line: Difference
 hand-circle          # the drawn circle around 6174
 stage-empty          # the empty stage before a run
-input-note           # hint, digits left, or the input error
+input-note           # the empty stage: slots, hint, digits left, or the input error
+  input-note-slots   # four slots that mirror the field
+  input-note-title   # what to do next, or why the number cannot run
+  input-note-detail  # the reason, for a leading 0 or four equal digits
 how-it-works-intro   # the routine list in the empty stage
 trail                # the step trail
 trail-goal           # the 6174 goal at the end of the trail

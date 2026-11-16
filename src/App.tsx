@@ -2,11 +2,11 @@ import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, RotateCcw } from 
 import { useDeferredValue, useEffect, useRef, useState } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
 import { EndPanel, HowItWorks } from '@/components/end-panel'
+import { InputNote } from '@/components/input-note'
 import { SolidDiceIcon } from '@/components/icons/solid-dice-icon'
 import { StageStep } from '@/components/stage-step'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Trail } from '@/components/trail'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -55,7 +55,7 @@ export default function App() {
   const revealMs = (play.animate && arrivalIndex >= 0 ? stepMotionMs(arrivalIndex) : AT_REST_LANDED_MS) + ARRIVAL_MS
   const arrived = arrivalIndex >= 0 && play.reached >= arrivalIndex
   const partial = run.rawInput.length > 0 && run.rawInput.length < 4 && run.rawInput[0] !== '0'
-  const showAlert = run.error !== null && !partial
+  const invalid = run.error !== null && !partial
 
   // Build the step counts while the page is idle, so the first 6174 does not pay for them.
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function App() {
               onChange={(event) => handleChange(event.target.value)}
               // A full field takes no more keys, so select it: the next 4 keys type a new number.
               onFocus={(event) => event.currentTarget.select()}
-              aria-invalid={showAlert || undefined}
+              aria-invalid={invalid || undefined}
               aria-describedby={run.error ? 'input-note' : undefined}
               className="h-14 flex-1 bg-card text-center font-mono text-3xl font-bold tracking-[0.2em] shadow-sm md:text-3xl lg:w-44 lg:flex-none"
             />
@@ -156,24 +156,7 @@ export default function App() {
               animate={play.animate}
               empty={
                 <div className="flex max-w-sm flex-col gap-4 text-left">
-                  {showAlert ? (
-                    <Alert id="input-note" variant="destructive" className="text-base">
-                      <AlertDescription>{run.error}</AlertDescription>
-                    </Alert>
-                  ) : (
-                    <p id="input-note" className="text-pretty font-heading text-lg font-bold text-foreground">
-                      {partial ? (
-                        <>
-                          <span className="font-mono">{4 - run.rawInput.length}</span> more digit
-                          {run.rawInput.length === 3 ? '' : 's'}.
-                        </>
-                      ) : (
-                        <>
-                          Type a <span className="font-mono">4</span>-digit number, or press Random.
-                        </>
-                      )}
-                    </p>
-                  )}
+                  <InputNote raw={run.rawInput} error={partial ? null : run.error} />
                   <HowItWorks id="how-it-works-intro" />
                 </div>
               }
