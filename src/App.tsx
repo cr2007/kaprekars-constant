@@ -237,7 +237,7 @@ export default function App() {
         )}
 
         {hasRun && (
-          <details id="all-steps" className={cn(DISCLOSURE, 'self-start min-[840px]:col-start-1')} onToggle={(event) => setAllOpen(event.currentTarget.open)}>
+          <details id="all-steps" className={cn(DISCLOSURE, 'self-start min-[840px]:col-start-2 min-[840px]:row-start-2')} onToggle={(event) => setAllOpen(event.currentTarget.open)}>
             <summary id="all-steps-summary" className={SUMMARY}>
               <ChevronRight className={CHEVRON} aria-hidden />
               See all steps
@@ -260,8 +260,9 @@ export default function App() {
           </details>
         )}
 
-        {/* The background reading. In a run, wide screens put it beside "See all steps", under the end panel. */}
-        <details id="origin-details" className={cn(DISCLOSURE, 'self-start', hasRun ? 'min-[840px]:col-start-2' : 'min-[840px]:col-span-2')}>
+        {/* The background reading. In a run, wide screens give it the wide column under the stage, and
+            "See all steps" (a short list) the side column. Phones keep the source order: the steps first. */}
+        <details id="origin-details" className={cn(DISCLOSURE, 'self-start', hasRun ? 'min-[840px]:col-start-1 min-[840px]:row-start-2' : 'min-[840px]:col-span-2')}>
           <summary id="origin-summary" className={SUMMARY}>
             <ChevronRight className={CHEVRON} aria-hidden />
             Where <span className="font-mono">6174</span> comes from
