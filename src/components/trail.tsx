@@ -15,9 +15,26 @@ interface TrailProps {
   onPick: (index: number) => void
 }
 
-/** Short ease with a small overshoot, for the snap after a tap or a release. */
-const SNAP_EASE = 'cubic-bezier(0.34, 1.3, 0.64, 1)'
-const SNAP_MS = 250
+/**
+ * A spring as CSS `linear()`: stiffness 170, damping 22, mass 1 (damping
+ * ratio 0.84). It is half way at 119 ms, so a tap answers at once, then it
+ * eases in with 0.7% overshoot and settles within 0.5% at about 530 ms.
+ */
+function spring(stiffness: number, damping: number): { easing: string; ms: number } {
+  const w0 = Math.sqrt(stiffness)
+  const zeta = damping / (2 * w0)
+  const wd = w0 * Math.sqrt(1 - zeta * zeta)
+  const x = (t: number) => 1 - Math.exp(-zeta * w0 * t) * (Math.cos(wd * t) + ((zeta * w0) / wd) * Math.sin(wd * t))
+  // Step 1: the time to settle within 0.5%, found once at load.
+  let settle = 0
+  for (let t = 0; t < 2; t += 0.001) if (Math.abs(1 - x(t)) > 0.005) settle = t
+  // Step 2: 40 samples over that time; the last one is exactly 1.
+  const points = Array.from({ length: 40 }, (_, i) => (i === 39 ? 1 : x((settle * i) / 39)).toFixed(4))
+  return { easing: `linear(${points.join(', ')})`, ms: Math.round(settle * 1000) }
+}
+const GLIDE = spring(170, 22)
+/** The lift during a tap's glide: up fast as the pill leaves, then down with the settle. */
+const LIFT = '1.04 1.1'
 /** A press must travel this many px before it counts as a drag, not a tap. */
 const DRAG_SLOP = 4
 
@@ -54,12 +71,25 @@ function place({ pill, copy }: PillParts, x: number | null) {
   copy.style.transform = x === null ? '' : `translateX(${-x}px)`
 }
 
-/** Animates the pill from `from` to `to` (px), or stops at once under reduced motion. Returns the pill's animation. */
-function glide({ pill, copy }: PillParts, from: number, to: number): Animation | null {
-  for (const el of [pill, copy]) el.getAnimations().forEach((a) => a.cancel())
+/**
+ * Animates the pill from `from` to `to` (px) on the spring, or stops at
+ * once under reduced motion. With `sheen`, the glide carries the lift in
+ * the same motion: the pill rises in the first 30% from `lift` (its scale
+ * now) and settles back to rest as it lands. Returns the pill's animation.
+ */
+function glide({ pill, copy }: PillParts, from: number, to: number, sheen?: HTMLElement, lift = '1 1'): Animation | null {
+  for (const el of [pill, copy, sheen]) el?.getAnimations().forEach((a) => a.cancel())
   if (from === to || reducedMotion()) return null
-  const options = { duration: SNAP_MS, easing: SNAP_EASE }
+  const options = { duration: GLIDE.ms, easing: GLIDE.easing }
   copy.animate([{ transform: `translateX(${-from}px)` }, { transform: `translateX(${-to}px)` }], options)
+  sheen?.animate(
+    [
+      { scale: lift, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
+      { scale: LIFT, offset: 0.3, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' },
+      { scale: '1 1' },
+    ],
+    { duration: GLIDE.ms }
+  )
   return pill.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], options)
 }
 
@@ -77,12 +107,15 @@ function glide({ pill, copy }: PillParts, from: number, to: number): Animation |
 export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   const pillRef = useRef<HTMLSpanElement>(null)
   const copyRef = useRef<HTMLSpanElement>(null)
+  const sheenRef = useRef<HTMLSpanElement>(null)
   /** The pill and its numbers, once both are mounted. */
   const parts = (): PillParts | null =>
     pillRef.current && copyRef.current ? { pill: pillRef.current, copy: copyRef.current } : null
   const optionEls = useRef<(HTMLLabelElement | null)[]>([])
   const drag = useRef<{ id: number; startX: number; from: number; moved: boolean } | null>(null)
   const glideFrom = useRef<number | null>(null)
+  /** The pill's scale when the next glide starts, if it is lifted (a release after a drag). */
+  const liftFrom = useRef<string | undefined>(undefined)
   const shownIndex = useRef(index)
   const swallowClick = useRef(false)
   // The step nearest the pill during a drag. Null when no drag is in progress.
@@ -90,11 +123,13 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   // The pill lifts while it is pressed, dragged, or gliding after a tap or a release.
   const [pressed, setPressed] = useState(false)
   const [gliding, setGliding] = useState(false)
-  const lifted = pressed || hot !== null || gliding
+  // Pressed or dragged: the pill holds its lift. A glide animates the lift itself, so it only deepens the shadow.
+  const held = pressed || hot !== null
+  const lifted = held || gliding
 
-  /** A glide the user started: the pill lifts as it leaves and settles when it lands. */
-  function liftGlide(p: PillParts, from: number, to: number) {
-    const animation = glide(p, from, to)
+  /** A glide the user started: the pill lifts as it leaves and settles when it lands. `lift` is its scale now. */
+  function liftGlide(p: PillParts, from: number, to: number, lift?: string) {
+    const animation = glide(p, from, to, sheenRef.current ?? undefined, lift)
     if (!animation) return
     setGliding(true)
     animation.finished.catch(() => undefined).finally(() => setGliding(false))
@@ -108,9 +143,11 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
     const byUser = glideFrom.current !== null
     const from = glideFrom.current ?? shownIndex.current * p.pill.offsetWidth
     glideFrom.current = null
+    const lift = liftFrom.current
+    liftFrom.current = undefined
     shownIndex.current = index
     if (performance.now() - lastKeyAt < KEY_MS) glide(p, to, to)
-    else if (byUser) liftGlide(p, from, to)
+    else if (byUser) liftGlide(p, from, to, lift)
     else glide(p, from, to)
   }, [index])
 
@@ -184,8 +221,12 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
 
     // Step 3: snap, and show that step at rest. A new step glides from the layout effect; the same one glides here.
     const target = cancelled ? index : Math.round(x / p.pill.offsetWidth)
-    if (target === index) liftGlide(p, x, index * p.pill.offsetWidth)
-    else glideFrom.current = x
+    // The pill is lifted from the drag: the glide starts its lift from there, so the scale never pops.
+    if (target === index) liftGlide(p, x, index * p.pill.offsetWidth, LIFT)
+    else {
+      glideFrom.current = x
+      liftFrom.current = LIFT
+    }
     if (!cancelled) onPick(target)
   }
 
@@ -254,9 +295,10 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
           style={{ width: `calc((100% - 0.5rem) / ${steps.length})`, '--i': index } as CSSProperties}
         >
           <span
+            ref={sheenRef}
             data-lifted={lifted || undefined}
             className="glass-sheen absolute inset-0 rounded-full bg-primary transition-[scale] duration-200 ease-out motion-reduce:transition-none"
-            style={lifted && !reducedMotion() ? { scale: '1.04 1.1' } : undefined}
+            style={held && !reducedMotion() ? { scale: LIFT } : undefined}
           />
           <span className="absolute inset-0 overflow-hidden rounded-full text-primary-foreground">
             <span
