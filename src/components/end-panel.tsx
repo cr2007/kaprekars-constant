@@ -98,7 +98,7 @@ export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
                 type="button"
                 variant="secondary"
                 inert={run.wentFurther}
-                className={cn('h-11 gap-2 px-4 text-base', run.wentFurther && 'invisible')}
+                className={cn('h-auto min-h-11 gap-2 px-4 text-base whitespace-normal', run.wentFurther && 'invisible')}
                 onClick={goFurther}
               >
                 <RotateCw className="size-4" aria-hidden />

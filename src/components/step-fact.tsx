@@ -39,7 +39,9 @@ export function StepFact({ stepCount }: StepFactProps) {
         <span className="font-mono">{total.toLocaleString('en-US')}</span> numbers you could type take
         exactly <span className="font-mono">{stepCount}</span>.
       </figcaption>
-      <ul id="step-chart" className="flex items-end gap-1.5">
+      {/* A container, so a tooltip can wrap at 70% of the chart: the middle bars center theirs, and the
+          3rd bar's center sits at 36%, so no tooltip reaches past the chart, even at large text. */}
+      <ul id="step-chart" className="@container flex items-end gap-1.5">
         {counts.map((numbers, index) => {
           const steps = index + 1
           const current = steps === stepCount
@@ -60,7 +62,7 @@ export function StepFact({ stepCount }: StepFactProps) {
                 {/* Always in the DOM, so it names the button; only its visibility changes, so nothing moves. */}
                 <span
                   className={cn(
-                    'absolute bottom-full z-20 mb-1.5 flex w-max flex-col rounded-md bg-foreground px-2 py-1 text-left text-xs text-background shadow-md transition-opacity duration-150 ease-out motion-reduce:transition-none',
+                    'absolute bottom-full z-20 mb-1.5 flex w-max max-w-[70cqi] flex-col rounded-md bg-foreground px-2 py-1 text-left text-xs text-background shadow-md transition-opacity duration-150 ease-out motion-reduce:transition-none',
                     tipAlign(index, counts.length),
                     open === index ? 'opacity-100' : 'pointer-events-none opacity-0'
                   )}

@@ -28,7 +28,7 @@ export function ShareLink({ value }: ShareLinkProps) {
 
   return (
     <div id="share-link" className="flex flex-col gap-1">
-      <Button id="share-button" type="button" variant="outline" className="h-11 w-fit gap-2" onClick={copy}>
+      <Button id="share-button" type="button" variant="outline" className="h-auto min-h-11 w-fit gap-2 whitespace-normal" onClick={copy}>
         {state === 'copied' ? <Check className="size-4" aria-hidden /> : <Link2 className="size-4" aria-hidden />}
         Share <span className="font-mono">{value}</span>
       </Button>

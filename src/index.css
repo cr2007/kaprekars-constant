@@ -264,12 +264,13 @@ html[data-theme-flip] *::after {
   Trail digits fit their step. The trail is a size container; each step is
   100cqi / --n wide. Four mono digits take about 2.5em, plus 0.875rem for
   the step's padding and a gap, so a long run on a narrow screen (or with
-  large text) shrinks the digits, never below 10 px at the default size,
-  instead of running them together.
+  large text) shrinks the digits instead of running them together. The
+  floor is 10 px, not rem: the stage shows the same numbers in large type,
+  so at 200% text a crowded trail may stay small and still fit.
 */
 .trail-num {
   --trail-max: 0.875rem;
-  font-size: min(var(--trail-max), max(0.625rem, calc((100cqi / var(--n) - 0.875rem) / 2.5)));
+  font-size: min(var(--trail-max), max(10px, calc((100cqi / var(--n) - 0.875rem) / 2.5)));
 }
 
 @media (width >= 40rem) {
