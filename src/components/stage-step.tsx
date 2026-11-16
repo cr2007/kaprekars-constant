@@ -124,7 +124,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
         </div>
 
         <dl id="stage-sum" className="grid grid-cols-[minmax(0,auto)_1.5rem_auto] items-center justify-center gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-3">
-          <div id="sum-start" className={LINE}>
+          {/* Extra room under the start number, so it reads as the input, not as a line of the subtraction. */}
+          <div id="sum-start" className={cn(LINE, 'mb-3 md:mb-4')}>
             <dt className={label}>Start with</dt>
             <dd ref={input} className="col-start-3">
               <NumberTiles digits={shownStep.digits} className={TILE_SIZE} />
