@@ -21,11 +21,16 @@ export function NumberTiles({ digits, tone = 'solid', className }: NumberTilesPr
     <span className="inline-flex">
       <span aria-hidden="true" className={cn('flex gap-1.5 sm:gap-2', className)}>
         {digits.map((digit, index) => (
+          // relative, isolate, overflow-hidden: the sort's fill sits inside the tile, under the digit.
+          // The digit has its own span, so a new digit replaces only that text, never the fill beside it.
           <span
             key={index}
-            className={cn('flex size-11 items-center justify-center rounded-lg font-mono text-xl font-bold', TILE_TONE[tone])}
+            className={cn(
+              'relative isolate flex size-11 items-center justify-center overflow-hidden rounded-lg font-mono text-xl font-bold',
+              TILE_TONE[tone]
+            )}
           >
-            {digit}
+            <span>{digit}</span>
           </span>
         ))}
       </span>

@@ -224,28 +224,29 @@ function playLine(tiles: HTMLElement[], rest: DOMRect[], sources: DOMRect[], lin
   })
 }
 
+/** The latest fill of each tile, so only it clears the tile's z-index when it ends. */
+const currentFill = new WeakMap<HTMLElement, HTMLElement | null>()
+
 /**
  * A fill inside the tile rises to d / 9 of its height, stays while the
- * tiles slide, then drains. The tile gets `isolation`, so the fill paints
- * over its background and under its digit, and a z-index by digit, so the
- * bigger digit passes in front. The fill removes itself, and the tile gets
- * its own style back, when the fill ends or is cancelled.
+ * tiles slide, then drains. The tile is isolated (NumberTiles), so the
+ * fill paints over its background and under its digit. A z-index by digit
+ * puts the bigger digit in front as paths cross. The fill removes itself
+ * when it ends or is cancelled.
  */
 function fillTile(tile: HTMLElement, at: number, drainAt: number, ms: number) {
-  // Step 1: set the tile up as the fill's stacking context, and keep its own style to give back.
+  // Step 1: the bigger digit passes in front. The tile's own classes make it the fill's stacking context.
   const d = Number(tile.textContent)
-  const saved = tile.style.cssText
-  tile.style.position = 'relative'
-  tile.style.isolation = 'isolate'
-  tile.style.overflow = 'hidden'
   tile.style.zIndex = String(d)
 
   // Step 2: the fill, behind the digit, at scaleY(0).
   const fill = document.createElement('span')
   fill.style.cssText = `position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--foreground);opacity:${FILL_OPACITY};transform-origin:bottom;transform:scaleY(0)`
   tile.append(fill)
+  currentFill.set(tile, fill)
 
-  // Step 3: rise to d / 9, hold while the tiles slide, drain. Then remove the fill and give the style back.
+  // Step 3: rise to d / 9, hold while the tiles slide, drain. Then remove the fill. A newer fill on the
+  // same tile owns its z-index, so a cancelled older one leaves it alone.
   const total = drainAt + ms - at
   const level = `scaleY(${d / 9})`
   fill
@@ -261,7 +262,7 @@ function fillTile(tile: HTMLElement, at: number, drainAt: number, ms: number) {
     .finished.catch(() => undefined)
     .finally(() => {
       fill.remove()
-      tile.style.cssText = saved
+      if (currentFill.get(tile) === fill) tile.style.zIndex = ''
     })
 }
 
