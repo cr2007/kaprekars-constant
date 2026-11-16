@@ -38,7 +38,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   const parts = (): PillParts | null =>
     pillRef.current && copyRef.current ? { pill: pillRef.current, copy: copyRef.current } : null
   const optionEls = useRef<(HTMLLabelElement | null)[]>([])
-  const drag = useRef<{ id: number; startX: number; from: number; moved: boolean } | null>(null)
+  const drag = useRef<{ id: number; startX: number; from: number; moved: boolean; stopKeys?: () => void } | null>(null)
   const glideFrom = useRef<number | null>(null)
   /** The pill's scale when the next glide starts, if it is lifted (a release after a drag). */
   const liftFrom = useRef<string | undefined>(undefined)
@@ -64,7 +64,8 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   // Glide the pill to the new step after every change. A tap or a release lifts it; autoplay does not; a key jumps.
   useLayoutEffect(() => {
     const p = parts()
-    if (!p) return
+    // During a drag the pill follows the pointer, not the stage.
+    if (!p || drag.current?.moved) return
     const to = index * p.pill.offsetWidth
     const byUser = glideFrom.current !== null
     const from = glideFrom.current ?? shownIndex.current * p.pill.offsetWidth
@@ -119,6 +120,12 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
       event.currentTarget.setPointerCapture(event.pointerId)
       for (const el of [p.pill, p.copy]) el.getAnimations().forEach((a) => a.cancel())
       d.moved = true
+      // A drag scrubs the run, so autoplay pauses on the shown step, as it does for a video.
+      onPick(index)
+      // Escape cancels the drag: the pill glides back to the shown step.
+      const onKey = (e: KeyboardEvent) => e.key === 'Escape' && finishDrag(d.id, true)
+      window.addEventListener('keydown', onKey)
+      d.stopKeys = () => window.removeEventListener('keydown', onKey)
     }
 
     // Step 2: follow the pointer, clamped to the track, and mark the nearest step.
@@ -128,22 +135,25 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
     setHot(Math.round(x / width))
   }
 
-  /** Ends a drag: snaps to the nearest step, or back to the shown one when cancelled. */
-  function endDrag(event: PointerEvent<HTMLFieldSetElement>, cancelled: boolean) {
+  /** Ends a drag: snaps to the nearest step, or back to the shown one when cancelled (pointercancel, Escape). */
+  function finishDrag(pointerId: number, cancelled: boolean) {
     const d = drag.current
     const p = parts()
-    if (!d || !p || d.id !== event.pointerId) return
+    if (!d || !p || d.id !== pointerId) return
 
     // Step 1: clear the drag state. A tap ends here, and its click picks the step.
     drag.current = null
     setPressed(false)
+    d.stopKeys?.()
     if (!d.moved) return
     const x = paintedX(p.pill)
     place(p, null)
     setHot(null)
 
-    // Step 2: a drag is not also a click on the step under the pointer.
+    // Step 2: a drag is not also a click on the step under the pointer. That click comes in the same task as the
+    // release; one frame later the guard is off, so a later key press on a radio is not swallowed.
     swallowClick.current = true
+    requestAnimationFrame(() => (swallowClick.current = false))
 
     // Step 3: snap, and show that step at rest. A new step glides from the layout effect; the same one glides here.
     const target = cancelled ? index : Math.round(x / p.pill.offsetWidth)
@@ -159,7 +169,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   /** The text of step `i`, or dots before the run reaches it. On the pill, the dots take the pill's text color. */
   const number = (s: KaprekarStep, i: number, onPill = false) =>
     i <= reached ? (
-      <span key="shown" className="stage-fade-in font-mono text-sm tabular-nums sm:text-lg">
+      <span key="shown" className="trail-num stage-fade-in font-mono tabular-nums">
         {pad4(s.input)}
       </span>
     ) : (
@@ -173,12 +183,12 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
     <div id="trail" className="flex min-h-13 scroll-mb-24 items-center gap-1.5 max-sm:-mx-1">
       <fieldset
         id="trail-steps"
-        className="glass-track relative grid min-w-0 flex-1 touch-pan-y rounded-full p-1 select-none"
-        style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+        className="glass-track relative grid min-w-0 flex-1 touch-pan-y rounded-full p-1 select-none [container-type:inline-size]"
+        style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))`, '--n': steps.length } as CSSProperties}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={(event) => endDrag(event, false)}
-        onPointerCancel={(event) => endDrag(event, true)}
+        onPointerUp={(event) => finishDrag(event.pointerId, false)}
+        onPointerCancel={(event) => finishDrag(event.pointerId, true)}
         onPointerLeave={onPointerLeave}
       >
         <legend className="sr-only">Steps from {pad4(steps[0].input)}</legend>

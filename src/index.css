@@ -260,6 +260,24 @@ html[data-theme-flip] *::after {
   }
 }
 
+/*
+  Trail digits fit their step. The trail is a size container; each step is
+  100cqi / --n wide. Four mono digits take about 2.5em, plus 0.875rem for
+  the step's padding and a gap, so a long run on a narrow screen (or with
+  large text) shrinks the digits, never below 10 px at the default size,
+  instead of running them together.
+*/
+.trail-num {
+  --trail-max: 0.875rem;
+  font-size: min(var(--trail-max), max(0.625rem, calc((100cqi / var(--n) - 0.875rem) / 2.5)));
+}
+
+@media (width >= 40rem) {
+  .trail-num {
+    --trail-max: 1.125rem;
+  }
+}
+
 /* A step joins the trail with an opacity fade only, because people scan the trail often. */
 @keyframes stage-fade-in {
   from {
