@@ -96,22 +96,26 @@ export default function App() {
       {/* Step 1 of the story: the number goes in, right above where it plays. */}
       {/* isolate: the watermark's -z-10 stays inside the header, above the page background. */}
       <header id="page-header" className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
-        {/* Decoration (WCAG 1.4.3 "incidental"). CSS content keeps the digits out of the DOM text: copy, find and axe skip them. */}
-        <span
-          id="hero-watermark"
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-end overflow-hidden font-mono text-[min(8rem,30vw)] leading-none font-bold text-primary/12 before:content-['6174'] lg:text-[10rem] dark:text-primary/15"
-        />
-        {/* WHATWG hgroup: one heading, then a p that names the constant. */}
-        <hgroup id="hero" className="flex flex-col gap-1">
-          <h1 id="page-title" className="text-balance font-heading text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
-            Watch a number become <span className="font-mono text-primary">6174</span>
-          </h1>
-          <p id="hero-subline" className="text-pretty text-base text-muted-foreground lg:text-lg">
-            <span className="font-mono">6174</span> is Kaprekar's constant. Almost every <span className="font-mono">4</span>-digit number ends there.
-          </p>
-        </hgroup>
-        <div className="flex">
+        {/* Phones: the title block spans the header, centered, with room for the toggles on both sides,
+            and it holds the watermark. From sm up the wrapper is static, so the watermark fills the header. */}
+        <div className="relative max-sm:col-span-2 max-sm:px-11 max-sm:text-center sm:static">
+          {/* Decoration (WCAG 1.4.3 "incidental"). CSS content keeps the digits out of the DOM text: copy, find and axe skip them. */}
+          <span
+            id="hero-watermark"
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden font-mono text-[min(8rem,30vw)] leading-none font-bold text-primary/12 before:content-['6174'] sm:justify-end lg:text-[10rem] dark:text-primary/15"
+          />
+          {/* WHATWG hgroup: one heading, then a p that names the constant. */}
+          <hgroup id="hero" className="flex flex-col gap-1">
+            <h1 id="page-title" className="text-balance font-heading text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
+              Watch a number become <span className="font-mono text-primary">6174</span>
+            </h1>
+            <p id="hero-subline" className="text-pretty text-base text-muted-foreground lg:text-lg">
+              <span className="font-mono">6174</span> is Kaprekar's constant. Almost every <span className="font-mono">4</span>-digit number ends there.
+            </p>
+          </hgroup>
+        </div>
+        <div className="flex max-sm:absolute max-sm:top-0 max-sm:right-0">
           <BookSideToggle side={book.side} toggleSide={book.toggleSide} />
           <ThemeToggle />
         </div>
