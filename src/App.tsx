@@ -85,12 +85,14 @@ export default function App() {
       data-book-side={book.side}
       className={`mx-auto flex min-h-svh max-w-5xl flex-col gap-4 pt-[max(1rem,env(safe-area-inset-top))] lg:gap-5 lg:pt-8 ${GUTTERS}`}
     >
+      {/* The number field is the main task, and it sits in the header, above <main>. Before a run <main>
+          has nothing to focus, so a link to it sent the next Tab to the footer. The link goes to the field. */}
       <a
         id="skip-link"
-        href="#main-content"
+        href="#number-input"
         className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-lg focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-primary-foreground focus-visible:shadow-lg"
       >
-        Skip to main content
+        Skip to the number field
       </a>
 
       {/* Step 1 of the story: the number goes in, right above where it plays. */}

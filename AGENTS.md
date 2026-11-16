@@ -99,7 +99,7 @@ put a fixed id in a component that renders twice: pass it as a prop.
 
 ```
 page                 # the whole page; data-book-side lives here
-skip-link            # "Skip to main content"
+skip-link            # "Skip to the number field"
 page-header          # title, toggles and the number input
 hero                 # the title and the subline (hgroup)
 page-title           # the h1
