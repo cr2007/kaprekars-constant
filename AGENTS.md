@@ -158,8 +158,7 @@ next-challenge       # "Next challenge"
 all-steps            # "See all steps" disclosure
 all-steps-summary    # its summary
 all-steps-list       # its list of steps
-page-footer          # the footer
-origin-details       # "Where 6174 comes from" disclosure
+origin-details       # "Where 6174 comes from" disclosure, beside all-steps on wide screens
 origin-summary       # its summary
 origin-text          # its paragraph
 wikipedia-link       # "Read more on Wikipedia"

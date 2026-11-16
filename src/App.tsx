@@ -86,7 +86,7 @@ export default function App() {
       className={`mx-auto flex min-h-svh max-w-5xl flex-col gap-4 pt-[max(1rem,env(safe-area-inset-top))] lg:gap-5 lg:pt-8 ${GUTTERS}`}
     >
       {/* The number field is the main task, and it sits in the header, above <main>. Before a run <main>
-          has nothing to focus, so a link to it sent the next Tab to the footer. The link goes to the field. */}
+          has nothing to focus, so a link to it sent the next Tab to the end of the page. The link goes to the field. */}
       <a
         id="skip-link"
         href="#number-input"
@@ -237,7 +237,7 @@ export default function App() {
         )}
 
         {hasRun && (
-          <details id="all-steps" className={cn(DISCLOSURE, 'min-[840px]:col-span-2')} onToggle={(event) => setAllOpen(event.currentTarget.open)}>
+          <details id="all-steps" className={cn(DISCLOSURE, 'self-start min-[840px]:col-start-1')} onToggle={(event) => setAllOpen(event.currentTarget.open)}>
             <summary id="all-steps-summary" className={SUMMARY}>
               <ChevronRight className={CHEVRON} aria-hidden />
               See all steps
@@ -259,10 +259,9 @@ export default function App() {
             )}
           </details>
         )}
-      </main>
 
-      <footer id="page-footer">
-        <details id="origin-details" className={DISCLOSURE}>
+        {/* The background reading. In a run, wide screens put it beside "See all steps", under the end panel. */}
+        <details id="origin-details" className={cn(DISCLOSURE, 'self-start', hasRun ? 'min-[840px]:col-start-2' : 'min-[840px]:col-span-2')}>
           <summary id="origin-summary" className={SUMMARY}>
             <ChevronRight className={CHEVRON} aria-hidden />
             Where <span className="font-mono">6174</span> comes from
@@ -287,7 +286,8 @@ export default function App() {
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
         </details>
-      </footer>
+      </main>
+
     </div>
   )
 }

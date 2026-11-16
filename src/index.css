@@ -364,7 +364,7 @@ html[data-theme-flip] *::after {
       "header  stage"
       "end     stage"
       "steps   stage"
-      "footer  stage";
+      "origin  stage";
     align-content: start;
   }
 
@@ -373,7 +373,7 @@ html[data-theme-flip] *::after {
       "stage header"
       "stage end"
       "stage steps"
-      "stage footer";
+      "stage origin";
   }
 
   #main-content {
@@ -383,7 +383,7 @@ html[data-theme-flip] *::after {
   #page-header,
   #end-panel,
   #all-steps,
-  #page-footer {
+  #origin-details {
     margin-inline: 1rem;
   }
 
@@ -397,8 +397,8 @@ html[data-theme-flip] *::after {
   #all-steps {
     grid-area: steps;
   }
-  #page-footer {
-    grid-area: footer;
+  #origin-details {
+    grid-area: origin;
   }
 
   #stage-block {
