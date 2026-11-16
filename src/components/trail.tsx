@@ -54,20 +54,22 @@ function place({ pill, copy }: PillParts, x: number | null) {
   copy.style.transform = x === null ? '' : `translateX(${-x}px)`
 }
 
-/** Animates the pill from `from` to `to` (px), or stops at once under reduced motion. */
-function glide({ pill, copy }: PillParts, from: number, to: number) {
+/** Animates the pill from `from` to `to` (px), or stops at once under reduced motion. Returns the pill's animation. */
+function glide({ pill, copy }: PillParts, from: number, to: number): Animation | null {
   for (const el of [pill, copy]) el.getAnimations().forEach((a) => a.cancel())
-  if (from === to || reducedMotion()) return
+  if (from === to || reducedMotion()) return null
   const options = { duration: SNAP_MS, easing: SNAP_EASE }
-  pill.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], options)
   copy.animate([{ transform: `translateX(${-from}px)` }, { transform: `translateX(${-to}px)` }], options)
+  return pill.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], options)
 }
 
 /**
  * The run as a scrubber: one native radio per step, labelled with the
  * number that step starts from, then the goal, 6174. A pill sits behind
  * the shown step. Tap a step, or press the pill and drag it: it follows
- * the pointer 1:1, lifts a little, and snaps to the nearest step on release. A tap on the
+ * the pointer 1:1 and snaps to the nearest step on release. The pill lifts
+ * (a little bigger, a deeper shadow) while pressed, dragged, or gliding after
+ * a tap or a release; autoplay glides without it, and keys jump. A tap on the
  * shown step stops autoplay there. Arrow keys move between steps as in
  * any radio group. Phones drop the goal label, so 8 steps keep a 44 px
  * target each. Render it only with a run: it reads `steps[0]`.
@@ -85,16 +87,31 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   const swallowClick = useRef(false)
   // The step nearest the pill during a drag. Null when no drag is in progress.
   const [hot, setHot] = useState<number | null>(null)
+  // The pill lifts while it is pressed, dragged, or gliding after a tap or a release.
+  const [pressed, setPressed] = useState(false)
+  const [gliding, setGliding] = useState(false)
+  const lifted = pressed || hot !== null || gliding
 
-  // Glide the pill to the new step after every change, unless a key moved it.
+  /** A glide the user started: the pill lifts as it leaves and settles when it lands. */
+  function liftGlide(p: PillParts, from: number, to: number) {
+    const animation = glide(p, from, to)
+    if (!animation) return
+    setGliding(true)
+    animation.finished.catch(() => undefined).finally(() => setGliding(false))
+  }
+
+  // Glide the pill to the new step after every change. A tap or a release lifts it; autoplay does not; a key jumps.
   useLayoutEffect(() => {
     const p = parts()
     if (!p) return
     const to = index * p.pill.offsetWidth
+    const byUser = glideFrom.current !== null
     const from = glideFrom.current ?? shownIndex.current * p.pill.offsetWidth
     glideFrom.current = null
     shownIndex.current = index
-    glide(p, performance.now() - lastKeyAt < KEY_MS ? to : from, to)
+    if (performance.now() - lastKeyAt < KEY_MS) glide(p, to, to)
+    else if (byUser) liftGlide(p, from, to)
+    else glide(p, from, to)
   }, [index])
 
   /** Shows step `i`, and glides from where the pill is painted now. */
@@ -111,9 +128,18 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
     // Step 1: only a primary press on the shown step grabs the pill.
     if (!pill || event.button !== 0 || !optionEls.current[index]?.contains(event.target as Node)) return
 
-    // Step 2: note where the pill is painted, even mid-glide. A tap leaves it alone.
+    // Step 2: note where the pill is painted, even mid-glide, and lift it at once, so the press feels held.
     const from = paintedX(pill)
     drag.current = { id: event.pointerId, startX: event.clientX, from, moved: false }
+    setPressed(true)
+  }
+
+  /** A press that leaves the track before it drags is not a drag: the pill settles. */
+  function onPointerLeave(event: PointerEvent<HTMLFieldSetElement>) {
+    const d = drag.current
+    if (!d || d.moved || d.id !== event.pointerId) return
+    drag.current = null
+    setPressed(false)
   }
 
   /** Moves the pill 1:1 with the pointer, inside the track. */
@@ -147,6 +173,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
 
     // Step 1: clear the drag state. A tap ends here, and its click picks the step.
     drag.current = null
+    setPressed(false)
     if (!d.moved) return
     const x = paintedX(p.pill)
     place(p, null)
@@ -157,7 +184,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
 
     // Step 3: snap, and show that step at rest. A new step glides from the layout effect; the same one glides here.
     const target = cancelled ? index : Math.round(x / p.pill.offsetWidth)
-    if (target === index) glide(p, x, index * p.pill.offsetWidth)
+    if (target === index) liftGlide(p, x, index * p.pill.offsetWidth)
     else glideFrom.current = x
     if (!cancelled) onPick(target)
   }
@@ -173,7 +200,6 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
         ····
       </span>
     )
-  const lifted = hot !== null
 
   // scroll-mb: a focused step scrolls clear of the playback bar under it.
   return (
@@ -186,6 +212,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
         onPointerMove={onPointerMove}
         onPointerUp={(event) => endDrag(event, false)}
         onPointerCancel={(event) => endDrag(event, true)}
+        onPointerLeave={onPointerLeave}
       >
         <legend className="sr-only">Steps from {pad4(steps[0].input)}</legend>
         {steps.map((s, i) => (
