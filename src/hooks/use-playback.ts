@@ -43,17 +43,17 @@ export interface Playback {
 
 /**
  * Which step the stage shows, and the timer that plays through a run.
- * A new run plays from step 1. A run from `?n=` opens on its last step,
- * paused, so a shared link lands on 6174. Left and Right (outside a
- * field) step back and forward.
+ * Every run plays from step 1, also a run from `?n=` (a shared link):
+ * its reader sees the routine, not only the end. Left and Right
+ * (outside a field) step back and forward.
  */
 export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   const last = steps.length - 1
-  const [index, setIndex] = useState(Math.max(0, last))
-  const [reached, setReached] = useState(Math.max(0, last))
-  const [playing, setPlaying] = useState(false)
+  const [index, setIndex] = useState(0)
+  const [reached, setReached] = useState(0)
+  const [playing, setPlaying] = useState(steps.length > 1)
   const [animate, setAnimate] = useState(true)
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState(() => (steps.length === 1 ? endSentence(steps) : ''))
   const [seen, setSeen] = useState({ runId, length: steps.length })
   /** The step on the stage and the time its motion ends. */
   const motion = useRef({ key: '', end: 0 })

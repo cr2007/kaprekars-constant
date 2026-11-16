@@ -44,7 +44,6 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
   const result = useRef<HTMLDivElement>(null)
   const resultBox = useRef<HTMLDivElement>(null)
   const badge = useRef<HTMLSpanElement>(null)
-  const firstPaint = useRef(true)
   const shown = useRef<{ runId: number; index: number } | null>(null)
   const celebrated = useRef<number | null>(null)
   const shownStep = step ?? PLACEHOLDER
@@ -61,25 +60,21 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
       resultBox: resultBox.current,
       badge: badge.current,
     }
-    if (!step || !root.current || Object.values(rows).some((el) => !el)) {
-      firstPaint.current = false
-      return
-    }
+    if (!step || !root.current || Object.values(rows).some((el) => !el)) return
 
-    // Step 1: decide the motion. A page opened from `?n=`, and a step picked
-    // with Back, Next or the trail, paint at rest at once. The same step
+    // Step 1: decide the motion. A step picked with Back, Next or the trail
+    // paints at rest at once. A run plays, also from `?n=`. The same step
     // again (StrictMode runs effects twice) does nothing new.
     const prev = shown.current
     shown.current = { runId, index }
     const same = prev?.runId === runId && prev.index === index
     let landedAt = AT_REST_LANDED_MS
-    if (!same && (firstPaint.current || !animate)) {
+    if (!same && !animate) {
       root.current.getAnimations({ subtree: true }).forEach((a) => a.cancel())
     } else if (!same) {
       const handoff = prev?.runId === runId && index === prev.index + 1
       landedAt = playStep(root.current, rows as StageRows, step.digits, index === 0, handoff)
     }
-    firstPaint.current = false
 
     // Step 2: the circle starts 250 ms after the difference lands, with the badge.
     if (!same) setCircleAt(arrival ? landedAt + CIRCLE_DELAY_MS : null)
