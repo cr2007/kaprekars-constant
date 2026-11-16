@@ -1,9 +1,11 @@
-import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, RotateCcw } from 'lucide-react'
-import { useDeferredValue, useEffect, useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useRef } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
+import { AllSteps, OriginDetails } from '@/components/disclosures'
 import { EndPanel, HowItWorks } from '@/components/end-panel'
+import { Hero } from '@/components/hero'
 import { InputNote } from '@/components/input-note'
 import { DiceIcon } from '@/components/icons/dice-icon'
+import { PlaybackBar } from '@/components/playback-bar'
 import { StageStep } from '@/components/stage-step'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Trail } from '@/components/trail'
@@ -11,22 +13,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useBookSide } from '@/hooks/use-book-side'
-import { pad4, usePlayback } from '@/hooks/use-playback'
+import { usePlayback } from '@/hooks/use-playback'
 import { useRun } from '@/hooks/use-run'
 import { KAPREKAR_CONSTANT, sanitizeDigitInput } from '@/lib/kaprekar'
 import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, reducedMotion, stepMotionMs } from '@/lib/stage-motion'
 import { distribution } from '@/lib/stats'
-import { cn } from 'cn'
 
 /** Side and bottom padding that keeps clear of notches and home bars. */
 const GUTTERS =
   'pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]'
-const BAR_BUTTON =
-  'inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-3 font-semibold text-foreground outline-none transition-[color,background-color,scale] duration-150 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:scale-97 aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:active:scale-100 motion-reduce:active:scale-100 sm:px-4'
-const DISCLOSURE = 'group rounded-2xl bg-muted/60 px-4 open:pb-4'
-const SUMMARY =
-  'flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden'
-const CHEVRON = 'size-4 shrink-0 transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none'
+
 /**
  * The Stage: one step at a time, large. The page reads in the order of
  * the story: type a number, watch the stage, see 6174, try another. Each
@@ -42,7 +38,6 @@ export default function App() {
   const play = usePlayback(steps, runId)
   const inputRef = useRef<HTMLInputElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
-  const [allOpen, setAllOpen] = useState(false)
   const book = useBookSide()
 
   const hasRun = steps.length > 0
@@ -76,9 +71,6 @@ export default function App() {
     }
   }
 
-  const playLabel = play.playing ? 'Pause' : play.index >= last ? 'Replay' : 'Play'
-  const PlayIcon = play.playing ? Pause : playLabel === 'Replay' ? RotateCcw : Play
-
   return (
     <div
       id="page"
@@ -98,30 +90,7 @@ export default function App() {
       {/* Step 1 of the story: the number goes in, right above where it plays. */}
       {/* isolate: the watermark's -z-10 stays inside the header, above the page background. */}
       <header id="page-header" className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
-        {/* Phones: the title block spans the header, centered, and holds the watermark. Only the title keeps
-            room for the toggles on both sides; the subline under them uses the full width. From sm up the
-            wrapper is static, so the watermark fills the header. */}
-        <div className="relative max-sm:col-span-2 max-sm:text-center sm:static">
-          {/* Decoration (WCAG 1.4.3 "incidental"). CSS content keeps the digits out of the DOM text: copy, find and axe skip them. */}
-          <span
-            id="hero-watermark"
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden font-mono text-[min(8rem,30vw)] leading-none font-bold text-primary/12 before:content-['6174'] sm:justify-end lg:text-[10rem] dark:text-primary/15"
-          />
-          {/* WHATWG hgroup: one heading, then a p that names the constant. */}
-          <hgroup id="hero" className="flex flex-col gap-1">
-            <h1 id="page-title" className="text-balance font-heading max-sm:px-11 text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
-              Watch a number become <span className="font-mono text-primary">6174</span>
-            </h1>
-            {/* Phones: one sentence per line, so the line is easy to scan. */}
-            <p id="hero-subline" className="text-pretty text-base text-muted-foreground lg:text-lg">
-              <span className="font-mono">6174</span> is Kaprekar's constant.{' '}
-              <span className="max-sm:block">
-                Almost every <span className="font-mono">4</span>-digit number ends there.
-              </span>
-            </p>
-          </hgroup>
-        </div>
+        <Hero />
         <div className="flex max-sm:absolute max-sm:top-0 max-sm:right-0">
           <BookSideToggle side={book.side} toggleSide={book.toggleSide} />
           <ThemeToggle />
@@ -189,46 +158,7 @@ export default function App() {
             )}
           </div>
 
-          {hasRun && (
-            <>
-              {/* In flow, not sticky: on a short screen a stuck bar covered the lower rows of the stage. */}
-              <div id="playback-bar">
-                <fieldset className="mx-auto flex w-fit items-center gap-1 rounded-full border border-border bg-card p-1.5 shadow-sm">
-                  <legend className="sr-only">Playback</legend>
-                  {/* aria-disabled, not disabled: the button keeps focus when it ends the run. */}
-                  <button
-                    id="back-button"
-                    type="button"
-                    className={BAR_BUTTON}
-                    aria-disabled={play.index === 0}
-                    onClick={() => play.go(play.index - 1)}
-                  >
-                    <ChevronLeft className="size-5" aria-hidden />
-                    Back
-                  </button>
-                  <button
-                    id="play-button"
-                    type="button"
-                    className={cn(BAR_BUTTON, 'min-w-28 bg-primary text-primary-foreground hover:bg-primary/85')}
-                    onClick={play.toggle}
-                  >
-                    <PlayIcon className="size-5" aria-hidden />
-                    {playLabel}
-                  </button>
-                  <button
-                    id="next-button"
-                    type="button"
-                    className={BAR_BUTTON}
-                    aria-disabled={play.index >= last}
-                    onClick={() => play.go(play.index + 1)}
-                  >
-                    Next
-                    <ChevronRight className="size-5" aria-hidden />
-                  </button>
-                </fieldset>
-              </div>
-            </>
-          )}
+          {hasRun && <PlaybackBar play={play} last={last} />}
         </div>
 
         {/* Steps 3 and 4: how far to 6174, then the result and the next number. */}
@@ -236,60 +166,11 @@ export default function App() {
           <EndPanel key={runId} run={run} arrived={arrived} remaining={arrivalIndex - play.index} circleMs={circleMs} />
         )}
 
-        {hasRun && (
-          <details id="all-steps" className={cn(DISCLOSURE, 'self-start min-[840px]:col-start-2 min-[840px]:row-start-2')} onToggle={(event) => setAllOpen(event.currentTarget.open)}>
-            <summary id="all-steps-summary" className={SUMMARY}>
-              <ChevronRight className={CHEVRON} aria-hidden />
-              See all steps
-            </summary>
-            {allOpen && (
-              <ol id="all-steps-list" aria-labelledby="all-steps-summary" className="flex flex-col gap-1 font-mono text-lg tabular-nums">
-                {steps.map((s, i) => (
-                  // A flex row centres the small label on the larger digits; on the baseline it hung 2.8 px low.
-                  <li key={i} className="flex items-center gap-2">
-                    <span className="font-sans text-sm text-muted-foreground">
-                      Step <span className="font-mono">{i + 1}</span>:
-                    </span>
-                    <span>
-                      {pad4(s.descendingNumber)} &minus; {pad4(s.ascendingNumber)} ={' '}
-                      <span className={cn(s.result === KAPREKAR_CONSTANT && 'font-bold text-primary')}>
-                        {pad4(s.result)}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </details>
-        )}
+        {hasRun && <AllSteps steps={steps} className="min-[840px]:col-start-2 min-[840px]:row-start-2" />}
 
         {/* The background reading. In a run, wide screens give it the wide column under the stage, and
             "See all steps" (a short list) the side column. Phones keep the source order: the steps first. */}
-        <details id="origin-details" className={cn(DISCLOSURE, 'self-start', hasRun ? 'min-[840px]:col-start-1 min-[840px]:row-start-2' : 'min-[840px]:col-span-2')}>
-          <summary id="origin-summary" className={SUMMARY}>
-            <ChevronRight className={CHEVRON} aria-hidden />
-            Where <span className="font-mono">6174</span> comes from
-          </summary>
-          <p id="origin-text" className="max-w-prose text-pretty text-sm text-muted-foreground sm:text-base">
-            The mathematician D. R. Kaprekar found this routine in <span className="font-mono">1949</span>,
-            working with digits by hand. From any <span className="font-mono">4</span>-digit number with at
-            least two different digits, sorting and subtracting always arrived at{' '}
-            <span className="font-mono">6174</span>, and then stayed there. Other digit lengths have their own
-            resting numbers, but <span className="font-mono">6174</span> is the famous one, and it carries his
-            name.
-          </p>
-          <a
-            id="wikipedia-link"
-            href="https://en.wikipedia.org/wiki/6174_(number)"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-1 inline-flex min-h-11 items-center gap-1 rounded-lg text-sm font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Read more on Wikipedia
-            <ExternalLink className="size-3.5" aria-hidden />
-            <span className="sr-only"> (opens in a new tab)</span>
-          </a>
-        </details>
+        <OriginDetails className={hasRun ? 'min-[840px]:col-start-1 min-[840px]:row-start-2' : 'min-[840px]:col-span-2'} />
       </main>
 
     </div>
