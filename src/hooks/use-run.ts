@@ -83,6 +83,8 @@ export function useRun(): Run {
   /** Keeps the field to its first 4 digits and runs them when there are 4. */
   function setInput(value: string) {
     const digitsOnly = sanitizeDigitInput(value)
+    // The same 4 digits as the run on screen (a 5th key, or a paste of the same number) keep the run going.
+    if (digitsOnly === rawInput && steps.length > 0) return
     setRawInput(digitsOnly)
 
     // Step 1: 4 digits in means there is a full number to run.
