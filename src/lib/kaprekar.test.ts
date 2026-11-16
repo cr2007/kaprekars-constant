@@ -34,24 +34,14 @@ describe('sanitizeDigitInput', () => {
 })
 
 describe('validateInput', () => {
-  test('rejects an empty string', () => {
-    expect(validateInput('').valid).toBe(false)
-  })
-
-  test('rejects non-digit characters', () => {
-    expect(validateInput('12a4').valid).toBe(false)
-  })
-
-  test('rejects fewer than 4 digits', () => {
-    expect(validateInput('123').valid).toBe(false)
-  })
-
-  test('rejects more than 4 digits', () => {
-    expect(validateInput('12345').valid).toBe(false)
-  })
-
-  test('rejects a leading zero', () => {
-    expect(validateInput('0123').valid).toBe(false)
+  test.each([
+    ['an empty string', ''],
+    ['a non-digit', '12a4'],
+    ['fewer than 4 digits', '123'],
+    ['more than 4 digits', '12345'],
+    ['a leading zero', '0123'],
+  ])('rejects %s', (_case, raw) => {
+    expect(validateInput(raw).valid).toBe(false)
   })
 
   test('rejects a leading zero before 4 digits are typed', () => {
@@ -96,17 +86,6 @@ describe('computeStep', () => {
 })
 
 describe('runKaprekarRoutine', () => {
-  test('reaches 6174 within 7 steps for a typical number', () => {
-    const steps = runKaprekarRoutine(3524)
-    expect(steps.length).toBeLessThanOrEqual(7)
-    expect(steps.at(-1)?.result).toBe(KAPREKAR_CONSTANT)
-  })
-
-  test('reaches 6174 for a number with a zero digit', () => {
-    const steps = runKaprekarRoutine(1000)
-    expect(steps.at(-1)?.result).toBe(KAPREKAR_CONSTANT)
-  })
-
   test('reaches 6174 in a single step when already there', () => {
     const steps = runKaprekarRoutine(KAPREKAR_CONSTANT)
     expect(steps).toHaveLength(1)

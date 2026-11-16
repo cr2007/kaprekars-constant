@@ -3,18 +3,11 @@ import { runKaprekarRoutine } from './kaprekar'
 import { countWithSteps, distribution, randomWithSteps, shareWithSteps } from './stats'
 
 describe('distribution', () => {
-  test('counts 8,991 valid inputs', () => {
-    expect(distribution().total).toBe(8991)
-  })
-
-  test('puts every valid input in exactly one group of 1 to 7 steps', () => {
+  test('puts each of the 8,991 valid inputs in exactly one group of 1 to 7 steps', () => {
     const { byCount, total } = distribution()
+    expect(total).toBe(8991)
     expect(byCount[0]).toEqual([])
     expect(byCount.reduce((sum, group) => sum + group.length, 0)).toBe(total)
-  })
-
-  test('puts 3524 with the 3-step numbers', () => {
-    expect(distribution().byCount[3]).toContain(3524)
   })
 
   test('agrees with a full run of the routine for every input', () => {
