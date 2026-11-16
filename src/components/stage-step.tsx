@@ -124,8 +124,16 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
         </div>
 
         <dl id="stage-sum" className="grid grid-cols-[minmax(0,auto)_1.5rem_auto] items-center justify-center gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-3">
-          {/* Extra room under the start number, so it reads as the input, not as a line of the subtraction. */}
-          <div id="sum-start" className={cn(LINE, 'mb-3 md:mb-4')}>
+          {/* Extra room under the start number, so it reads as the input, not as a line of the subtraction.
+              A thin dashed line sits half way in that room (18 px, 28 px from md): dashed and 1 px, so it
+              reads as a divider, not as the solid 2 px bar of the subtraction. */}
+          <div
+            id="sum-start"
+            className={cn(
+              LINE,
+              'relative mb-3 after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[9px] after:border-t after:border-dashed after:border-border md:mb-4 md:after:-bottom-[14px]'
+            )}
+          >
             <dt className={label}>Start with</dt>
             <dd ref={input} className="col-start-3">
               <NumberTiles digits={shownStep.digits} className={TILE_SIZE} />
