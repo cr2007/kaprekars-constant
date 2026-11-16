@@ -81,7 +81,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   useEffect(() => {
     const key = `${runId}:${index}`
     if (motion.current.key === key) return
-    motion.current = { key, end: animate && steps[index] ? performance.now() + stepMotionMs(index) : 0 }
+    motion.current = { key, end: animate && steps[index] ? performance.now() + stepMotionMs(steps[index].digits, index) : 0 }
   })
 
   // Step 3: while playing, wait for the step's motion and a hold, then move on. Stop at the end.

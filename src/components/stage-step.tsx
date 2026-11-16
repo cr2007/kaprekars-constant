@@ -77,7 +77,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, empty }
       root.current.getAnimations({ subtree: true }).forEach((a) => a.cancel())
     } else if (!same) {
       const handoff = prev?.runId === runId && index === prev.index + 1
-      landedAt = playStep(root.current, rows as StageRows, handoff)
+      landedAt = playStep(root.current, rows as StageRows, step.digits, index === 0, handoff)
     }
     firstPaint.current = false
 

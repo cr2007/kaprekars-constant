@@ -49,7 +49,7 @@ export default function App() {
   const last = steps.length - 1
   const arrivalIndex = steps.findIndex((s) => s.result === KAPREKAR_CONSTANT)
   // The steps beside the stage stay until the circle starts around 6174, then the result takes their place.
-  const circleMs = (play.animate && arrivalIndex >= 0 ? stepMotionMs(arrivalIndex) : AT_REST_LANDED_MS) + CIRCLE_DELAY_MS
+  const circleMs = (play.animate && arrivalIndex >= 0 ? stepMotionMs(steps[arrivalIndex].digits, arrivalIndex) : AT_REST_LANDED_MS) + CIRCLE_DELAY_MS
   const arrived = arrivalIndex >= 0 && play.reached >= arrivalIndex
   const partial = run.rawInput.length > 0 && run.rawInput.length < 4 && run.rawInput[0] !== '0'
   const invalid = run.error !== null && !partial
