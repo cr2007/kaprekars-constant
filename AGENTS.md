@@ -110,7 +110,7 @@ theme-toggle         # light or dark theme
 number-label         # "Your 4-digit number"
 number-input         # the 4-digit field
 random-button        # "Random"
-random-dice-icon     # the dice on the Random button
+random-dice-icon     # the dice on the Random button; they roll on hover
 main-content         # <main>
 playback-status      # screen-reader status of the playback
 stage-block          # the stage, the trail and the playback bar

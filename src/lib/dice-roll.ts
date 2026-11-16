@@ -1,0 +1,22 @@
+/** The faces of the two dice: [back, front]. */
+export type Pair = readonly [number, number]
+
+/** The faces at rest, as in the src icon: back die 2, front die 3. */
+export const REST_PAIR: Pair = [2, 3]
+
+/** The faces a roll can show. Face 6 has its own pip layout, so it stays legible at 20 px. */
+export const ROLL_FACES: readonly number[] = [1, 2, 3, 4, 5, 6]
+
+const same = (a: Pair, b: Pair) => a[0] === b[0] && a[1] === b[1]
+
+/**
+ * A new pair of faces, uniform over every pair of {@link ROLL_FACES} except
+ * `last` and the rest pair, so each roll visibly changes the dice.
+ * `random` returns a number in [0, 1), as `Math.random` does.
+ */
+export function rollPair(last: Pair, random: () => number = Math.random): Pair {
+  const pairs = ROLL_FACES.flatMap((back) => ROLL_FACES.map((front): Pair => [back, front])).filter(
+    (pair) => !same(pair, last) && !same(pair, REST_PAIR)
+  )
+  return pairs[Math.floor(random() * pairs.length)]
+}

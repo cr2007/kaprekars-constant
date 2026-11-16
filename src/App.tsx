@@ -3,7 +3,7 @@ import { useDeferredValue, useEffect, useRef, useState } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
 import { EndPanel, HowItWorks } from '@/components/end-panel'
 import { InputNote } from '@/components/input-note'
-import { SolidDiceIcon } from '@/components/icons/solid-dice-icon'
+import { DiceIcon } from '@/components/icons/dice-icon'
 import { StageStep } from '@/components/stage-step'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Trail } from '@/components/trail'
@@ -147,7 +147,7 @@ export default function App() {
               className="h-14 gap-2 bg-card px-4 text-base dark:bg-card"
               onClick={run.random}
             >
-              <SolidDiceIcon id="random-dice-icon" className="size-5" />
+              <DiceIcon id="random-dice-icon" className="size-5" />
               Random
             </Button>
           </div>
