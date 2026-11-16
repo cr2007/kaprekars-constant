@@ -52,6 +52,16 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
   const isConstant = step?.result === KAPREKAR_CONSTANT
   // When the circle around 6174 starts, in ms. Null hides it. Set where the step's motion is planned.
   const [circleAt, setCircleAt] = useState<number | null>(null)
+  const emptyBox = useRef<HTMLDivElement>(null)
+  /** Where the field's slots sat in the empty stage, and the scroll then, so a new run's digits can fly from them. */
+  const slots = useRef<{ rects: DOMRect[]; scrollY: number } | null>(null)
+
+  // While the stage is empty, note where the slots sit after each render. The run's first paint reads it.
+  useLayoutEffect(() => {
+    if (step) return
+    const row = emptyBox.current?.querySelector('#input-note-slots')
+    slots.current = row ? { rects: [...row.children].map((el) => el.getBoundingClientRect()), scrollY: window.scrollY } : null
+  })
 
   useLayoutEffect(() => {
     const rows = {
@@ -75,7 +85,13 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
       root.current.getAnimations({ subtree: true }).forEach((a) => a.cancel())
     } else if (!same) {
       const handoff = prev?.runId === runId && index === prev.index + 1
-      landedAt = playStep(root.current, rows as StageRows, step.digits, index === 0, handoff)
+      // A run that starts while the slots show flies its digits in from them, moved by any scroll since.
+      const noted = index === 0 && !handoff ? slots.current : null
+      // Use the slots once: a later replay of step 1 fades in, with no slots on screen.
+      slots.current = null
+      const dy = noted ? window.scrollY - noted.scrollY : 0
+      const from = noted?.rects.map((r) => new DOMRect(r.x, r.y - dy, r.width, r.height)) ?? null
+      landedAt = playStep(root.current, rows as StageRows, step.digits, index === 0, handoff, from)
     }
 
     // Step 2: the circle starts 250 ms after the difference lands, with the badge.
@@ -149,7 +165,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
         </dl>
       </div>
 
-      {!step && <div id="stage-empty" className="flex items-center justify-center p-2 text-center">{empty}</div>}
+      {!step && <div id="stage-empty" ref={emptyBox} className="flex items-center justify-center p-2 text-center">{empty}</div>}
     </section>
   )
 }

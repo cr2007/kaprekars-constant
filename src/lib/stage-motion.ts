@@ -6,6 +6,14 @@ export const EASE_IN_OUT = 'cubic-bezier(0.77, 0, 0.175, 1)'
 
 /** The last result moves up into the input row over this time. */
 const HANDOFF_MS = 300
+/**
+ * A new run: each digit flies from its slot in the empty stage to its
+ * place in the input row, over this time, this far apart. The copies drop
+ * only once the last one lands, so the start does not feel rushed.
+ */
+const SLOT_MS = 400
+const SLOT_STAGGER_MS = 50
+export const SLOTS_IN_MS = SLOT_MS + 3 * SLOT_STAGGER_MS
 
 /** One row fades in over this time. */
 const FADE_MS = 200
@@ -60,12 +68,13 @@ export function stepTimeline(handoff: boolean): StepTimeline {
 
 /**
  * How long step `index` with these input digits moves when autoplay
- * arrives at it: step 1 starts a run, every later step arrives by the
- * handoff. Autoplay waits this long.
+ * arrives at it: step 1 starts a run (its digits fly in from the slots;
+ * a replay fades them in, sooner, so the wait is never short), and every
+ * later step arrives by the handoff. Autoplay waits this long.
  */
 export function stepMotionMs(digits: number[], index: number): number {
   if (reducedMotion()) return stepTimeline(false).end
-  return sortTimeline(digits, index === 0, index > 0).end
+  return sortTimeline(digits, index === 0, index > 0 ? HANDOFF_MS : SLOTS_IN_MS).end
 }
 
 /* ---------------------------------------------------------------------------
@@ -175,15 +184,16 @@ function sortLine(digits: number[], desc: boolean, copyAt: number, t0: number, k
 }
 
 /**
- * The timeline of one step. Both copies drop in input order. Then line 2
- * sorts biggest first, then line 3 smallest first, then the difference
- * lands. `teach` is step 1, at full time; later steps run at 60%.
+ * The timeline of one step. The input row is in place at `inputMs`. Then
+ * both copies drop in input order, line 2 sorts biggest first, line 3
+ * smallest first, and the difference lands. `teach` is step 1, at full
+ * time; later steps run at 60%.
  */
-export function sortTimeline(digits: number[], teach: boolean, handoff: boolean): SortTimeline {
+export function sortTimeline(digits: number[], teach: boolean, inputMs: number): SortTimeline {
   const k = teach ? 1 : 0.6
   const copyMs = teach ? 260 : 180
   const pause = teach ? 80 : 30
-  const descCopy = handoff ? HANDOFF_MS : FADE_MS
+  const descCopy = inputMs
   const ascCopy = descCopy + copyMs / 2
   const desc = sortLine(digits, true, descCopy, ascCopy + copyMs + pause, k)
   const asc = sortLine(digits, false, ascCopy, desc.end + pause, k)
@@ -303,14 +313,46 @@ export function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Ani
 }
 
 /**
+ * Each input tile flies from its slot in the empty stage (`slots`, measured
+ * before the stage changed) to its place, one after another: a shared
+ * element move, so the typed digits become the run.
+ */
+function flyFromSlots(tiles: HTMLElement[], slots: DOMRect[]) {
+  // The tile at the front of the move leaves first, so no tile passes over one that has landed.
+  const right = slots[0] && tiles[0] ? tiles[0].getBoundingClientRect().left > slots[0].left : true
+  tiles.forEach((tile, i) => {
+    const first = slots[i]
+    const last = tile.getBoundingClientRect()
+    if (!first) return
+    const scale = first.width / last.width
+    const rank = right ? tiles.length - 1 - i : i
+    tile.animate(
+      [
+        { transform: `translate(${first.left - last.left}px, ${first.top - last.top}px) scale(${scale})`, transformOrigin: '0 0' },
+        { transform: 'none', transformOrigin: '0 0' },
+      ],
+      { duration: SLOT_MS, delay: rank * SLOT_STAGGER_MS, easing: EASE_IN_OUT, fill: 'backwards' }
+    )
+  })
+}
+
+/**
  * Plays one step on the stage. With `handoff`, the last result moves up
- * into the input row, so the eye sees it become the next input; otherwise
- * the input fades in. Then the copies drop and lines 2 and 3 sort in place
+ * into the input row, so the eye sees it become the next input. With
+ * `slots`, a new run's digits fly in from the slots of the empty stage.
+ * Otherwise the input fades in. Then the copies drop and lines 2 and 3 sort in place
  * (see `sortTimeline`), and the difference rises into place. Reduced
  * motion: the input, line 2, line 3 and the difference fade in, in that
  * order. Returns the time in ms at which the step is at rest.
  */
-export function playStep(root: HTMLElement, rows: StageRows, digits: number[], teach: boolean, handoff: boolean): number {
+export function playStep(
+  root: HTMLElement,
+  rows: StageRows,
+  digits: number[],
+  teach: boolean,
+  handoff: boolean,
+  slots: DOMRect[] | null = null
+): number {
   // Step 1: stop every running animation first, so the rects below are the
   // real layout and a fast click never leaves a tile mid-flight.
   root.getAnimations({ subtree: true }).forEach((a) => a.cancel())
@@ -330,10 +372,11 @@ export function playStep(root: HTMLElement, rows: StageRows, digits: number[], t
   const tiles = { input: tilesOf(rows.input), desc: tilesOf(rows.desc), asc: tilesOf(rows.asc) }
   const [input, desc, asc] = [rect(tiles.input), rect(tiles.desc), rect(tiles.asc)]
   const from = rows.result.getBoundingClientRect()
-  const plan = sortTimeline(digits, teach, handoff)
+  const plan = sortTimeline(digits, teach, handoff ? HANDOFF_MS : slots ? SLOTS_IN_MS : FADE_MS)
 
-  // Step 4: the input. The old result becomes this step's input, or the input fades in.
+  // Step 4: the input. The old result becomes this step's input, the digits fly in from the slots, or the input fades in.
   if (handoff) flipFrom(rows.input, from, HANDOFF_MS)
+  else if (slots) flyFromSlots(tiles.input, slots)
   else fadeIn(rows.input, 0)
 
   // Step 5: line 2 copies the input row; line 3 copies line 2 while it still shows input order.

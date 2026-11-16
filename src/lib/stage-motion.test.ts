@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { ARRIVAL_MS, sortTimeline, stepTimeline } from './stage-motion'
+import { ARRIVAL_MS, SLOTS_IN_MS, sortTimeline, stepTimeline } from './stage-motion'
 
 test('the rows of a step appear in reading order', () => {
   const plan = stepTimeline(false)
@@ -28,7 +28,7 @@ const ALL = Array.from({ length: 10000 }, (_, n) => String(n).padStart(4, '0').s
 test('the sort ends every line in sorted order, in place, at full size, with equal digits in input order', () => {
   for (const digits of ALL) {
     for (const teach of [true, false]) {
-      const plan = sortTimeline(digits, teach, !teach)
+      const plan = sortTimeline(digits, teach, teach ? SLOTS_IN_MS : 300)
       for (const [line, desc] of [[plan.desc, true], [plan.asc, false]] as const) {
         const spelled = line.order.map((slot) => digits[slot])
         const want = [...digits].sort((a, b) => (desc ? b - a : a - b))
@@ -48,13 +48,13 @@ test('the sort ends every line in sorted order, in place, at full size, with equ
   }
 })
 
-test('step 1 sorts in under 3 s for every number, and a later step in under 2 s', () => {
+test('step 1 ends in under 3.5 s for every number (0.55 s of it the digits flying in), and a later step in under 2 s', () => {
   let teach = 0
   let quick = 0
   for (const digits of ALL) {
-    teach = Math.max(teach, sortTimeline(digits, true, false).end)
-    quick = Math.max(quick, sortTimeline(digits, false, true).end)
+    teach = Math.max(teach, sortTimeline(digits, true, SLOTS_IN_MS).end)
+    quick = Math.max(quick, sortTimeline(digits, false, 300).end)
   }
-  expect(teach).toBeLessThan(3000)
+  expect(teach).toBeLessThan(3500)
   expect(quick).toBeLessThan(2000)
 })
