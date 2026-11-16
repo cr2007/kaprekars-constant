@@ -28,7 +28,8 @@ function Disclosure({ id, summaryId, summary, className, onToggle, children }: D
     >
       <summary id={summaryId} className={SUMMARY}>
         <ChevronRight className={CHEVRON} aria-hidden />
-        {summary}
+        {/* One span: as flex items, "Where", "6174" and "comes from" broke into columns on a narrow screen. */}
+        <span>{summary}</span>
       </summary>
       {children}
     </details>
@@ -48,7 +49,7 @@ export function AllSteps({ steps, className }: { steps: KaprekarStep[]; classNam
           {steps.map((s, i) => (
             // A flex row centres the small label on the larger digits; on the baseline it hung 2.8 px low.
             <li key={i} className="flex items-center gap-2">
-              <span className="font-sans text-sm text-muted-foreground">
+              <span className="font-sans text-sm whitespace-nowrap text-muted-foreground">
                 Step <span className="font-mono">{i + 1}</span>:
               </span>
               <span>
