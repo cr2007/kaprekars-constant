@@ -97,10 +97,23 @@ export default function App() {
       </a>
 
       {/* Step 1 of the story: the number goes in, right above where it plays. */}
-      <header id="page-header" className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
-        <h1 id="page-title" className="text-balance font-heading text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
-          Watch a number become <span className="font-mono text-primary">6174</span>
-        </h1>
+      {/* isolate: the watermark's -z-10 stays inside the header, above the page background. */}
+      <header id="page-header" className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
+        {/* Decoration (WCAG 1.4.3 "incidental"). CSS content keeps the digits out of the DOM text: copy, find and axe skip them. */}
+        <span
+          id="hero-watermark"
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-end overflow-hidden font-mono text-[min(8rem,30vw)] leading-none font-bold text-primary/12 before:content-['6174'] lg:text-[10rem] dark:text-primary/15"
+        />
+        {/* WHATWG hgroup: one heading, then a p that names the constant. */}
+        <hgroup id="hero" className="flex flex-col gap-1">
+          <h1 id="page-title" className="text-balance font-heading text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
+            Watch a number become <span className="font-mono text-primary">6174</span>
+          </h1>
+          <p id="hero-subline" className="text-pretty text-base text-muted-foreground lg:text-lg">
+            <span className="font-mono">6174</span> is Kaprekar's constant. Almost every <span className="font-mono">4</span>-digit number ends there.
+          </p>
+        </hgroup>
         <div className="flex">
           <BookSideToggle side={book.side} toggleSide={book.toggleSide} />
           <ThemeToggle />
@@ -125,13 +138,13 @@ export default function App() {
               onFocus={(event) => event.currentTarget.select()}
               aria-invalid={invalid || undefined}
               aria-describedby={run.error ? 'input-note' : undefined}
-              className="h-14 flex-1 bg-card text-center font-mono text-3xl font-bold tracking-[0.2em] shadow-sm md:text-3xl lg:w-44 lg:flex-none"
+              className="h-14 flex-1 bg-card text-center dark:bg-card font-mono text-3xl font-bold tracking-[0.2em] shadow-sm md:text-3xl lg:w-44 lg:flex-none"
             />
             <Button
               id="random-button"
               type="button"
               variant="outline"
-              className="h-14 gap-2 bg-card px-4 text-base"
+              className="h-14 gap-2 bg-card px-4 text-base dark:bg-card"
               onClick={run.random}
             >
               <SolidDiceIcon id="random-dice-icon" className="size-5" />

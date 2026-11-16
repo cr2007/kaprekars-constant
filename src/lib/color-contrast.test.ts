@@ -92,6 +92,21 @@ describe('theme tokens in index.css', () => {
     expect(oklchContrastRatio(mutedForeground, card)).toBeGreaterThanOrEqual(4.5)
   })
 
+  test.each([
+    ['light', root, 0.12],
+    ['dark', dark, 0.15],
+  ])('%s: hero text stays readable over the faint 6174 watermark', (_name, block, alpha) => {
+    // The watermark is primary at 12% (light) or 15% (dark) over the background. Both share hue 168, so mix L and C.
+    const background = readOklchVar(block, 'background')
+    const primary = readOklchVar(block, 'primary')
+    const mix = (k: 0 | 1) => background[k] + (primary[k] - background[k]) * alpha
+    const under: Oklch = [mix(0), mix(1), 168]
+    expect(oklchContrastRatio(readOklchVar(block, 'muted-foreground'), under)).toBeGreaterThanOrEqual(4.5)
+    expect(oklchContrastRatio(readOklchVar(block, 'foreground'), under)).toBeGreaterThanOrEqual(7)
+    // The title 6174 is large bold text: 3:1.
+    expect(oklchContrastRatio(primary, under)).toBeGreaterThanOrEqual(3)
+  })
+
   test('dark card reads as a distinct, brighter elevated surface above the page', () => {
     const background = readOklchVar(dark, 'background')
     const card = readOklchVar(dark, 'card')

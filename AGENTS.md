@@ -101,7 +101,10 @@ put a fixed id in a component that renders twice: pass it as a prop.
 page                 # the whole page; data-book-side lives here
 skip-link            # "Skip to main content"
 page-header          # title, toggles and the number input
+hero                 # the title and the subline (hgroup)
 page-title           # the h1
+hero-subline         # names 6174 as Kaprekar's constant
+hero-watermark       # the faint 6174 behind the header (decoration)
 book-side-toggle     # swaps book pages (two-screen devices only)
 theme-toggle         # light or dark theme
 number-label         # "Your 4-digit number"
