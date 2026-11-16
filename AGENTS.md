@@ -138,7 +138,7 @@ play-button          # Play, Pause or Replay
 next-button          # Next
 end-panel            # the panel beside or under the stage
 end-progress         # before 6174: rounds left and the routine
-rounds-left          # "2 more rounds to 6174."
+rounds-left          # "2 more rounds to 6174.", then "Last round to 6174."
 how-it-works         # the routine list in the end panel
 end-result           # after 6174: fact, actions, try another
 step-fact            # the step count fact and its chart

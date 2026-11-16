@@ -65,8 +65,15 @@ export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
         className={cn('flex flex-col gap-3', arrived && cn(hiddenLayer, 'transition-[opacity,visibility] duration-200 ease-out'))}
         style={arrived ? { transitionDelay: `${circleMs}ms` } : undefined}
       >
-        <p id="rounds-left" className={cn('font-heading text-lg font-bold text-foreground', remaining <= 0 && 'invisible')}>
-          <span className="font-mono">{remaining}</span> more round{remaining === 1 ? '' : 's'} to{' '}
+        {/* On the 6174 step the count is 0: the line stays, so it fades out with the routine. */}
+        <p id="rounds-left" className={cn('font-heading text-lg font-bold text-foreground', remaining < 0 && 'invisible')}>
+          {remaining === 0 ? (
+            'Last round to '
+          ) : (
+            <>
+              <span className="font-mono">{remaining}</span> more round{remaining === 1 ? '' : 's'} to{' '}
+            </>
+          )}
           <span className="font-mono">6174</span>.
         </p>
         <HowItWorks id="how-it-works" />
