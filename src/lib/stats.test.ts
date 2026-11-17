@@ -31,6 +31,11 @@ describe('randomWithSteps', () => {
       expect(runKaprekarRoutine(randomWithSteps(steps))).toHaveLength(steps)
     }
   })
+
+  test('spreads its picks over the whole group, not only its first number', () => {
+    const picks = new Set(Array.from({ length: 30 }, () => randomWithSteps(3)))
+    expect(picks.size).toBeGreaterThan(20)
+  })
 })
 
 describe('shareWithSteps', () => {

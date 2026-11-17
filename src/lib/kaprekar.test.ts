@@ -35,13 +35,13 @@ describe('sanitizeDigitInput', () => {
 
 describe('validateInput', () => {
   test.each([
-    ['an empty string', ''],
-    ['a non-digit', '12a4'],
-    ['fewer than 4 digits', '123'],
-    ['more than 4 digits', '12345'],
-    ['a leading zero', '0123'],
-  ])('rejects %s', (_case, raw) => {
-    expect(validateInput(raw).valid).toBe(false)
+    ['an empty string', '', 'Enter a 4-digit number.'],
+    ['a non-digit', '12a4', 'Use digits only.'],
+    ['fewer than 4 digits', '123', 'Enter 4 digits.'],
+    ['more than 4 digits', '12345', 'Enter only 4 digits.'],
+    ['a leading zero', '0123', 'The first digit cannot be 0.'],
+  ])('rejects %s, and says why', (_case, raw, message) => {
+    expect(validateInput(raw)).toEqual({ valid: false, message })
   })
 
   test('rejects a leading zero before 4 digits are typed', () => {
@@ -123,6 +123,11 @@ describe('randomValidNumber', () => {
       expect(candidate).toBeLessThanOrEqual(9999)
       expect(validateInput(String(candidate)).valid).toBe(true)
     }
+  })
+
+  test('spreads its picks: Random must not keep giving the same number', () => {
+    const picks = new Set(Array.from({ length: 50 }, randomValidNumber))
+    expect(picks.size).toBeGreaterThan(40)
   })
 })
 

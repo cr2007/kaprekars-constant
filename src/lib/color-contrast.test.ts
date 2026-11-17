@@ -18,6 +18,19 @@ describe('oklchContrastRatio', () => {
     expect(oklchContrastRatio(a, b)).toBeCloseTo(oklchContrastRatio(b, a), 5)
   })
 
+  test('matches the WCAG ratios of the sRGB primaries, so the OKLCH to sRGB math is right for hue too', () => {
+    // OKLCH of pure red, blue and lime (CSS Color 4); ratios from the sRGB values: 3.998, 8.592, 15.304.
+    const white: Oklch = [1, 0, 0]
+    const black: Oklch = [0, 0, 0]
+    expect(oklchContrastRatio([0.62796, 0.25768, 29.2339], white)).toBeCloseTo(3.998, 1)
+    expect(oklchContrastRatio([0.45201, 0.31321, 264.052], white)).toBeCloseTo(8.592, 1)
+    expect(oklchContrastRatio([0.86644, 0.29483, 142.4953], black)).toBeCloseTo(15.304, 1)
+  })
+
+  test('blends a translucent color in sRGB, as CSS does: 50% black over white is 3.98:1 to white', () => {
+    expect(oklchContrastRatio([0, 0, 0], [1, 0, 0], 0.5)).toBeCloseTo(3.977, 1)
+  })
+
   test('alpha compositing pulls the ratio toward the background', () => {
     const foreground: Oklch = [0.95, 0.01, 168]
     const background: Oklch = [0.2, 0.02, 168]
