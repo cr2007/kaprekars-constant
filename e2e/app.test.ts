@@ -238,6 +238,31 @@ test('the page fits a 280 px screen and 200% text, with the longest run plus the
   }
 })
 
+/** The first biggest-first tile's width and its digit's font size, in px. */
+async function stageTile(page: Page) {
+  await page.waitForFunction(() => !!document.querySelector('#sum-biggest [aria-hidden="true"] > span'))
+  return page.evaluate(() => {
+    const tile = document.querySelector('#sum-biggest [aria-hidden="true"] > span') as HTMLElement
+    const digit = tile.querySelector('span') as HTMLElement
+    return { tile: +tile.getBoundingClientRect().width.toFixed(1), digit: +getComputedStyle(digit).fontSize.replace('px', '') }
+  })
+}
+
+test('200% text does not shrink the stage tiles on a narrow phone (WCAG 1.4.4)', async () => {
+  // The bug: at 200% text the card subtracted a rem-based operator column, so the tiles and digits got smaller.
+  const base = await open('/?n=1234', 320, 653)
+  const normal = await stageTile(base)
+  await base.context().close()
+  const big = await openLargeText('/?n=1234', 320, 653)
+  const large = await stageTile(big)
+  await big.context().close()
+  // Large text must not shrink a tile or a digit by more than a tenth.
+  expect({ tileKept: large.tile >= normal.tile * 0.9, digitKept: large.digit >= normal.digit * 0.9 }).toEqual({
+    tileKept: true,
+    digitKept: true,
+  })
+})
+
 test('on a 360 px phone every control in the result is at least 44 by 44 px', async () => {
   const page = await open('/?n=2323', 360, 780, { hasTouch: true })
   await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 15_000 })
