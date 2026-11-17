@@ -118,7 +118,6 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
 
   /** Pauses, or plays from here (from step 1 at the end). The shown step plays again first. */
   function toggle() {
-    if (last < 0) return
     if (playing) {
       setPlaying(false)
       return

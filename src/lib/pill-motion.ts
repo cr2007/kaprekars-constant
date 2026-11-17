@@ -19,11 +19,8 @@ export const LIFT = '1.04 1.1'
  */
 const KEY_MS = 250
 let lastKeyAt = -Infinity
-// Guarded, so the module also loads in unit tests, where there is no window.
-if (typeof window !== 'undefined') {
-  for (const type of ['keydown', 'keyup']) {
-    window.addEventListener(type, (event) => (lastKeyAt = event.timeStamp), true)
-  }
+for (const type of ['keydown', 'keyup']) {
+  window.addEventListener(type, (event) => (lastKeyAt = event.timeStamp), true)
 }
 
 /** True when a key press or release came just now: the pill then jumps. */

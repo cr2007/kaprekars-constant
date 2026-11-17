@@ -162,17 +162,13 @@ function fadeIn(el: HTMLElement, delay: number, duration = FADE_MS): Animation {
   return el.animate([{ opacity: 0 }, { opacity: 1 }], { duration, delay, easing: EASE_OUT, fill: 'backwards' })
 }
 
-/**
- * Animates `el` from `first`, a rect measured before a DOM change, to where it sits now (FLIP).
- *
- * @returns The animation, or null when nothing moved.
- */
-function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Animation | null {
+/** Animates `el` from `first`, a rect measured before a DOM change, to where it sits now (FLIP). */
+function flipFrom(el: HTMLElement, first: DOMRect, duration: number) {
   const last = el.getBoundingClientRect()
   const dx = first.left - last.left
   const dy = first.top - last.top
-  if (dx === 0 && dy === 0) return null
-  return el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], {
+  if (dx === 0 && dy === 0) return
+  el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], {
     duration,
     easing: EASE_IN_OUT,
     fill: 'backwards',

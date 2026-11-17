@@ -109,7 +109,7 @@ function Die({ part, className, style }: { part: Part; className?: string; style
  *
  * @remarks
  * - The pips are holes cut by a mask, so the icon reads on any button background.
- * - The nearest `[data-dice-trigger]` or `button` is the trigger. On enter, the dice swap places with a quarter turn onto a new random pair of faces.
+ * - The nearest `button` is the trigger. On enter, the dice swap places with a quarter turn onto a new random pair of faces.
  * - They stay there until the pointer leaves, then turn back onto 2 and 3.
  * - Keyboard focus and reduced motion change the faces with no motion.
  * - It keeps its own pose math, not the `src/lib` motion helpers.
@@ -117,10 +117,10 @@ function Die({ part, className, style }: { part: Part; className?: string; style
 export function DiceIcon({ id, className }: { id?: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
 
-  // Find the trigger and wire its hover and focus events to the dice; the cleanup below unwires them.
+  // Find the trigger and wire its hover and focus events to the dice.
   useEffect(() => {
     const icon = ref.current
-    const target = icon?.closest('[data-dice-trigger]') ?? icon?.closest('button')
+    const target = icon?.closest('button')
     if (!icon || !target) return
     const dice = PARTS.map((part) => ({ die: DICE[part], el: icon.querySelector<SVGSVGElement>(`[data-part="${part}"]`)! }))
     let owner: 'pointer' | 'focus' | null = null
@@ -219,7 +219,7 @@ export function DiceIcon({ id, className }: { id?: string; className?: string })
   }, [])
 
   return (
-    <span ref={ref} id={id} data-dice className={cn('relative inline-block shrink-0', className)} aria-hidden>
+    <span ref={ref} id={id} className={cn('relative inline-block shrink-0', className)} aria-hidden>
       {PARTS.map((part) => (
         <Die
           key={part}
