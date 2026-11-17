@@ -5,6 +5,9 @@ type Theme = 'light' | 'dark'
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
+/** The browser bar color for each theme: the same values as the theme-color tags in index.html. */
+const THEME_COLOR: Record<Theme, string> = { light: '#edf8f3', dark: '#05100c' }
+
 /** Reads the theme the user picked earlier, or null if they never picked one. */
 function getStoredTheme(): Theme | null {
   try {
@@ -29,6 +32,7 @@ function getSystemTheme(): Theme {
  * - Only that pick goes to `localStorage`.
  * - A blocking script in `index.html` applies the same class before React mounts, so the wrong theme never flashes.
  * - A flip turns transitions off for one style flush, so every color changes in the same frame.
+ * - The theme-color tags follow the theme, so the browser bars match a pick that differs from the OS.
  */
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => getStoredTheme() ?? getSystemTheme())
@@ -40,6 +44,8 @@ export function useTheme() {
     const root = document.documentElement
     root.dataset.themeFlip = ''
     root.classList.toggle('dark', theme === 'dark')
+    // The tags pick a color by the OS theme, so a picked theme sets both. Phone browsers paint their bars with it.
+    for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) meta.content = THEME_COLOR[theme]
 
     // Step 2: flush styles once with the new colors, then turn transitions back on.
     void root.offsetHeight

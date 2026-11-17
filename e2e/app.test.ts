@@ -227,6 +227,16 @@ test('the page fits a 280 px screen and 200% text, with the longest run plus the
   await empty.context().close()
 })
 
+test('the theme toggle sets the browser bar color too', async () => {
+  const page = await open('/', 390, 844)
+  const barColor = () =>
+    page.evaluate(() => [...document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')].find((m) => matchMedia(m.media).matches)?.content)
+  expect(await barColor()).toBe('#edf8f3')
+  await page.locator('#theme-toggle').click()
+  expect(await barColor()).toBe('#05100c')
+  await page.context().close()
+})
+
 test('a new number typed mid-sort keeps every fill inside its tile, and leaves no tile style behind', async () => {
   const page = await open('/?n=2323')
   await page.waitForTimeout(700)
