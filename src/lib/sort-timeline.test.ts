@@ -2,10 +2,15 @@ import { expect, test } from 'bun:test'
 import { sortTimeline } from './sort-timeline'
 import { SLOTS_IN_MS } from './stage-motion'
 
-/** Every step input with two or more different digits, leading zeros kept (later steps have them). */
-const ALL = Array.from({ length: 10000 }, (_, n) => String(n).padStart(4, '0').split('').map(Number)).filter(
-  (d) => new Set(d).size > 1
-)
+/**
+ * Every step input with two or more different digits, leading zeros kept (later steps have them).
+ *
+ * @remarks A mutation run (`STRYKER=1`) checks every 23rd input: the instrumented code runs about
+ * 200 times slower, and the full list would take an hour per mutant. Normal runs check all 9,990.
+ */
+const ALL = Array.from({ length: 10000 }, (_, n) => String(n).padStart(4, '0').split('').map(Number))
+  .filter((d) => new Set(d).size > 1)
+  .filter((_, i) => !process.env.STRYKER || i % 23 === 0)
 
 test('the sort ends every line in sorted order, in place, at full size, with equal digits in input order', () => {
   for (const digits of ALL) {
