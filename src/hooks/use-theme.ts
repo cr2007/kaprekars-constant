@@ -5,8 +5,8 @@ type Theme = 'light' | 'dark'
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
-/** The browser bar color for each theme: the same values as the theme-color tags in index.html. */
-const THEME_COLOR: Record<Theme, string> = { light: '#edf8f3', dark: '#05100c' }
+/** The browser bar color for each theme: the same values as the theme-color tags in index.html (a unit test checks it). */
+export const THEME_COLOR: Record<Theme, string> = { light: '#edf8f3', dark: '#05100c' }
 
 /** Reads the theme the user picked earlier, or null if they never picked one. */
 function getStoredTheme(): Theme | null {
