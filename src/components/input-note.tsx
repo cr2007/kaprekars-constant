@@ -1,11 +1,12 @@
+import type { InputProblem } from '@/lib/kaprekar'
 import { TILE_TONE } from '@/lib/tile-tone'
 import { cn } from 'cn'
 
 interface InputNoteProps {
   /** The digits in the field. */
   raw: string
-  /** The validation message, or null. */
-  error: string | null
+  /** Why the digits cannot run, or null. */
+  problem: InputProblem | null
 }
 
 /** A slot: 44 px, or smaller when 4 slots do not fit the note's width (a narrow screen, or large text). */
@@ -21,10 +22,10 @@ const SLOT =
  * - It sits in the stage like the steps do, not in an alert box.
  * - {@link StageStep} reads the slot positions to fly a new run's digits out of them.
  */
-export function InputNote({ raw, error }: InputNoteProps) {
+export function InputNote({ raw, problem }: InputNoteProps) {
   // Step 1: pick the case. The field takes digits only, at most 4.
-  const zero = error !== null && raw[0] === '0'
-  const same = error !== null && raw.length === 4 && new Set(raw).size === 1
+  const zero = problem === 'leading-zero'
+  const same = problem === 'same-digits'
   const left = 4 - raw.length
 
   let title: React.ReactNode
@@ -45,8 +46,6 @@ export function InputNote({ raw, error }: InputNoteProps) {
         <span className="font-mono">0000</span>. Use at least two different digits.
       </>
     )
-  } else if (error !== null && raw.length === 4) {
-    title = error
   } else if (raw.length > 0) {
     title = (
       <>

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  type InputProblem,
   KAPREKAR_CONSTANT,
   computeStep,
   randomValidNumber,
@@ -40,26 +41,15 @@ describe('sanitizeDigitInput', () => {
 })
 
 describe('validateInput', () => {
-  test.each([
-    ['an empty string', '', 'Enter a 4-digit number.'],
-    ['a non-digit', '12a4', 'Use digits only.'],
-    ['fewer than 4 digits', '123', 'Enter 4 digits.'],
-    ['more than 4 digits', '12345', 'Enter only 4 digits.'],
-    ['a leading zero', '0123', 'The first digit cannot be 0.'],
-  ])('rejects %s, and says why', (_case, raw, message) => {
-    expect(validateInput(raw)).toEqual({ valid: false, message })
-  })
-
-  test('rejects a leading zero before 4 digits are typed', () => {
-    const result = validateInput('0')
-    expect(result.valid).toBe(false)
-    expect(result.message).toMatch(/first digit cannot be 0/)
-  })
-
-  test('rejects a repdigit', () => {
-    const result = validateInput('1111')
-    expect(result.valid).toBe(false)
-    expect(result.message).toMatch(/same/)
+  test.each<[string, string, InputProblem]>([
+    ['an empty string', '', 'empty'],
+    ['a non-digit', '12a4', 'not-digits'],
+    ['fewer than 4 digits', '123', 'short'],
+    ['more than 4 digits', '12345', 'long'],
+    ['a leading zero', '0123', 'leading-zero'],
+    ['a repdigit', '1111', 'same-digits'],
+  ])('rejects %s, and says why', (_case, raw, reason) => {
+    expect(validateInput(raw)).toEqual({ valid: false, reason })
   })
 
   test('accepts a valid 4-digit number', () => {

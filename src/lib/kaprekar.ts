@@ -21,12 +21,11 @@ export interface KaprekarStep {
   resultDigits: number[]
 }
 
+/** Why a string cannot start the routine. The field never gets `not-digits` or `long`; a `?n=` link can. */
+export type InputProblem = 'empty' | 'not-digits' | 'leading-zero' | 'short' | 'long' | 'same-digits'
+
 /** The outcome of checking whether a string is a usable 4-digit number. */
-interface ValidationResult {
-  valid: boolean
-  /** Present when `valid` is false; explains why, for display to the user. */
-  message?: string
-}
+type ValidationResult = { valid: true } | { valid: false; reason: InputProblem }
 
 /**
  * Splits a number into its digits, zero-padded to 4 places.
@@ -68,34 +67,18 @@ export function sanitizeDigitInput(raw: string): string {
  */
 export function validateInput(raw: string): ValidationResult {
   // Step 1: reject anything that isn't digits-only.
-  if (raw.length === 0) {
-    return { valid: false, message: 'Enter a 4-digit number.' }
-  }
-  if (!/^\d+$/.test(raw)) {
-    return { valid: false, message: 'Use digits only.' }
-  }
+  if (raw.length === 0) return { valid: false, reason: 'empty' }
+  if (!/^\d+$/.test(raw)) return { valid: false, reason: 'not-digits' }
 
   // Step 2: reject a leading zero. Check it before the length, so the error shows at once.
-  if (raw[0] === '0') {
-    return { valid: false, message: 'The first digit cannot be 0.' }
-  }
+  if (raw[0] === '0') return { valid: false, reason: 'leading-zero' }
 
   // Step 3: reject anything short of, or past, 4 digits.
-  if (raw.length < 4) {
-    return { valid: false, message: 'Enter 4 digits.' }
-  }
-  if (raw.length > 4) {
-    return { valid: false, message: 'Enter only 4 digits.' }
-  }
+  if (raw.length < 4) return { valid: false, reason: 'short' }
+  if (raw.length > 4) return { valid: false, reason: 'long' }
 
   // Step 4: reject repdigits (1111, 2222, ...), which always give 0. Needs all 4 digits.
-  if (new Set(raw).size === 1) {
-    return {
-      valid: false,
-      message:
-        'All 4 digits are the same. This number cannot reach 6174. Try a number with at least two different digits.',
-    }
-  }
+  if (new Set(raw).size === 1) return { valid: false, reason: 'same-digits' }
 
   return { valid: true }
 }

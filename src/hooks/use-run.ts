@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  type InputProblem,
   type KaprekarStep,
   computeStep,
   randomValidNumber,
@@ -14,8 +15,8 @@ import { readInputParam, writeNumberParam } from '@/lib/url'
 export interface Run {
   /** The digits in the input field (0 to 4 of them). */
   rawInput: string
-  /** Why the input cannot run yet, for display. Null when there is nothing to report. */
-  error: string | null
+  /** Why the input cannot run yet. Null when there is nothing to report. */
+  error: InputProblem | null
   /** Every step on screen, including the extra round after "Do one more round". */
   steps: KaprekarStep[]
   /** Steps it took to first reach 6174. Excludes the extra round. 0 before a run. */
@@ -38,6 +39,12 @@ export interface Run {
   nextChallenge: () => void
 }
 
+/** Why `raw` cannot run, or null when it can. An empty field reports nothing. */
+function problemOf(raw: string): InputProblem | null {
+  const check = validateInput(raw)
+  return check.valid || check.reason === 'empty' ? null : check.reason
+}
+
 /**
  * The run state: the input, its error, and the steps on screen.
  *
@@ -48,9 +55,7 @@ export function useRun(): Run {
   const [start] = useState(readInputParam)
   const startsValid = start !== null && validateInput(start).valid
   const [rawInput, setRawInput] = useState(start ?? '')
-  const [error, setError] = useState<string | null>(() =>
-    start && !startsValid ? (validateInput(start).message ?? null) : null
-  )
+  const [error, setError] = useState(() => (start === null ? null : problemOf(start)))
   const [steps, setSteps] = useState<KaprekarStep[]>(() => (startsValid ? runKaprekarRoutine(Number(start)) : []))
   const [wentFurther, setWentFurther] = useState(false)
   const [runId, setRunId] = useState(0)
@@ -73,7 +78,7 @@ export function useRun(): Run {
     // Step 1: stop and explain when the number is not usable.
     const validation = validateInput(value)
     if (!validation.valid) {
-      setError(validation.message ?? 'Enter a 4-digit number.')
+      setError(validation.reason)
       clearRun()
       return
     }
@@ -102,7 +107,7 @@ export function useRun(): Run {
     // Step 2: fewer than 4 digits. An empty field reports nothing; a
     // partial one says why it is not usable yet.
     clearRun()
-    setError(digitsOnly.length === 0 ? null : (validateInput(digitsOnly).message ?? null))
+    setError(problemOf(digitsOnly))
   }
 
   /** Puts `value` in the field and runs it, if it is a valid start number. */
