@@ -105,17 +105,19 @@ function Die({ part, className, style }: { part: Part; className?: string; style
 }
 
 /**
- * Two solid dice, drawn in a 24-unit box like a lucide icon, that roll on
- * hover. The pips are holes cut by a mask, so the icon reads on any
- * button background. When the pointer
- * enters the nearest `[data-dice-trigger]` or `button`, the dice swap places
- * with a quarter turn onto a new random pair of faces. They stay there until
- * the pointer leaves, then turn back onto 2 and 3. Keyboard focus and
- * reduced motion change the faces with no motion.
+ * Two solid dice, drawn in a 24-unit box like a lucide icon, that roll on hover.
+ *
+ * @remarks
+ * - The pips are holes cut by a mask, so the icon reads on any button background.
+ * - The nearest `[data-dice-trigger]` or `button` is the trigger. On enter, the dice swap places with a quarter turn onto a new random pair of faces.
+ * - They stay there until the pointer leaves, then turn back onto 2 and 3.
+ * - Keyboard focus and reduced motion change the faces with no motion.
+ * - It keeps its own pose math, not the `src/lib` motion helpers.
  */
 export function DiceIcon({ id, className }: { id?: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
 
+  // Find the trigger and wire its hover and focus events to the dice; the cleanup below unwires them.
   useEffect(() => {
     const icon = ref.current
     const target = icon?.closest('[data-dice-trigger]') ?? icon?.closest('button')

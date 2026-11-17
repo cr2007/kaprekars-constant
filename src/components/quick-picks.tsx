@@ -9,8 +9,9 @@ interface QuickPicksProps {
 }
 
 /**
- * Numbers with a reason to try them, as small chips. Each chip runs at
- * once, so a second number costs one tap.
+ * Numbers with a reason to try them, as small chips.
+ *
+ * @remarks Each chip runs at once, so a second number costs one tap.
  */
 export function QuickPicks({ onPick }: QuickPicksProps) {
   // The date is read once per mount, so the chips stay put while the panel is open.

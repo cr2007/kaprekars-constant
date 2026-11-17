@@ -25,15 +25,16 @@ const GUTTERS =
   'pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]'
 
 /**
- * The Stage: one step at a time, large. The page reads in the order of
- * the story: type a number, watch the stage, see 6174, try another. Each
- * part shows only when its state needs it: the trail and the playback
- * bar wait for a run, and the result waits for 6174.
+ * The page: the header with the number field, then the Stage that plays one step at a time.
+ *
+ * @remarks
+ * The page reads in story order: type a number, watch the stage, see 6174, try another.
+ * Each part shows only when its state needs it. The {@link Trail} and the {@link PlaybackBar}
+ * wait for a run. The {@link EndPanel} result waits for 6174.
  */
 export default function App() {
   const run = useRun()
-  // The input echoes the key at once; the stage renders the new run just after,
-  // so the 4th key does not wait for the whole stage.
+  // The input echoes the key at once. The stage renders the new run just after, so the 4th key does not wait.
   const steps = useDeferredValue(run.steps)
   const runId = useDeferredValue(run.runId)
   const play = usePlayback(steps, runId)
@@ -78,8 +79,7 @@ export default function App() {
       data-book-side={book.side}
       className={`mx-auto flex min-h-svh max-w-5xl flex-col gap-4 pt-[max(1rem,env(safe-area-inset-top))] lg:gap-5 lg:pt-8 ${GUTTERS}`}
     >
-      {/* The number field is the main task, and it sits in the header, above <main>. Before a run <main>
-          has nothing to focus, so a link to it sent the next Tab to the end of the page. The link goes to the field. */}
+      {/* The link targets the field, not <main>: before a run <main> has nothing to focus. */}
       <a
         id="skip-link"
         href="#number-input"
@@ -88,8 +88,7 @@ export default function App() {
         Skip to the number field
       </a>
 
-      {/* The story starts here: the number goes in, right above where it plays. isolate: the watermark's
-          -z-10 stays inside the header, above the page background. */}
+      {/* Step 1: type. isolate keeps the watermark's -z-10 inside the header, above the page background. */}
       <header id="page-header" className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
         <Hero />
         <div className="flex max-sm:absolute max-sm:top-0 max-sm:right-0">
@@ -133,7 +132,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* minmax(0, 1fr): one column on phones that its content can never widen past the screen. */}
+      {/* minmax(0, 1fr): content can never widen the phone column past the screen. */}
       <main id="main-content" className="grid grid-cols-[minmax(0,1fr)] gap-4 min-[840px]:grid-cols-[minmax(0,1fr)_21rem] min-[840px]:gap-x-8 min-[840px]:gap-y-5 lg:gap-x-10">
         <output id="playback-status" className="sr-only">{play.message}</output>
 
@@ -171,8 +170,7 @@ export default function App() {
 
         {hasRun && <AllSteps steps={steps} className="min-[840px]:col-start-2 min-[840px]:row-start-2" />}
 
-        {/* The background reading. In a run, wide screens give it the wide column under the stage, and
-            "See all steps" (a short list) the side column. Phones keep the source order: the steps first. */}
+        {/* In a run, wide screens put this under the stage and "See all steps" in the side column. Phones keep source order. */}
         <OriginDetails className={hasRun ? 'min-[840px]:col-start-1 min-[840px]:row-start-2' : 'min-[840px]:col-span-2'} />
       </main>
 

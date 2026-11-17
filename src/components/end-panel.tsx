@@ -26,8 +26,9 @@ const SWAP_MS = 200
 const hiddenLayer = 'invisible opacity-0'
 
 /**
- * The routine in the words of the stage's own row labels, so a first run maps onto it.
- * It renders in two places, so each caller gives its own `id`.
+ * The routine in the words of the stage's row labels, so a first run maps onto it.
+ *
+ * @remarks It renders in two places, so each caller gives its own `id`.
  */
 export function HowItWorks({ id }: { id: string }) {
   return (
@@ -41,12 +42,14 @@ export function HowItWorks({ id }: { id: string }) {
 }
 
 /**
- * What sits beside (desktop) or under (phone) the stage during a run.
- * Before 6174: how many rounds are left, and the routine to follow along.
- * After 6174, in story order: the result, what 6174 does next, then
- * another number to try. Both layers share one grid cell, so the panel
- * keeps the taller one's height. Key it by run id, so each run reveals
- * its result again.
+ * The panel beside (desktop) or under (phone) the stage during a run.
+ *
+ * @remarks
+ * - Before 6174 it shows the rounds left and the routine.
+ * - After 6174 it shows, in story order: the result, what 6174 does next, then another number to try.
+ * - Both layers share one grid cell, so the panel keeps the taller height.
+ * - Key it by run id, so each run reveals its result again.
+ * - `circleMs` comes from {@link StageStep} timing: the swap waits for the hand circle.
  */
 export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
   const loopNote = useRef<HTMLParagraphElement>(null)
@@ -125,8 +128,7 @@ export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
           <h2 id="try-another" className="font-heading text-lg font-bold text-foreground">
             Try another number
           </h2>
-          {/* Phones: one row of chips that scrolls sideways and fades at the edge it hides.
-              Inline-size containment stops the unwrapped row from widening the page. */}
+          {/* Phones: one row of chips that scrolls sideways. Inline-size containment keeps the row from widening the page. */}
           <div id="quick-picks" className="chip-scroller -mx-1 overflow-x-auto px-1 py-1 [contain:inline-size] max-sm:[&_li]:shrink-0 max-sm:[&>ul]:flex-nowrap">
             <QuickPicks onPick={run.runNumber} />
           </div>

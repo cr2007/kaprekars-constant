@@ -10,9 +10,9 @@ import { cn } from 'cn'
 const PLACEHOLDER = computeStep(3524)
 
 /**
- * Bigger tiles from `md` up. In a narrow card (below 19rem: a 280 to 320 px
- * screen, or large text) the tiles size to the card instead, so 4 always fit
- * beside the operator column. `NumberTiles` puts this class on the tile row.
+ * Bigger tiles from `md` up, and card-sized tiles below 19rem (a 280 to 320 px screen, or large text).
+ *
+ * @remarks Card-sized tiles keep 4 tiles beside the operator column. `NumberTiles` puts this class on the tile row.
  */
 const TILE_SIZE =
   'md:*:size-14 md:*:text-2xl @max-[19rem]:*:size-[min(2.75rem,calc((100cqi_-_3.5rem)/4))] @max-[19rem]:*:text-[length:min(1.25rem,calc((100cqi_-_3.5rem)/9))]'
@@ -43,11 +43,12 @@ interface StageStepProps {
 }
 
 /**
- * The active step as a column sum: the input, its digits biggest first,
- * minus its digits smallest first, equals the difference. It is a
- * description list, so a screen reader hears each line's name with its
- * number. The layout is the same for every step, so the page never
- * changes height between steps.
+ * The active step as a column sum: the input, its digits biggest first, minus its digits smallest first, equals the difference.
+ *
+ * @remarks
+ * - It is a description list, so a screen reader hears each line's name with its number.
+ * - The layout is the same for every step, so the page never changes height between steps.
+ * - The motion comes from {@link playStep} and {@link playArrival}. {@link Trail} and the playback bar choose the step.
  */
 export function StageStep({ step, index, total, runId, arrival, animate, take, empty }: StageStepProps) {
   const root = useRef<HTMLDivElement>(null)
@@ -77,6 +78,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
     slots.current = row ? { rects: [...row.children].map((el) => el.getBoundingClientRect()), scrollY: window.scrollY } : null
   })
 
+  // Plan and start the motion for the shown step.
   useLayoutEffect(() => {
     const rows = {
       input: input.current,
@@ -88,9 +90,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
     }
     if (!step || !root.current || Object.values(rows).some((el) => !el)) return
 
-    // Step 1: decide the motion. A step picked with Back, Next or the trail
-    // paints at rest at once. A run plays, also from `?n=`. The same step
-    // again (StrictMode runs effects twice) does nothing new.
+    // Step 1: decide the motion. A step picked with Back, Next or the trail paints at rest.
+    // A run plays, also from `?n=`. The same step again (StrictMode runs effects twice) does nothing.
     const prev = shown.current
     shown.current = { runId, index, take }
     const same = prev?.runId === runId && prev.index === index && prev.take === take
@@ -108,8 +109,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
       landedAt = playStep(root.current, rows as StageRows, step.digits, index === 0, handoff, from)
     }
 
-    // Step 2: the circle starts 250 ms after the difference lands, with the badge.
-    // On the loop step, the start 6174 is circled first; the result's circle follows once that one is drawn.
+    // Step 2: start the circle after the difference lands, with the badge.
+    // On the loop step, the start 6174 is circled first and the result follows.
     if (!same) {
       setStartCircleAt(loop ? landedAt + CIRCLE_DELAY_MS : null)
       setCircleAt(arrival || loop ? landedAt + CIRCLE_DELAY_MS + (loop ? LOOP_SECOND_CIRCLE_MS : 0) : null)
@@ -145,9 +146,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
           id="stage-sum"
           className="grid grid-cols-[minmax(0,auto)_1.5rem_auto] items-center justify-center gap-x-3 gap-y-1.5 md:gap-x-4 md:gap-y-3 @max-[19rem]:grid-cols-[1.5rem_auto]"
         >
-          {/* Extra room under the start number, so it reads as the input, not as a line of the subtraction.
-              A thin dashed line sits half way in that room (18 px, 28 px from md): dashed and 1 px, so it
-              reads as a divider, not as the solid 2 px bar of the subtraction. */}
+          {/* Extra room under the start number, so it reads as the input. A thin dashed divider sits half way
+              in that room, unlike the solid 2 px bar of the subtraction. */}
           <div
             id="sum-start"
             className={cn(
@@ -180,8 +180,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
             </dd>
           </div>
 
-          {/* The rule above the difference sits in the extra top margin, clear of the circle's 8 px pad. Stacked,
-              the label sits above the tiles, so the row draws the rule instead of the tiles' cell. */}
+          {/* The rule sits in the top margin, clear of the circle's 8 px pad. Stacked, the row draws it, not the tiles' cell. */}
           <div
             id="sum-difference"
             className={cn(

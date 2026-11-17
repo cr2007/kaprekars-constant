@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+/** The page that holds the input. */
 type BookSide = 'left' | 'right'
 
 /** Reads which page held the input last time, defaulting to the left page. */
@@ -13,12 +14,12 @@ function getInitialSide(): BookSide {
 }
 
 /**
- * Tracks which page of the foldable "book" layout (see `index.css`) holds
- * the input; the stage takes the other page. It persists the choice to
- * `localStorage`.
+ * Tracks which page of the foldable "book" layout holds the input, and saves the choice.
  *
- * This only affects layout on devices that report two viewport segments;
- * everywhere else it's inert state with no visible effect.
+ * @remarks
+ * - The stage takes the other page. See the book rules in `index.css`.
+ * - The choice goes to `localStorage`.
+ * - It changes layout only on devices that report two viewport segments. Elsewhere it has no visible effect.
  */
 export function useBookSide() {
   const [side, setSide] = useState<BookSide>(getInitialSide)

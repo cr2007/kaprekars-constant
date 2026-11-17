@@ -15,11 +15,12 @@ function tipAlign(index: number, count: number): string {
 }
 
 /**
- * "3 steps. 2,124 of the 8,991 numbers you could type take exactly 3."
- * A 7-bar chart shows where that sits. Each bar is a button that shows
- * its own count in a small tooltip on hover, focus, tap or pen hover.
- * The tooltip text is also the button's name, so a screen reader hears
- * the same count. The caption keeps the main fact.
+ * The step count fact, such as "3 steps. 2,124 of the 8,991 numbers you could type take exactly 3.", with a 7-bar chart.
+ *
+ * @remarks
+ * - Each bar is a button. Its tooltip shows the bar's count on hover, focus, tap or pen hover.
+ * - The tooltip text is also the button's name, so a screen reader hears the same count.
+ * - The caption keeps the main fact. Counts come from `distribution` in `src/lib/stats.ts`.
  */
 export function StepFact({ stepCount }: StepFactProps) {
   const { byCount, total } = distribution()
@@ -39,8 +40,7 @@ export function StepFact({ stepCount }: StepFactProps) {
         <span className="font-mono">{total.toLocaleString('en-US')}</span> numbers you could type take
         exactly <span className="font-mono">{stepCount}</span>.
       </figcaption>
-      {/* A container, so a tooltip can wrap at 70% of the chart: the middle bars center theirs, and the
-          3rd bar's center sits at 36%, so no tooltip reaches past the chart, even at large text. */}
+      {/* A container, so a tooltip wraps at 70% of the chart and never reaches past it, even at large text. */}
       <ul id="step-chart" className="@container flex items-end gap-1.5">
         {counts.map((numbers, index) => {
           const steps = index + 1

@@ -9,8 +9,9 @@ interface ShareLinkProps {
 }
 
 /**
- * Copies a link to this exact run (`?n=1004`). If the clipboard is not
- * available, it shows the link as text so people can copy it by hand.
+ * A button that copies a link to this exact run, such as `?n=1004`.
+ *
+ * @remarks If the clipboard is not available, it shows the link as text to copy by hand.
  */
 export function ShareLink({ value }: ShareLinkProps) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')

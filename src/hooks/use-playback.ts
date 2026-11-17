@@ -25,11 +25,13 @@ function ownsArrows(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest('input, textarea, select') !== null
 }
 
+/** What {@link usePlayback} returns: the step on the stage, the autoplay state and the controls. */
 export interface Playback {
   /** The step on the stage. */
   index: number
   /** The furthest step shown in this run. The trail hides steps past it. */
   reached: number
+  /** True while autoplay runs. */
   playing: boolean
   /** False after Back, Next, an arrow key, or a trail pick: the stage shows that step at rest. */
   animate: boolean
@@ -45,9 +47,11 @@ export interface Playback {
 
 /**
  * Which step the stage shows, and the timer that plays through a run.
- * Every run plays from step 1, also a run from `?n=` (a shared link):
- * its reader sees the routine, not only the end. Left and Right
- * (outside a field) step back and forward.
+ *
+ * @remarks
+ * - Every run plays from step 1, also a run from `?n=` (a shared link), so its reader sees the routine.
+ * - Left and Right step back and forward, outside a field.
+ * - {@link StageStep} plays the motion. This hook only waits for it with {@link stepMotionMs}.
  */
 export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   const last = steps.length - 1
@@ -61,8 +65,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   /** The step on the stage and the time its motion ends. */
   const motion = useRef({ key: '', end: 0 })
 
-  // Step 1: react to a new run, a cleared run, or the extra round, during
-  // render, so the stage never paints the old index with the new steps.
+  // Step 1: react to a new run, a cleared run, or the extra round during render, so no frame pairs the old index with new steps.
   if (seen.runId !== runId || seen.length !== steps.length) {
     const grew = seen.runId === runId && steps.length === seen.length + 1
     setSeen({ runId, length: steps.length })

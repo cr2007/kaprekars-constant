@@ -14,6 +14,7 @@ const SEED = 24116
 
 /** Circle padding in px, the same as the insets of `.hand-circle` in index.css. */
 const PAD_X = 11
+/** Vertical circle padding in px. */
 const PAD_Y = 8
 
 /** A line drawing on a path with `pathLength={1}`: the dash grows from 0 to the full line. */
@@ -35,9 +36,12 @@ interface HandCircleProps {
 }
 
 /**
- * A hand-drawn circle around its children: rough-notation's two pen
- * loops from a fixed seed. It is decoration only: aria-hidden, absolutely
- * placed, so it takes no layout space. Reduced motion shows it at rest.
+ * A hand-drawn circle around its children, as two pen loops from a fixed seed.
+ *
+ * @remarks
+ * - It is decoration only: `aria-hidden` and absolutely placed, so it takes no layout space.
+ * - Reduced motion shows it at rest.
+ * - The loop math lives in {@link roughCircle}.
  */
 export function HandCircle({ id, show, delay, animate, children }: HandCircleProps) {
   const target = useRef<HTMLSpanElement>(null)

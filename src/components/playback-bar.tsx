@@ -9,10 +9,14 @@ const BAR_BUTTON =
 const LABEL = '@max-[18rem]:sr-only'
 
 /**
- * Back, Play and Next under the stage, like a player's controls. It sits
- * in flow, not sticky: on a short screen a stuck bar covered the lower
- * rows of the stage. Below 18rem (a 280 px screen, or large text) the
- * buttons show only their icons. `last` is the index of the run's last step.
+ * Back, Play and Next under the stage, like a player's controls.
+ *
+ * @remarks
+ * - It sits in flow, not sticky: on a short screen a stuck bar covered the lower rows of the stage.
+ * - Below 18rem (a 280 px screen, or large text) the buttons show only their icons.
+ * - Play reads Pause while playing and Replay at the end. See {@link usePlayback}.
+ *
+ * @param last - The index of the run's last step.
  */
 export function PlaybackBar({ play, last }: { play: Playback; last: number }) {
   const label = play.playing ? 'Pause' : play.index >= last ? 'Replay' : 'Play'

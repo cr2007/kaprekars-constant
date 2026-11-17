@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
+/** A theme the user can pick. */
 type Theme = 'light' | 'dark'
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
@@ -21,16 +22,13 @@ function getSystemTheme(): Theme {
 }
 
 /**
- * Tracks the light/dark theme and toggles the `dark` class on `<html>` so
- * Tailwind's `dark:` variant picks it up.
+ * Tracks the light or dark theme and sets the `dark` class on `<html>` for Tailwind's `dark:` variant.
  *
- * The theme follows the OS setting, also when it changes, until the user
- * picks one with {@link toggleTheme}. Only that pick goes to `localStorage`.
- *
- * A blocking script in `index.html` applies the same class before React
- * mounts, so there is no flash of the wrong theme on load. A flip turns
- * transitions off for one style flush, so every color changes in the
- * same frame.
+ * @remarks
+ * - The theme follows the OS setting, also when it changes, until the user picks one with `toggleTheme`.
+ * - Only that pick goes to `localStorage`.
+ * - A blocking script in `index.html` applies the same class before React mounts, so the wrong theme never flashes.
+ * - A flip turns transitions off for one style flush, so every color changes in the same frame.
  */
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => getStoredTheme() ?? getSystemTheme())
@@ -49,6 +47,7 @@ export function useTheme() {
   }, [theme])
 
   useEffect(() => {
+    // Follow the OS theme until the user picks one.
     const query = window.matchMedia(DARK_QUERY)
     function followSystem(event: MediaQueryListEvent) {
       if (!userPicked.current) setTheme(event.matches ? 'dark' : 'light')

@@ -7,10 +7,12 @@ interface BookSideToggleProps {
 }
 
 /**
- * Icon button that swaps the two pages of the foldable book layout: the
- * stage on one, the input and reading on the other. Hidden by CSS (see
- * `#book-side-toggle` in `index.css`) until the browser reports two
- * side-by-side viewport segments, so it never shows on a single screen.
+ * Icon button that swaps the two pages of the foldable book layout.
+ *
+ * @remarks
+ * - The stage sits on one page, the input and reading on the other.
+ * - CSS hides it (see `#book-side-toggle` in `index.css`) until the browser reports two viewport segments.
+ * - State comes from {@link useBookSide}.
  */
 export function BookSideToggle({ side, toggleSide }: BookSideToggleProps) {
   return (

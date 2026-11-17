@@ -4,8 +4,10 @@ import { pad4 } from '@/hooks/use-playback'
 import { KAPREKAR_CONSTANT, type KaprekarStep } from '@/lib/kaprekar'
 import { cn } from 'cn'
 
+/** Classes for a disclosure summary: a 44 px target with a focus ring and no native marker. */
 const SUMMARY =
   'flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden'
+/** Classes for the chevron that turns when the disclosure opens. */
 const CHEVRON = 'size-4 shrink-0 transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none'
 
 interface DisclosureProps {
@@ -37,8 +39,9 @@ function Disclosure({ id, summaryId, summary, className, onToggle, children }: D
 }
 
 /**
- * "See all steps": every step of the run as one equation per line. The
- * list renders only while open, so a closed disclosure costs nothing.
+ * "See all steps": every step of the run as one equation per line.
+ *
+ * @remarks The list renders only while open, so a closed disclosure costs nothing.
  */
 export function AllSteps({ steps, className }: { steps: KaprekarStep[]; className?: string }) {
   const [open, setOpen] = useState(false)

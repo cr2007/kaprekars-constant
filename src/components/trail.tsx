@@ -18,13 +18,15 @@ interface TrailProps {
 }
 
 /**
- * The run as a scrubber: one native radio per step, labelled with the
- * number that step starts from, then the goal, 6174.
+ * The run as a scrubber: one native radio per step, labelled with the number that step starts from, then the goal 6174.
  *
- * @remarks A pill sits behind the shown step; {@link usePillDrag} moves it.
- * A tap on the shown step stops autoplay there. Arrow keys move between
- * steps as in any radio group. Phones drop the goal label, so 8 steps keep
- * a 44 px target each. Render it only with a run: it reads `steps[0]`.
+ * @remarks
+ * - A pill sits on the shown step. {@link usePillDrag} moves it.
+ * - A tap on the shown step stops autoplay there.
+ * - Arrow keys move between steps as in any radio group.
+ * - Phones drop the goal label, so 8 steps keep a 44 px target each.
+ * - Render it only with a run: it reads `steps[0]`.
+ * - {@link StageStep} shows the picked step.
  */
 export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
   const { pillRef, copyRef, sheenRef, optionRef, held, lifted, select, onLabelClick, trackHandlers } = usePillDrag(
@@ -77,9 +79,8 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
             {number(s, i)}
           </label>
         ))}
-        {/* The pill rests at `--i` step widths from the start. A drag writes inline px transforms over it.
-            It sits above the labels and lets every pointer through. Its numbers move the other way, so they
-            line up with the track's numbers and show only inside the pill. */}
+        {/* The pill rests `--i` step widths from the start, above the labels, and lets pointers through.
+            A drag writes inline px transforms over it. Its numbers move the other way, to line up with the track's. */}
         <span
           ref={pillRef}
           aria-hidden

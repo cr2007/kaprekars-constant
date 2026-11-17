@@ -13,10 +13,13 @@ const SLOT =
   'flex size-[min(2.75rem,calc((100cqi_-_1.125rem)/4))] items-center justify-center rounded-lg font-mono text-[length:min(1.25rem,calc((100cqi_-_1.125rem)/9))] font-bold'
 
 /**
- * What the empty stage says about the field. Four slots mirror the field:
- * typed digits are tiles, missing digits are dashed slots. Under them, one
- * line says what to do next, or why the number cannot run. It sits in the
- * stage like the steps do, not in an alert box.
+ * What the empty stage says about the field: four slots, then one line of text.
+ *
+ * @remarks
+ * - Typed digits are tiles. Missing digits are dashed slots.
+ * - The line says what to do next, or why the number cannot run.
+ * - It sits in the stage like the steps do, not in an alert box.
+ * - {@link StageStep} reads the slot positions to fly a new run's digits out of them.
  */
 export function InputNote({ raw, error }: InputNoteProps) {
   // Step 1: pick the case. The field takes digits only, at most 4.

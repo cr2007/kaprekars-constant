@@ -12,9 +12,9 @@ interface NumberTilesProps {
 /**
  * Renders digits as colored tiles, one per digit.
  *
- * The tiles are `aria-hidden`: a screen reader reading them one at a time
- * would hear "7, 7, 6, 6" instead of "7766". A hidden text node next to
- * them carries the real number instead.
+ * @remarks
+ * - The tiles are `aria-hidden`: a screen reader would hear "7, 7, 6, 6", not "7766".
+ * - A screen-reader-only text node next to them carries the real number.
  */
 export function NumberTiles({ digits, tone = 'solid', className }: NumberTilesProps) {
   return (

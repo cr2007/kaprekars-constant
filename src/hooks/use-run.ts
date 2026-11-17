@@ -35,8 +35,9 @@ export interface Run {
 }
 
 /**
- * The run state: the input, its error, and the steps on screen. It
- * starts from `?n=` and keeps `?n=` in sync with the run.
+ * The run state: the input, its error, and the steps on screen.
+ *
+ * @remarks It starts from `?n=` and keeps `?n=` in sync with the run.
  */
 export function useRun(): Run {
   // Step 1: a ?n= link fills the field as if it were typed. A valid number runs; another one shows why it cannot.

@@ -14,9 +14,9 @@ interface ChallengeProps {
 }
 
 /**
- * A small hunt that invites a second try: "Can you find a number that
- * takes exactly 1 step? 383 numbers do." It checks each run and moves on
- * to the next target when asked.
+ * A small hunt that invites a second try: "Can you find a number that takes exactly 1 step?"
+ *
+ * @remarks It checks each run against the target and moves to the next target when asked.
  */
 export function Challenge({ current, stepCount }: ChallengeProps) {
   const [targetIndex, setTargetIndex] = useState(0)
