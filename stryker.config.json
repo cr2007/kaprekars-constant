@@ -13,7 +13,7 @@
     "src/lib/motion.ts:33-73",
     "src/lib/url.ts:10-13"
   ],
-  "ignorePatterns": ["dist", "lab", "e2e", "public", ".claude"],
+  "ignorePatterns": ["dist", "e2e", "public", ".claude"],
   "coverageAnalysis": "off",
   "concurrency": 4,
   "reporters": ["clear-text", "progress", "json"],
