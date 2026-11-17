@@ -15,7 +15,7 @@
   ],
   "ignorePatterns": ["dist", "lab", "e2e", "public", ".claude"],
   "coverageAnalysis": "off",
-  "concurrency": 2,
+  "concurrency": 4,
   "reporters": ["clear-text", "progress", "json"],
   "jsonReporter": { "fileName": "reports/mutation/mutation.json" },
   "tsconfigFile": "stryker.no-tsconfig.json"
