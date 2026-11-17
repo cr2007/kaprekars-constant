@@ -3,7 +3,7 @@ import type { Playback } from '@/hooks/use-playback'
 import { cn } from 'cn'
 
 const BAR_BUTTON =
-  'inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-3 font-semibold text-foreground outline-none transition-[color,background-color,scale] duration-150 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:scale-97 aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:active:scale-100 motion-reduce:active:scale-100 sm:px-4 @max-[20rem]:min-w-0 @max-[20rem]:flex-1 @max-[20rem]:px-0'
+  'inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-3 font-semibold text-foreground outline-none transition-[color,background-color,scale] duration-150 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card active:scale-97 aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:active:scale-100 motion-reduce:active:scale-100 sm:px-4 @max-[20rem]:min-w-0 @max-[20rem]:flex-1 @max-[20rem]:px-0'
 
 /** A button label that hides (but stays for screen readers) when the bar is narrower than 20rem, its width with labels. */
 const LABEL = '@max-[20rem]:sr-only'
