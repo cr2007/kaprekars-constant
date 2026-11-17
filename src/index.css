@@ -154,11 +154,13 @@
   html {
     @apply font-sans;
     }
-  /* No double-tap zoom delay on the things people tap. */
+  /* On the things people tap: no double-tap zoom delay, and a long press does not select the label. */
   button,
   summary,
   label {
     touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
   }
 }
 
