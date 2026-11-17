@@ -182,17 +182,17 @@ test('"Do one more round" circles the start 6174 and the result 6174', async () 
   await page.context().close()
 })
 
-/** Opens `path` with the root text size raised to 200%, as a large Android text setting does. */
+/**
+ * Opens `path` with the browser's default text size at 200%, as a large text setting does.
+ *
+ * @remarks It sets the default font size, not a CSS rule, so `rem` media queries see it too.
+ */
 async function openLargeText(path: string, width: number, height: number): Promise<Page> {
   const context = await browser.newContext({ viewport: { width, height } })
-  await context.addInitScript(() =>
-    document.addEventListener('DOMContentLoaded', () => {
-      const style = document.createElement('style')
-      style.textContent = 'html { font-size: 200%; }'
-      document.head.append(style)
-    })
-  )
   const page = await context.newPage()
+  const cdp = await context.newCDPSession(page)
+  await cdp.send('Page.enable')
+  await cdp.send('Page.setFontSizes', { fontSizes: { standard: 32, fixed: 26 } })
   await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' })
   return page
 }
@@ -269,6 +269,14 @@ test('200% text does not shrink the stage tiles on a narrow phone (WCAG 1.4.4)',
     tileKept: true,
     digitKept: true,
   })
+})
+
+test('200% text on a 900 px screen keeps one column, so the stage keeps its width', async () => {
+  // The side column is 21rem: with a px breakpoint it took 672 of 900 px and left the stage 100 px.
+  const page = await openLargeText('/?n=3524', 900, 900)
+  const card = await page.locator('#stage-card').evaluate((el) => el.getBoundingClientRect().width)
+  expect(card).toBeGreaterThan(600)
+  await page.context().close()
 })
 
 test('on a 360 px phone every control in the result is at least 44 by 44 px', async () => {

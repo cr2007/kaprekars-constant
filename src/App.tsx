@@ -147,7 +147,7 @@ export default function App() {
       </header>
 
       {/* minmax(0, 1fr): content can never widen the phone column past the screen. */}
-      <main id="main-content" className="grid grid-cols-[minmax(0,1fr)] gap-4 min-[840px]:grid-cols-[minmax(0,1fr)_21rem] min-[840px]:gap-x-8 min-[840px]:gap-y-5 lg:gap-x-10">
+      <main id="main-content" className="grid grid-cols-[minmax(0,1fr)] gap-4 min-[52.5rem]:grid-cols-[minmax(0,1fr)_21rem] min-[52.5rem]:gap-x-8 min-[52.5rem]:gap-y-5 lg:gap-x-10">
         <output id="playback-status" className="sr-only">{play.message}</output>
 
         {/* Part 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
@@ -182,10 +182,10 @@ export default function App() {
           <EndPanel key={runId} run={run} arrived={arrived} remaining={arrivalIndex - play.index} circleMs={circleMs} />
         )}
 
-        {hasRun && <AllSteps steps={steps} className="min-[840px]:col-start-2 min-[840px]:row-start-2" />}
+        {hasRun && <AllSteps steps={steps} className="min-[52.5rem]:col-start-2 min-[52.5rem]:row-start-2" />}
 
         {/* In a run, wide screens put this under the stage and "See all steps" in the side column. Phones keep source order. */}
-        <OriginDetails className={hasRun ? 'min-[840px]:col-start-1 min-[840px]:row-start-2' : 'min-[840px]:col-span-2'} />
+        <OriginDetails className={hasRun ? 'min-[52.5rem]:col-start-1 min-[52.5rem]:row-start-2' : 'min-[52.5rem]:col-span-2'} />
       </main>
 
     </div>
