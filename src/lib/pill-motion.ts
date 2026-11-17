@@ -1,29 +1,11 @@
-import { reducedMotion } from '@/lib/stage-motion'
+import { EASE_OUT, reducedMotion, spring } from '@/lib/motion'
 
 /*
   The trail pill's motion, apart from React: the spring it glides on, the
   lift, and the check that keeps keyboard moves instant.
 */
 
-/**
- * A spring with mass 1 as a CSS `linear()` easing and its duration: the
- * time it takes to settle within 0.5%. Only for an underdamped spring
- * (damping below 2 * sqrt(stiffness)). The trail uses stiffness 170 and
- * damping 22 (ratio 0.84): half way at about 120 ms, so a tap answers at
- * once, then it eases in with 0.7% overshoot and settles at about 530 ms.
- */
-export function spring(stiffness: number, damping: number): { easing: string; ms: number } {
-  const w0 = Math.sqrt(stiffness)
-  const zeta = damping / (2 * w0)
-  const wd = w0 * Math.sqrt(1 - zeta * zeta)
-  const x = (t: number) => 1 - Math.exp(-zeta * w0 * t) * (Math.cos(wd * t) + ((zeta * w0) / wd) * Math.sin(wd * t))
-  // Step 1: the time to settle within 0.5%, found once at load.
-  let settle = 0
-  for (let t = 0; t < 2; t += 0.001) if (Math.abs(1 - x(t)) > 0.005) settle = t
-  // Step 2: 40 samples over that time; the last one is exactly 1.
-  const points = Array.from({ length: 40 }, (_, i) => (i === 39 ? 1 : x((settle * i) / 39)).toFixed(4))
-  return { easing: `linear(${points.join(', ')})`, ms: Math.round(settle * 1000) }
-}
+/** The glide: stiffness 170, damping 22. Half way at about 120 ms, so a tap answers at once; it settles at about 530 ms. */
 const GLIDE = spring(170, 22)
 /** The pill's scale while it is lifted: pressed, dragged, or at the top of a tap's glide. */
 export const LIFT = '1.04 1.1'
@@ -86,7 +68,7 @@ export function glide({ pill, copy }: PillParts, from: number, to: number, sheen
   // Step 3: the lift rises in the first 30% of the glide and settles as the pill lands.
   sheen?.animate(
     [
-      { scale: lift, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' },
+      { scale: lift, easing: EASE_OUT },
       { scale: LIFT, offset: 0.3, easing: 'cubic-bezier(0.65, 0, 0.35, 1)' },
       { scale: '1 1' },
     ],

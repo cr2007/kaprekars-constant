@@ -1,8 +1,13 @@
-/** Strong ease-out for things that enter or respond to the user. */
-export const EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)'
-
-/** Strong ease-in-out for things that move from one place to another on screen. */
-const EASE_IN_OUT = 'cubic-bezier(0.77, 0, 0.175, 1)'
+/**
+ * The stage's motion in the DOM: the slot flight, the handoff, the sort
+ * (planned by {@link sortTimeline}) and the 6174 arrival.
+ *
+ * @remarks Every function checks {@link reducedMotion} first. Reduced
+ * motion keeps the order of the rows, with opacity only.
+ * @packageDocumentation
+ */
+import { EASE_IN_OUT, EASE_OUT, reducedMotion, spring } from '@/lib/motion'
+import { RESULT_MS, type SortLine, sortTimeline } from '@/lib/sort-timeline'
 
 /** The last result moves up into the input row over this time. */
 const HANDOFF_MS = 300
@@ -19,8 +24,6 @@ export const SLOTS_IN_MS = SLOT_MS + 3 * SLOT_STAGGER_MS
 const FADE_MS = 200
 /** From the start of one row's fade to the start of the next. */
 const ROW_GAP_MS = 250
-/** The difference rises into place over this time. */
-const RESULT_MS = 200
 /** One 6174 tile hops over this time. */
 const ARRIVE_MS = 450
 /** The 6174 tiles start their hops this far apart. */
@@ -31,14 +34,6 @@ const BADGE_DELAY_MS = 250
 export const AT_REST_LANDED_MS = 300
 /** The hand-drawn circle starts this long after the difference lands, with the badge. */
 export const CIRCLE_DELAY_MS = 250
-
-/**
- * True when the OS asks for reduced motion. CSS `@media` rules do not
- * stop Web Animations API calls, so every `el.animate()` path checks this.
- */
-export function reducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
 
 /** Reduced motion: when each row of a step fades in, in reading order, in ms from the step's start. */
 const REDUCED = {
@@ -59,133 +54,13 @@ export function stepMotionMs(digits: number[], index: number): number {
   return sortTimeline(digits, index === 0, index > 0 ? HANDOFF_MS : SLOTS_IN_MS).end
 }
 
-/* ---------------------------------------------------------------------------
- * The sort (M-2h2). A copy of the input drops into line 2 and into line 3.
- * Then each line sorts in place: a fill inside each tile rises to its digit
- * (a 9 fills the tile, a 0 stays empty), the tiles slide into order in their
- * own line, and the fills drain. Where paths cross, the bigger digit passes
- * in front. Step 1 plays at full time; later steps at 60%.
- * ------------------------------------------------------------------------- */
-
 /**
- * A spring ease-out as CSS `linear()`: stiffness 456, damping 27.3, mass 1.
- * It overshoots by 7% and settles in about 390 ms. The copies drop on it.
+ * A spring for the copies as they drop into their line: stiffness 456,
+ * damping 27.3, so it overshoots by 7% and settles in about 400 ms.
  */
-const DROP_SPRING =
-  'linear(0, 0.06, 0.187, 0.356, 0.52, 0.67, 0.805, 0.905, 0.978, 1.027, 1.056, 1.069, 1.071, 1.065, 1.054, 1.043, 1.031, 1.021, 1.012, 1.005, 1.001, 0.997, 0.996, 0.995, 1)'
-/** Material 3 emphasized, for the slide in the line. */
-const EMPHASIZED = bezier(0.2, 0, 0, 1)
-/** Fill, slide and drain times in ms at step 1, and the gaps between them. */
-const FILL_MS = 200
-const SLIDE_AT_MS = 290
-const SLIDE_MS = 300
-const DRAIN_AT_MS = 60
-/** Places of equal rank start this far apart, biggest first in line 2. */
-const RANK_MS = 30
+const DROP_SPRING = spring(456, 27.3).easing
 /** The fill is the page text color at this opacity: it raises the digit contrast on the tile. */
 const FILL_OPACITY = 0.3
-
-type Ease = (p: number) => number
-
-/** A CSS `cubic-bezier()` as a function, solved by bisection (robust where the slope is flat). */
-function bezier(x1: number, y1: number, x2: number, y2: number): Ease {
-  const at = (t: number, a: number, b: number) => 3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3
-  return (x) => {
-    if (x <= 0 || x >= 1) return Math.min(1, Math.max(0, x))
-    let lo = 0
-    let hi = 1
-    for (let i = 0; i < 24; i++) {
-      const mid = (lo + hi) / 2
-      if (at(mid, x1, x2) < x) lo = mid
-      else hi = mid
-    }
-    return at((lo + hi) / 2, y1, y2)
-  }
-}
-
-/** A tile pose at time `t`: `x` in places (0 to 3), `s` the scale. */
-interface TrackPoint {
-  t: number
-  x: number
-  s: number
-}
-
-/** One sorted line. Arrays are per final place. */
-interface SortLine {
-  /** The input slot of the digit in each final place. */
-  order: number[]
-  /** When the copy of the source row drops into this line. */
-  copyAt: number
-  /** The poses of the tile in each final place. The first pose is where the copy lands. */
-  tracks: TrackPoint[][]
-  /** When each fill starts to rise, and when it starts to drain. */
-  fillAt: number[]
-  drainAt: number[]
-  fillMs: number
-  /** The line is at rest. */
-  end: number
-}
-
-interface SortTimeline {
-  copyMs: number
-  desc: SortLine
-  asc: SortLine
-  resultAt: number
-  end: number
-}
-
-/** A stable sort of the input slots: equal digits keep their order. */
-const stableOrder = (digits: number[], desc: boolean) =>
-  digits.map((_, slot) => slot).sort((a, b) => (desc ? digits[b] - digits[a] : digits[a] - digits[b]))
-
-/** The poses of one line that sorts from input order, from `t0`, with all times times `k`. */
-function sortLine(digits: number[], desc: boolean, copyAt: number, t0: number, k: number): SortLine {
-  const order = stableOrder(digits, desc)
-  const line: SortLine = { order, copyAt, tracks: [], fillAt: [], drainAt: [], fillMs: k * FILL_MS, end: t0 }
-  order.forEach((slot, i) => {
-    // Step 1: the digit in place i, and its rank. Equal digits share one rank, so they start together and never pass.
-    const d = digits[slot]
-    const r = order.findIndex((other) => digits[other] === d)
-    const slideAt = t0 + k * (SLIDE_AT_MS + r * RANK_MS)
-
-    // Step 2: the slide from its input slot to place i, sampled about every 16 ms. A tile already in place stays.
-    // The bigger digit grows a little as it passes, the smaller one shrinks: +6% for a 9, -14% for a 0.
-    const bump = -0.14 + (0.2 * d) / 9
-    const n = Math.round((k * SLIDE_MS) / 16)
-    line.tracks.push(
-      slot === i
-        ? [{ t: slideAt, x: i, s: 1 }]
-        : Array.from({ length: n + 1 }, (_, j) => {
-            const q = j / n
-            return { t: slideAt + q * k * SLIDE_MS, x: slot + (i - slot) * EMPHASIZED(q), s: 1 + 4 * bump * q * (1 - q) }
-          })
-    )
-
-    // Step 3: the fill rises first, drains 60 ms after the slide; the line rests when the last fill is gone.
-    line.fillAt.push(t0 + k * r * RANK_MS)
-    line.drainAt.push(slideAt + k * (SLIDE_MS + DRAIN_AT_MS))
-    line.end = Math.max(line.end, slideAt + k * (SLIDE_MS + DRAIN_AT_MS + FILL_MS))
-  })
-  return line
-}
-
-/**
- * The timeline of one step. The input row is in place at `inputMs`. Then
- * both copies drop in input order, line 2 sorts biggest first, line 3
- * smallest first, and the difference lands. `teach` is step 1, at full
- * time; later steps run at 60%.
- */
-export function sortTimeline(digits: number[], teach: boolean, inputMs: number): SortTimeline {
-  const k = teach ? 1 : 0.6
-  const copyMs = teach ? 260 : 180
-  const pause = teach ? 80 : 30
-  const descCopy = inputMs
-  const ascCopy = descCopy + copyMs / 2
-  const desc = sortLine(digits, true, descCopy, ascCopy + copyMs + pause, k)
-  const asc = sortLine(digits, false, ascCopy, desc.end + pause, k)
-  const resultAt = asc.end + pause
-  return { copyMs, desc, asc, resultAt, end: resultAt + RESULT_MS }
-}
 
 /** Moves `el` from an offset back to where it is. It adds to the element's other moves. */
 function slide(el: HTMLElement, dx: number, dy: number, delay: number, duration: number): Animation {
@@ -225,7 +100,7 @@ function playLine(tiles: HTMLElement[], rest: DOMRect[], sources: DOMRect[], lin
 }
 
 /** The latest fill of each tile, so only it clears the tile's z-index when it ends. */
-const currentFill = new WeakMap<HTMLElement, HTMLElement | null>()
+const currentFill = new WeakMap<HTMLElement, HTMLElement>()
 
 /**
  * A fill inside the tile rises to d / 9 of its height, stays while the
@@ -352,12 +227,11 @@ export function playStep(
 
   // Step 2: reduced motion fades the rows in reading order.
   if (reducedMotion()) {
-    const plan = REDUCED
     fadeIn(rows.input, 0)
-    fadeIn(rows.desc, plan.descAt)
-    fadeIn(rows.asc, plan.ascAt)
-    fadeIn(rows.resultBox, plan.resultAt, RESULT_MS)
-    return plan.end
+    fadeIn(rows.desc, REDUCED.descAt)
+    fadeIn(rows.asc, REDUCED.ascAt)
+    fadeIn(rows.resultBox, REDUCED.resultAt, RESULT_MS)
+    return REDUCED.end
   }
 
   // Step 3: measure every tile and the old result before anything moves.

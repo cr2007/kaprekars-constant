@@ -1,6 +1,6 @@
 import { type ReactNode, useLayoutEffect, useRef } from 'react'
 import { roughCircle } from '@/lib/rough-circle'
-import { reducedMotion } from '@/lib/stage-motion'
+import { reducedMotion } from '@/lib/motion'
 
 /** Draw time in ms for both loops, as rough-notation draws a circle. */
 const DURATION_MS = 550

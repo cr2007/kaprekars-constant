@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { spring } from './pill-motion'
+import { spring } from './motion'
 
 /** The sample values of a `linear()` easing. */
 const samples = (easing: string) => easing.slice('linear('.length, -1).split(', ').map(Number)

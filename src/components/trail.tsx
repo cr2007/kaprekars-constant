@@ -3,7 +3,7 @@ import { type CSSProperties, type PointerEvent, useLayoutEffect, useRef, useStat
 import { pad4 } from '@/hooks/use-playback'
 import type { KaprekarStep } from '@/lib/kaprekar'
 import { fromKeyboard, glide, LIFT, paintedX, type PillParts, place } from '@/lib/pill-motion'
-import { reducedMotion } from '@/lib/stage-motion'
+import { reducedMotion } from '@/lib/motion'
 import { cn } from 'cn'
 
 interface TrailProps {

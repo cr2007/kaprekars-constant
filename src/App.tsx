@@ -16,7 +16,8 @@ import { useBookSide } from '@/hooks/use-book-side'
 import { usePlayback } from '@/hooks/use-playback'
 import { useRun } from '@/hooks/use-run'
 import { KAPREKAR_CONSTANT, sanitizeDigitInput } from '@/lib/kaprekar'
-import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, reducedMotion, stepMotionMs } from '@/lib/stage-motion'
+import { reducedMotion } from '@/lib/motion'
+import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, stepMotionMs } from '@/lib/stage-motion'
 import { distribution } from '@/lib/stats'
 
 /** Side and bottom padding that keeps clear of notches and home bars. */

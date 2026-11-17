@@ -1,7 +1,7 @@
 import { type CSSProperties, useEffect, useId, useRef } from 'react'
 import { cn } from 'cn'
 import { type Pair, REST_PAIR, rollPair } from '@/lib/dice-roll'
-import { EASE_OUT, reducedMotion } from '@/lib/stage-motion'
+import { EASE_OUT, reducedMotion } from '@/lib/motion'
 
 /** Swap times in ms, both on EASE_OUT. Enter answers the user; leave is not slower. */
 const ENTER_MS = 200

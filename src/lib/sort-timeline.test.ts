@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
-import { SLOTS_IN_MS, sortTimeline } from './stage-motion'
+import { sortTimeline } from './sort-timeline'
+import { SLOTS_IN_MS } from './stage-motion'
 
 /** Every step input with two or more different digits, leading zeros kept (later steps have them). */
 const ALL = Array.from({ length: 10000 }, (_, n) => String(n).padStart(4, '0').split('').map(Number)).filter(
