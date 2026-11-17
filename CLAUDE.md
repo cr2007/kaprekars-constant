@@ -7,7 +7,10 @@ only the Claude-specific ones.
 
 ## Commits
 
-- Draft commit messages with the `/conventional-commit` skill.
+- Write commit messages in the format of the `/conventional-commit`
+  skill. Only the user can run that skill, so follow its format:
+  `type(scope): subject`, a first line of 50 characters or fewer, a
+  body wrapped at 72, and no ticket footer.
 - Do not add a `Co-Authored-By` line for Claude, in this repo.
 - Write commit messages in ASD-STE100 Simplified Technical English:
   short sentences, plain words, one fact per sentence.
@@ -38,6 +41,7 @@ only the Claude-specific ones.
 
 - This project has a `PRODUCT.md`. Read it before design work.
 - Use the `impeccable` skill for design, redesign, or accessibility
-  audit requests.
+  audit requests, when it is installed. Otherwise use
+  `/plan-design-review` and `/emil-design-eng`.
 - Verify a claimed fix (contrast, layout, alignment) by computing or
   measuring it, not by eyeballing a screenshot.

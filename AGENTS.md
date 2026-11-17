@@ -31,9 +31,11 @@ principles.
   `bun --bun node_modules/vite/bin/vite.js`, instead of the bare
   command name. The `dev`, `build`, and `preview` scripts in
   `package.json` already do this; keep new scripts consistent with
-  them. `oxlint`, `bun check`, and `bun test` are unaffected: `oxlint`
-  ships a real native binary, and `bun check` and `bun test` never
-  leave Bun. The `build` script type-checks with `bun check -b`.
+  them. `oxlint`, `bun check`, and `bun test` are unaffected: the
+  `oxlint` bin is a small JS entry that `bun --bun` runs under Bun,
+  before a native binding does the work, and `bun check` and
+  `bun test` never leave Bun. The `build` script type-checks with
+  `bun check -b`.
 - Run `bun --bun run build`, `bun --bun run lint`, `bun --bun run test`,
   `bun --bun run check:unused` and `bun --bun run check:tsdoc` after any
   code change. Run `bun --bun run test:e2e` too after a change to the
@@ -242,6 +244,9 @@ them with `bun --bun run test`. `e2e/app.test.ts` runs the production
 build in Chromium for what unit tests cannot reach: playback, the
 trail's clicks and drags, focus, the input note, the end panel timing.
 It needs a Chromium at `/snap/bin/chromium`, or set `CHROMIUM_PATH`.
+It serves the build on port 4179, so only one run can go at a time.
+Agents that work in parallel take a lock:
+`flock /tmp/kaprekar-e2e.lock bun --bun run test:e2e`.
 Add an e2e test for a fixed UI bug, so it cannot come back. Keep each
 test on one behavior; wait for a condition, not a fixed time, where
 you can.

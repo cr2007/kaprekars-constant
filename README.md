@@ -33,11 +33,11 @@ reaches 6174 within seven steps.
 
 ## Run it
 
-Install Bun first: https://bun.sh
+Install Bun first (CI uses 1.4.4): https://bun.sh
 
 ```sh
 bun install
-bun --bun dev
+bun --bun run dev
 ```
 
 Open the printed local URL in your browser.
@@ -71,23 +71,4 @@ to `/`.
 
 ## Project structure
 
-```
-src/
-  App.tsx                    # the Stage layout
-  components/                # UI components (stage step, trail, end panel)
-  components/ui/             # shadcn primitives
-  components/icons/          # one-off icons shadcn/lucide don't ship
-  hooks/use-run.ts           # run state, synced with ?n=
-  hooks/use-playback.ts      # which step the stage shows, autoplay
-  hooks/                     # also theme and book-side state
-  lib/kaprekar.ts            # the routine itself
-  lib/stage-motion.ts        # step, handoff and 6174 arrival motion
-  lib/stats.ts               # step counts over all valid inputs
-  lib/url.ts                 # ?n= read, write and share link
-  lib/rough-circle.ts        # seeded hand-drawn circle (MIT port)
-  lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
-  lib/*.test.ts              # regression tests (bun:test)
-public/
-  fonts/                     # Endless, the custom text font
-  favicon.ico                # 16 and 32 px tab icon frames
-```
+See the structure and the element ids in [AGENTS.md](AGENTS.md).
