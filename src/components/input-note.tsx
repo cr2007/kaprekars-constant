@@ -33,7 +33,12 @@ export function InputNote({ raw, problem }: InputNoteProps) {
   if (zero) {
     title = 'Start with 1 to 9.'
     // A non-breaking hyphen: "3-" and "digit" never split over two lines.
-    detail = 'A 0 in front makes it a 3\u2011digit number.'
+    detail = (
+      <>
+        A <span className="font-mono">0</span> in front makes it a <span className="font-mono">3</span>
+        {'\u2011digit number.'}
+      </>
+    )
   } else if (same) {
     title = (
       <>
