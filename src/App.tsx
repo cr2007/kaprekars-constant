@@ -159,7 +159,7 @@ export default function App() {
               animate={play.animate}
               take={play.take}
               empty={
-                <div className="flex max-w-sm flex-col gap-4 text-left">
+                <div className="flex w-full max-w-sm flex-col gap-4 text-left">
                   <InputNote raw={run.rawInput} error={partial ? null : run.error} />
                   <HowItWorks id="how-it-works-intro" />
                 </div>

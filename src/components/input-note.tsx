@@ -31,7 +31,8 @@ export function InputNote({ raw, error }: InputNoteProps) {
   let detail: React.ReactNode = null
   if (zero) {
     title = 'Start with 1 to 9.'
-    detail = 'A 0 in front makes it a 3-digit number.'
+    // A non-breaking hyphen: "3-" and "digit" never split over two lines.
+    detail = 'A 0 in front makes it a 3\u2011digit number.'
   } else if (same) {
     title = (
       <>
