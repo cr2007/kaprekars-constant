@@ -62,7 +62,9 @@ principles.
   check the syntax and the tag names.
 - Size layout that holds text with container queries in `rem`
   (`@container` and `@max-[19rem]:`), not viewport `px` breakpoints:
-  a `rem` breakpoint also fires at 200% text. Check a change at 280 px,
+  a `rem` breakpoint also fires at 200% text (a CSS `font-size` on
+  `html` does not reach media queries: the e2e helper sets the
+  browser's default size through CDP). Check a change at 280 px,
   at 320 px and at 200% text; `e2e/app.test.ts` checks them. On a
   phone, keep each control at 44 by 44 px or more.
 - Export a constant or a helper from `src/lib/`, not from a component
