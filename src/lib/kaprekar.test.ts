@@ -31,6 +31,12 @@ describe('sanitizeDigitInput', () => {
   test('returns an empty string for an empty input', () => {
     expect(sanitizeDigitInput('')).toBe('')
   })
+
+  test('reads Arabic-Indic, Persian and full-width digits from phone keyboards', () => {
+    expect(sanitizeDigitInput('\u0669\u0668\u0667\u0660')).toBe('9870')
+    expect(sanitizeDigitInput('\u06F1\u06F2\u06F3\u06F4')).toBe('1234')
+    expect(sanitizeDigitInput('\uFF15\uFF16\uFF17\uFF19')).toBe('5679')
+  })
 })
 
 describe('validateInput', () => {

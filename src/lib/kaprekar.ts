@@ -42,13 +42,22 @@ function numberFromDigits(digits: number[]): number {
   return Number(digits.join(''))
 }
 
+/** Arabic-Indic, Persian and full-width digits, which some phone keyboards type. */
+const OTHER_DIGITS = /[\u0660-\u0669\u06F0-\u06F9\uFF10-\uFF19]/g
+
 /**
  * Strips everything but digits from `raw` and keeps at most 4.
  *
- * @remarks The input drops a 5th digit and never blocks a keystroke, which is less surprising.
+ * @remarks
+ * - The input drops a 5th digit and never blocks a keystroke, which is less surprising.
+ * - Digits from {@link OTHER_DIGITS} become ASCII first. Each block starts at a code point
+ *   that ends in hex 0, so the last hex digit is the digit's value.
  */
 export function sanitizeDigitInput(raw: string): string {
-  return raw.replace(/\D/g, '').slice(0, 4)
+  return raw
+    .replace(OTHER_DIGITS, (d) => String(d.charCodeAt(0) % 16))
+    .replace(/\D/g, '')
+    .slice(0, 4)
 }
 
 /**
