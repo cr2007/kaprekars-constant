@@ -153,6 +153,10 @@
   html {
     @apply font-sans;
     }
+  /* The field selects its digits on each focus: a primary tint, not the browser blue. */
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 25%, transparent);
+  }
   /* On the things people tap: no double-tap zoom delay, and a long press does not select the label. */
   button,
   summary,
