@@ -180,8 +180,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
             </dd>
           </div>
 
-          {/* The rule above the difference sits in the extra top margin, clear of the circle's 8 px pad. */}
-          {/* The rule above the difference. Stacked, the label sits above the tiles, so the row draws the rule. */}
+          {/* The rule above the difference sits in the extra top margin, clear of the circle's 8 px pad. Stacked,
+              the label sits above the tiles, so the row draws the rule instead of the tiles' cell. */}
           <div
             id="sum-difference"
             className={cn(

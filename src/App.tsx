@@ -88,8 +88,8 @@ export default function App() {
         Skip to the number field
       </a>
 
-      {/* Step 1 of the story: the number goes in, right above where it plays. */}
-      {/* isolate: the watermark's -z-10 stays inside the header, above the page background. */}
+      {/* The story starts here: the number goes in, right above where it plays. isolate: the watermark's
+          -z-10 stays inside the header, above the page background. */}
       <header id="page-header" className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
         <Hero />
         <div className="flex max-sm:absolute max-sm:top-0 max-sm:right-0">

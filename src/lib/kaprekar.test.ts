@@ -19,7 +19,7 @@ describe('sanitizeDigitInput', () => {
   })
 
   test('keeps all 4 digits of a pasted number with a separator', () => {
-    // Regression (B-12): the field has no maxLength, which would cut "1,234" to "1,23" first.
+    // The field has no maxLength: it would cut "1,234" to "1,23" before this keeps the 4 digits.
     expect(sanitizeDigitInput('1,234')).toBe('1234')
     expect(sanitizeDigitInput(' 3 524 ')).toBe('3524')
   })
