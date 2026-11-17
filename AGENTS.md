@@ -125,7 +125,7 @@ src/
   lib/*.test.ts              # unit tests (bun:test)
 e2e/app.test.ts              # browser regression tests on the production build
 scripts/check-tsdoc.ts       # the TSDoc syntax check
-knip.json                    # knip config (keeps src/lib/utils.ts for the shadcn CLI)
+knip.json                    # knip config (keeps utils.ts for shadcn; Stryker false positive)
 stryker.config.json          # mutation testing scope: the pure code in src/lib
 .github/workflows/ci.yml     # CI: lint, knip, TSDoc, unit and e2e on each pull request
 public/

@@ -1,4 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreFiles": ["src/lib/utils.ts"]
+  "ignoreFiles": ["src/lib/utils.ts"],
+  "ignoreDependencies": ["@stryker-mutator/command-runner"]
 }
