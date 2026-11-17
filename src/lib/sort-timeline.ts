@@ -25,7 +25,7 @@ const RANK_MS = 30
 const EMPHASIZED = bezier(0.2, 0, 0, 1)
 
 /** A tile pose at time `t`: `x` in places (0 to 3), `s` the scale. */
-export interface TrackPoint {
+interface TrackPoint {
   t: number
   x: number
   s: number
