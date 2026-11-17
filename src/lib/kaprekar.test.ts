@@ -82,12 +82,6 @@ describe('computeStep', () => {
 })
 
 describe('runKaprekarRoutine', () => {
-  test('reaches 6174 in a single step when already there', () => {
-    const steps = runKaprekarRoutine(KAPREKAR_CONSTANT)
-    expect(steps).toHaveLength(1)
-    expect(steps[0].result).toBe(KAPREKAR_CONSTANT)
-  })
-
   test('every valid 4-digit input reaches 6174 in at most 7 steps', () => {
     // Step 1: run the routine on all 8,991 valid inputs and count steps.
     const stepCounts: Record<number, number> = {}

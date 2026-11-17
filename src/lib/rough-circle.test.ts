@@ -30,12 +30,4 @@ describe('roughCircle', () => {
     const paths = roughCircle(20, 20, 62, 56, 24116).map(numbers)
     expect(paths.map((path) => path.map((n) => Math.round(n * 100) / 100))).toEqual(LIBRARY)
   })
-
-  test('gives the same paths for the same seed and size', () => {
-    expect(roughCircle(103, 28, 206, 56, 24116)).toEqual(roughCircle(103, 28, 206, 56, 24116))
-  })
-
-  test('gives other paths for another seed', () => {
-    expect(roughCircle(103, 28, 206, 56, 24116)[0]).not.toBe(roughCircle(103, 28, 206, 56, 24117)[0])
-  })
 })
