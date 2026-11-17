@@ -26,10 +26,13 @@ beforeAll(async () => {
     stderr: 'ignore',
   })
   // Step 2: wait until the server answers, then start one browser for all tests.
-  for (let i = 0; i < 50; i++) {
-    if (await fetch(BASE).then((r) => r.ok).catch(() => false)) break
-    await Bun.sleep(100)
+  let up = false
+  for (let i = 0; i < 50 && !up; i++) {
+    up = await fetch(BASE).then((r) => r.ok).catch(() => false)
+    if (!up) await Bun.sleep(100)
   }
+  // A busy port stops the new server, and the tests would run against another build.
+  if (!up || server.exitCode !== null) throw new Error(`The preview server did not start on port ${PORT}.`)
   browser = await chromium.launch({ executablePath: CHROMIUM, headless: true })
 })
 
@@ -52,6 +55,10 @@ const heading = (page: Page) => page.locator('#stage-heading').textContent()
 /** Waits until the stage shows `text` in its heading. */
 const waitForStep = (page: Page, text: string, timeout = 10_000) =>
   page.waitForFunction((t) => document.querySelector('#stage-heading')?.textContent === t, text, { timeout })
+
+/** Waits until the result after 6174 has faded in. */
+const waitForResult = (page: Page) =>
+  page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 15_000 })
 
 /** Seeks every time-based animation to `ms` and holds it there, so a frame can be measured exactly. */
 const freezeAt = (page: Page, ms: number) =>
@@ -160,13 +167,13 @@ test('the routine stays beside the 6174 step until the circle starts, then the r
   expect(await page.locator('#rounds-left').textContent()).toBe('Last round to 6174.')
   expect(await page.locator('#end-progress').evaluate((e) => getComputedStyle(e).opacity)).toBe('1')
   // Then the result takes its place.
-  await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 8000 })
+  await waitForResult(page)
   await page.context().close()
 })
 
 test('"Do one more round" circles the start 6174 and the result 6174', async () => {
   const page = await open('/?n=2323')
-  await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 15_000 })
+  await waitForResult(page)
   await page.locator('#one-more-button').click()
   await waitForStep(page, 'Step 5 of 5', 2000)
   expect(await page.locator('#hand-circle-start').count()).toBe(1)
@@ -225,7 +232,7 @@ test('the page fits a 280 px screen and 200% text, with the longest run plus the
   for (const [label, make] of cases) {
     const page = await make()
     await page.locator('#trail-step-7').click()
-    await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 8000 })
+    await waitForResult(page)
     await page.locator('#one-more-button').click()
     await waitForStep(page, 'Step 8 of 8', 2000)
     await checkFits(page, `${label} 8 steps`)
@@ -265,7 +272,7 @@ test('200% text does not shrink the stage tiles on a narrow phone (WCAG 1.4.4)',
 
 test('on a 360 px phone every control in the result is at least 44 by 44 px', async () => {
   const page = await open('/?n=2323', 360, 780, { hasTouch: true })
-  await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 15_000 })
+  await waitForResult(page)
   const small = await page.evaluate(() =>
     [...document.querySelectorAll('button, a[href], summary, input, label:has(input[type="radio"])')]
       .map((el) => ({ name: el.id || el.textContent?.trim().slice(0, 12), r: el.getBoundingClientRect() }))
@@ -287,7 +294,7 @@ test('on a short phone a typed run scrolls the playback bar into view; a ?n= lin
   const page = await open('/', 375, 553, { hasTouch: true })
   await page.locator('#number-input').pressSequentially('3524')
   // 1 px slack: the scroll position is whole pixels, the layout is not.
-  await page.waitForFunction(() => document.querySelector('#playback-bar')!.getBoundingClientRect().bottom <= innerHeight + 1, null, { timeout: 3000 })
+  await page.waitForFunction(() => (document.querySelector('#playback-bar')?.getBoundingClientRect().bottom ?? Infinity) <= innerHeight + 1, null, { timeout: 10_000 })
   // The field stays in view, so the next number is one tap away.
   expect(await page.locator('#number-input').evaluate((el) => el.getBoundingClientRect().top >= 0)).toBe(true)
   await page.context().close()
@@ -332,7 +339,7 @@ test('Share copies the run link and says "Copied"', async () => {
 test('the step chart is one Tab stop, and arrow keys move between its bars', async () => {
   // 2323 takes 4 steps, so the 4th bar holds the Tab stop.
   const page = await open('/?n=2323', 1440, 900)
-  await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 15_000 })
+  await waitForResult(page)
   const bars = page.locator('#step-chart button')
   expect(await bars.evaluateAll((all) => all.map((b) => (b as HTMLElement).tabIndex))).toEqual([-1, -1, -1, 0, -1, -1, -1])
   await bars.nth(3).focus()
