@@ -61,19 +61,22 @@ export default function App() {
   const loadRunId = useRef(runId)
 
   // A new run, or the loop step, brings the stage into view: its top when started from below it,
-  // its playback bar when that starts below a short phone screen. A field that still has focus
-  // (a hardware keyboard) stays in view; on touch the 4th digit has closed the keyboard.
+  // its playback bar when that starts below a short phone screen and the whole block fits. A field
+  // that still has focus (a hardware keyboard) stays in view; on touch the 4th digit has closed the keyboard.
   useEffect(() => {
     const stage = stageRef.current
     if (!stage || steps.length === 0) return
     const { top, bottom } = stage.getBoundingClientRect()
     const behavior = reducedMotion() ? 'auto' : 'smooth'
     const typing = document.activeElement === inputRef.current
+    const viewport = document.documentElement.clientHeight
+    // The loop step makes the run one step longer than its count to 6174.
+    const later = runId !== loadRunId.current || steps.length > stepsToConstant(steps)
     if (top < 0) stage.scrollIntoView({ behavior, block: 'start' })
-    else if (runId !== loadRunId.current && !typing && bottom > document.documentElement.clientHeight) {
+    else if (later && !typing && bottom > viewport && bottom - top <= viewport) {
       stage.scrollIntoView({ behavior, block: 'nearest' })
     }
-  }, [runId, steps.length])
+  }, [runId, steps])
 
   /** Runs the typed value. On touch, closes the keyboard once 4 digits are in. */
   function handleChange(value: string) {
