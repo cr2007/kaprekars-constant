@@ -1,6 +1,6 @@
 import { type ReactNode, useLayoutEffect, useRef } from 'react'
 import { roughCircle } from '@/lib/rough-circle'
-import { reducedMotion } from '@/lib/motion'
+import { EASE_OUT, reducedMotion } from '@/lib/motion'
 
 /** Draw time in ms for both loops, as rough-notation draws a circle. */
 const DURATION_MS = 550
@@ -65,7 +65,7 @@ export function HandCircle({ id, show, delay, animate, children }: HandCirclePro
     const observer = new ResizeObserver(draw)
     observer.observe(el)
 
-    // Step 2: one loop after the other, each ease-out, timed by length, as rough-notation does.
+    // Step 2: one loop after the other, each with the house ease-out, timed by length, as rough-notation does.
     const lengths = paths.map((path) => path.getTotalLength())
     const total = lengths.reduce((sum, length) => sum + length, 0)
     let start = delay
@@ -74,7 +74,7 @@ export function HandCircle({ id, show, delay, animate, children }: HandCirclePro
         ? []
         : paths.map((path, i) => {
             const duration = (DURATION_MS * lengths[i]) / total
-            const drawing = path.animate(DRAW, { duration, delay: start, easing: 'ease-out', fill: 'backwards' })
+            const drawing = path.animate(DRAW, { duration, delay: start, easing: EASE_OUT, fill: 'backwards' })
             start += duration
             return drawing
           })
