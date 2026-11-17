@@ -320,6 +320,15 @@ test('"Next challenge" keeps its target after a new run', async () => {
   await page.context().close()
 })
 
+test('Share copies the run link and says "Copied"', async () => {
+  const page = await open('/?n=2323', 390, 844)
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.locator('#share-button').click()
+  await page.getByRole('button', { name: 'Copied' }).waitFor()
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toEndWith('?n=2323')
+  await page.context().close()
+})
+
 test('a new number typed mid-sort keeps every fill inside its tile, and leaves no tile style behind', async () => {
   const page = await open('/?n=2323')
   await page.waitForTimeout(700)
