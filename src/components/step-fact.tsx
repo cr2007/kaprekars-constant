@@ -60,6 +60,8 @@ export function StepFact({ stepCount }: StepFactProps) {
         aria-label="Numbers per step count"
         className="@container flex items-end"
         onKeyDown={(event) => {
+          // Alt, Ctrl and Meta keep their browser shortcuts (Alt+ArrowLeft goes back).
+          if (event.altKey || event.ctrlKey || event.metaKey) return
           const next = nextBar(event.key, tabBar, counts.length)
           if (next === null) return
           event.preventDefault()
