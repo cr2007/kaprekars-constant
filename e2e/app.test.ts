@@ -329,6 +329,20 @@ test('Share copies the run link and says "Copied"', async () => {
   await page.context().close()
 })
 
+test('the step chart is one Tab stop, and arrow keys move between its bars', async () => {
+  // 2323 takes 4 steps, so the 4th bar holds the Tab stop.
+  const page = await open('/?n=2323', 1440, 900)
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 15_000 })
+  const bars = page.locator('#step-chart button')
+  expect(await bars.evaluateAll((all) => all.map((b) => (b as HTMLElement).tabIndex))).toEqual([-1, -1, -1, 0, -1, -1, -1])
+  await bars.nth(3).focus()
+  await page.keyboard.press('ArrowRight')
+  expect(await bars.nth(4).evaluate((b) => b === document.activeElement)).toBe(true)
+  await page.keyboard.press('Tab')
+  expect(await page.evaluate(() => document.activeElement?.id)).toBe('one-more-button')
+  await page.context().close()
+})
+
 test('a new number typed mid-sort keeps every fill inside its tile, and leaves no tile style behind', async () => {
   const page = await open('/?n=2323')
   await page.waitForTimeout(700)
