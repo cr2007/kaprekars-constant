@@ -227,6 +227,20 @@ test('the page fits a 280 px screen and 200% text, with the longest run plus the
   await empty.context().close()
 })
 
+test('on a 360 px phone every control in the result is at least 44 by 44 px', async () => {
+  const page = await open('/?n=2323', 360, 780, { hasTouch: true })
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 15_000 })
+  const small = await page.evaluate(() =>
+    [...document.querySelectorAll('button, a[href], summary, input, label:has(input[type="radio"])')]
+      .map((el) => ({ name: el.id || el.textContent?.trim().slice(0, 12), r: el.getBoundingClientRect() }))
+      // Skip visually hidden ones: the skip link and the trail's radios.
+      .filter(({ r }) => r.width > 2 && (r.width < 44 || r.height < 44))
+      .map(({ name, r }) => `${name} ${Math.round(r.width)}x${Math.round(r.height)}`)
+  )
+  expect(small).toEqual([])
+  await page.context().close()
+})
+
 test('the theme toggle sets the browser bar color too', async () => {
   const page = await open('/', 390, 844)
   const barColor = () =>

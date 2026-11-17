@@ -40,8 +40,9 @@ export function StepFact({ stepCount }: StepFactProps) {
         <span className="font-mono">{total.toLocaleString('en-US')}</span> numbers you could type take
         exactly <span className="font-mono">{stepCount}</span>.
       </figcaption>
-      {/* A container, so a tooltip wraps at 70% of the chart and never reaches past it, even at large text. */}
-      <ul id="step-chart" className="@container flex items-end gap-1.5">
+      {/* A container, so a tooltip wraps at 70% of the chart and never reaches past it, even at large text.
+          No gap: each button pads its own bar, so the space between bars is tappable too. */}
+      <ul id="step-chart" className="@container flex items-end">
         {counts.map((numbers, index) => {
           const steps = index + 1
           const current = steps === stepCount
@@ -50,7 +51,7 @@ export function StepFact({ stepCount }: StepFactProps) {
             <li key={steps} className="relative flex flex-1">
               <button
                 type="button"
-                className="flex min-h-11 flex-1 flex-col items-center justify-end gap-1 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex min-h-11 flex-1 flex-col items-center justify-end gap-1 rounded-md px-0.75 outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 // Hover and pen hover show it; a touch tap shows it through focus and click.
                 onPointerEnter={(event) => event.pointerType !== 'touch' && setOpen(index)}
                 onPointerLeave={(event) => event.pointerType !== 'touch' && document.activeElement !== event.currentTarget && setOpen(null)}
