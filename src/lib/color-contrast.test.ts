@@ -127,6 +127,15 @@ describe('theme tokens in index.css', () => {
     expect(oklchContrastRatio(readOklchVar(block, 'primary'), readOklchVar(block, 'card'))).toBeGreaterThanOrEqual(4.5)
   })
 
+  test.each([
+    ['light', root],
+    ['dark', dark],
+  ])('%s: the number field edge clears 3:1 on the card and the page (WCAG 1.4.11)', (_name, block) => {
+    const input = readOklchVar(block, 'input')
+    expect(oklchContrastRatio(input, readOklchVar(block, 'card'))).toBeGreaterThanOrEqual(3)
+    expect(oklchContrastRatio(input, readOklchVar(block, 'background'))).toBeGreaterThanOrEqual(3)
+  })
+
   test('dark card reads as a distinct, brighter elevated surface above the page', () => {
     const background = readOklchVar(dark, 'background')
     const card = readOklchVar(dark, 'card')

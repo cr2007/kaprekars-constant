@@ -83,7 +83,8 @@
     --accent-foreground: oklch(0.22 0.02 168);
     --destructive: oklch(0.53 0.22 27.325);
     --border: oklch(0.88 0.03 168);
-    --input: oklch(0.88 0.03 168);
+    /* Field edges: 3:1 on card and page (WCAG 1.4.11). On phones the label is hidden, so the edge is the cue. */
+    --input: oklch(0.6 0.05 168);
     --ring: oklch(0.42 0.14 168);
     /* Graph-paper lines on the page: --primary at about 9% on --background. */
     --grid: oklch(0.92 0.025 168);
@@ -112,7 +113,7 @@
     --accent-foreground: oklch(0.97 0.01 168);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(0.32 0.03 168);
-    --input: oklch(0.32 0.03 168);
+    --input: oklch(0.52 0.04 168);
     --ring: oklch(0.68 0.15 168);
     --grid: oklch(0.21 0.03 168);
     --mark: oklch(0.78 0.14 55);
@@ -128,13 +129,11 @@
 @media (prefers-contrast: more) {
   :root {
     --border: oklch(0.6 0.05 168);
-    --input: oklch(0.6 0.05 168);
     --muted-foreground: oklch(0.3 0.03 168);
   }
 
   .dark {
     --border: oklch(0.52 0.04 168);
-    --input: oklch(0.52 0.04 168);
     --muted-foreground: oklch(0.8 0.025 168);
   }
 }
