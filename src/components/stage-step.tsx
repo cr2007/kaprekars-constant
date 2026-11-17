@@ -6,7 +6,7 @@ import { KAPREKAR_CONSTANT, type KaprekarStep, computeStep } from '@/lib/kapreka
 import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, playArrival, playStep, type StageRows } from '@/lib/stage-motion'
 import { cn } from 'cn'
 
-/** Holds the stage's height before the first run. It is never shown. */
+/** Holds the stage's height before the first run. */
 const PLACEHOLDER = computeStep(3524)
 
 /**

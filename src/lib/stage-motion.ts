@@ -46,9 +46,9 @@ const REDUCED = {
 }
 
 /**
- * Returns how long step `index` moves when autoplay arrives at it. Autoplay waits this long.
+ * Returns how long step `index` moves when autoplay arrives at it.
  *
- * @remarks Step 1 starts a run, so its digits fly in from the slots. A replay of step 1 fades in sooner,
+ * @remarks Autoplay waits this long. Step 1 starts a run, so its digits fly in from the slots. A replay of step 1 fades in sooner,
  * so this wait is never too short. Every later step arrives by the handoff.
  */
 export function stepMotionMs(digits: number[], index: number): number {
@@ -275,7 +275,6 @@ export function playArrival(rows: StageRows, delay: number) {
   tilesOf(rows.result).forEach((tile, i) => {
     tile.animate(
       [
-        // EASE_OUT on each segment: a hop up, then a settle.
         { transform: 'scale(1)', transformOrigin: origin, easing: EASE_OUT },
         { transform: 'scale(1.12)', transformOrigin: origin, offset: 0.4, easing: EASE_OUT },
         { transform: 'scale(1)', transformOrigin: origin },

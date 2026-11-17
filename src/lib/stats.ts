@@ -1,6 +1,6 @@
 import { KAPREKAR_CONSTANT, computeStep, validateInput } from '@/lib/kaprekar'
 
-/** Step counts over every valid 4-digit input. Built once, on first use. */
+/** Step counts over every valid 4-digit input. */
 interface Distribution {
   /** `byCount[k]` lists every valid input that first reaches 6174 in `k` steps (1 to 7). */
   byCount: number[][]
@@ -8,6 +8,7 @@ interface Distribution {
   total: number
 }
 
+/** Built once, on first use. */
 let cache: Distribution | null = null
 
 /**

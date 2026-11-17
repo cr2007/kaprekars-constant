@@ -26,7 +26,7 @@ export function ShareLink({ value }: ShareLinkProps) {
   useEffect(() => () => window.clearTimeout(timer.current), [])
   const copied = state === 'copied'
 
-  /** Copies the run's link and shows "Copied" for 2 s. A refused clipboard shows the link as text instead. */
+  /** Copies the run's link and shows "Copied" for 2 s, or shows the link as text if the clipboard refuses. */
   async function copy() {
     try {
       await navigator.clipboard.writeText(shareUrl(value))

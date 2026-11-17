@@ -11,7 +11,7 @@ interface TrailProps {
   index: number
   /** Steps past this one show as dots, so the trail fills in as the run plays. */
   reached: number
-  /** True once this run has shown 6174. The goal at the end lights up. */
+  /** True once this run has shown 6174, so the goal at the end lights up. */
   arrived: boolean
   onPick: (index: number) => void
 }
@@ -34,7 +34,7 @@ export function Trail({ steps, index, reached, arrived, onPick }: TrailProps) {
     onPick
   )
 
-  /** The text of step `i`, or dots before the run reaches it. On the pill, the dots take the pill's text color. */
+  /** The text of step `i`, or dots before the run reaches it, in the pill's text color on the pill. */
   const number = (s: KaprekarStep, i: number, onPill = false) =>
     i <= reached ? (
       <span key="shown" className="trail-num stage-fade-in font-mono tabular-nums">

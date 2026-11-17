@@ -49,7 +49,7 @@ export function HowItWorks({ id }: { id: string }) {
  * - After 6174 it shows, in story order: the result, what 6174 does next, then another number to try.
  * - Both layers share one grid cell, so the panel keeps the taller height.
  * - Key it by run id, so each run reveals its result again.
- * - `circleMs` comes from {@link StageStep} timing: the swap waits for the hand circle.
+ * - `circleMs` is the step's motion time plus the circle delay, so the swap waits for the hand circle.
  */
 export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
   const loopNote = useRef<HTMLParagraphElement>(null)

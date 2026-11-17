@@ -16,7 +16,7 @@ for (const pattern of ['src/**/*.{ts,tsx}', 'e2e/**/*.ts', 'scripts/**/*.ts']) {
     const text = await Bun.file(path).text()
     // A doc block opens with "/**" and white space, so a glob such as "src/**/*.ts" is not one.
     for (const block of text.matchAll(/\/\*\*\s[\s\S]*?\*\//g)) {
-      // Step 1: the line where the block starts, so each finding points at its own line.
+      // The line where the block starts, so each finding points at its own line.
       const blockLine = text.slice(0, block.index).split('\n').length
       for (const message of parser.parseString(block[0]).log.messages) {
         const line = blockLine + block[0].slice(0, message.textRange.pos).split('\n').length - 1

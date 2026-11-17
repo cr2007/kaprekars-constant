@@ -28,9 +28,11 @@
 
 type Point = [number, number]
 
-/** rough-notation's options for a circle: roughness 1.5, 9 curve steps, 95% curve fit. */
+/** rough-notation's roughness for a circle. */
 const ROUGHNESS = 1.5
+/** rough-notation's minimum curve steps for a circle. */
 const CURVE_STEP_COUNT = 9
+/** rough-notation's curve fit for a circle: 95%. */
 const CURVE_FITTING = 0.95
 
 /**
@@ -39,8 +41,8 @@ const CURVE_FITTING = 0.95
  * @remarks The same seed and size always give the same paths.
  * Units are px, so the wobble stays pen sized on any box.
  *
- * @param cx - Center x.
- * @param cy - Center y.
+ * @param cx - Center x of the box, in px.
+ * @param cy - Center y of the box, in px.
  * @param width - Width of the box to circle, padding included.
  * @param height - Height of the box to circle, padding included.
  * @param seed - A whole number from 1 to 2^31 - 1. Zero is not valid.

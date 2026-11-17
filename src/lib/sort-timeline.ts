@@ -14,10 +14,13 @@ import { bezier } from '@/lib/motion'
 
 /** The difference rises into place over this time. */
 export const RESULT_MS = 200
-/** Fill, slide and drain times in ms at step 1, and the gaps between them. */
+/** The fill rises over this many ms at step 1. */
 const FILL_MS = 200
+/** The slide starts this many ms after the fill starts. */
 const SLIDE_AT_MS = 290
+/** The slide takes this many ms. */
 const SLIDE_MS = 300
+/** The drain starts this many ms after the slide ends. */
 const DRAIN_AT_MS = 60
 /** Places of equal rank start this far apart, biggest first in line 2. */
 const RANK_MS = 30

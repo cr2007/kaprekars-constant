@@ -1,12 +1,11 @@
-import { EASE_OUT, reducedMotion, spring } from '@/lib/motion'
-
 /**
  * The trail pill's motion, apart from React: the glide spring, the lift, and the keyboard check.
  *
  * @packageDocumentation
  */
+import { EASE_OUT, reducedMotion, spring } from '@/lib/motion'
 
-/** The glide spring. It is half way at about 120 ms, so a tap answers at once, and it settles at about 530 ms. */
+/** The glide spring: half way at about 120 ms, so a tap answers at once, settled at about 530 ms. */
 const GLIDE = spring(170, 22)
 /** The pill's scale while it is lifted: pressed, dragged, or at the top of a tap's glide. */
 export const LIFT = '1.04 1.1'

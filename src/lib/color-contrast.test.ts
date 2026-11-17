@@ -44,7 +44,7 @@ describe('oklchContrastRatio', () => {
 /**
  * A tiny CSS custom-property reader, scoped to what `index.css` actually
  * contains: a flat `:root { --name: oklch(l c h); ... }` block, a flat
- * `.dark { ... }` block, and both again nested one level inside a single
+ * `.dark { ... }` block, and both again nested one level inside the first
  * `@media (prefers-contrast: more) { ... }` block. Good enough for this
  * file; not a general CSS parser.
  */
@@ -60,6 +60,7 @@ function extractBalancedBlock(css: string, startIndex: number): string {
   return css.slice(openBrace + 1, i - 1)
 }
 
+/** Returns the body of the first `selector { ... }` block at or after index `from`. */
 function findSelectorBlock(css: string, selector: string, from = 0): string {
   const pattern = new RegExp(`(?:^|[\\s};])${selector.replace(/[.]/g, '\\.')}\\s*\\{`, 'm')
   const match = pattern.exec(css.slice(from))
@@ -68,6 +69,7 @@ function findSelectorBlock(css: string, selector: string, from = 0): string {
   return extractBalancedBlock(css, absoluteIndex)
 }
 
+/** Reads the `--name` custom property from a block as an OKLCH triple. */
 function readOklchVar(block: string, name: string): Oklch {
   const match = new RegExp(`--${name}:\\s*oklch\\(([^)]+)\\)`).exec(block)
   if (!match) throw new Error(`--${name} not found in block`)
@@ -171,11 +173,8 @@ describe('theme tokens in index.css', () => {
   ])(
     "%s: the secondary button fill (\"Do one more round\") stays visible on the card fill",
     (_name, block, minRatio) => {
-      // Regression: #steps sits on bg-card; --secondary needs enough
-      // lightness separation from --card on its own, since the button
-      // has no border to fall back on. Dark held the higher bar because
-      // it's the one that actually went invisible (1.14:1) when #steps
-      // first gained its card fill.
+      // The button has no border, so --secondary needs lightness separation from --card on its own.
+      // Dark has the higher bar: it went invisible (1.14:1) once the card got a fill.
       const card = readOklchVar(block, 'card')
       const secondary = readOklchVar(block, 'secondary')
       expect(oklchContrastRatio(secondary, card)).toBeGreaterThanOrEqual(minRatio)

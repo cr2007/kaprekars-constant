@@ -1,6 +1,7 @@
 /**
  * End-to-end regression tests: the production build in a real browser.
- * Each test guards a behavior that unit tests cannot reach (layout,
+ *
+ * @remarks Each test guards a behavior that unit tests cannot reach (layout,
  * pointer events, focus, motion timing). Run them with
  * `bun --bun run test:e2e`; it builds first. Set CHROMIUM_PATH to use
  * another Chromium than /snap/bin/chromium.

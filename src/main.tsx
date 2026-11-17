@@ -1,4 +1,8 @@
-/** @packageDocumentation Mounts the app in StrictMode on `#root`. */
+/**
+ * Mounts the app in StrictMode on `#root`.
+ *
+ * @packageDocumentation
+ */
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

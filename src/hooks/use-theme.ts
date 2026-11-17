@@ -53,7 +53,6 @@ export function useTheme() {
   }, [theme])
 
   useEffect(() => {
-    // Follow the OS theme until the user picks one.
     const query = window.matchMedia(DARK_QUERY)
     function followSystem(event: MediaQueryListEvent) {
       if (!userPicked.current) setTheme(event.matches ? 'dark' : 'light')

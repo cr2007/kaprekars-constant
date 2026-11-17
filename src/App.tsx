@@ -98,7 +98,7 @@ export default function App() {
         Skip to the number field
       </a>
 
-      {/* Step 1: type. isolate keeps the watermark's -z-10 inside the header, above the page background.
+      {/* Part 1: type. isolate keeps the watermark's -z-10 inside the header, above the page background.
           A container: below 15rem (large text on a phone) the toggles get their own row above the title. */}
       <header id="page-header" className="@container relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
         <Hero />
@@ -147,7 +147,7 @@ export default function App() {
       <main id="main-content" className="grid grid-cols-[minmax(0,1fr)] gap-4 min-[840px]:grid-cols-[minmax(0,1fr)_21rem] min-[840px]:gap-x-8 min-[840px]:gap-y-5 lg:gap-x-10">
         <output id="playback-status" className="sr-only">{play.message}</output>
 
-        {/* Step 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
+        {/* Part 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
         <div id="stage-block" ref={stageRef} className="flex min-w-0 scroll-mt-4 flex-col gap-3">
           <div id="stage-view" className="flex min-w-0 flex-col gap-3">
             <StageStep
@@ -174,7 +174,7 @@ export default function App() {
           {hasRun && <PlaybackBar play={play} last={last} />}
         </div>
 
-        {/* Steps 3 and 4: how far to 6174, then the result and the next number. */}
+        {/* Parts 3 and 4: how far to 6174, then the result and the next number. */}
         {hasRun && (
           <EndPanel key={runId} run={run} arrived={arrived} remaining={arrivalIndex - play.index} circleMs={circleMs} />
         )}

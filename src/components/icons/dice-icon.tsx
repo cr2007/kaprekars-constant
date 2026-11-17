@@ -3,8 +3,9 @@ import { cn } from 'cn'
 import { type Pair, REST_PAIR, rollPair } from '@/lib/dice-roll'
 import { EASE_OUT, reducedMotion } from '@/lib/motion'
 
-/** Swap times in ms, both on EASE_OUT. Enter answers the user; leave is not slower. */
+/** The swap time in ms on enter, on EASE_OUT. */
 const ENTER_MS = 200
+/** The swap time in ms on leave, on EASE_OUT. It is not slower than enter. */
 const LEAVE_MS = 180
 
 /**
@@ -13,12 +14,9 @@ const LEAVE_MS = 180
  */
 const LEAVE_DELAY_MS = 120
 
-/**
- * The pointer events that start and end the hover, per `pointerType`. A
- * mouse and a pen (S Pen hover included) use enter and leave. Touch has no
- * hover, so it uses press and release.
- */
+/** The pointer event that starts the hover, per `pointerType`. Touch has no hover, so it uses press. */
 const ENTER: Record<string, string> = { mouse: 'pointerenter', pen: 'pointerenter', touch: 'pointerdown' }
+/** The pointer events that end the hover, per `pointerType`. Touch uses release. */
 const LEAVE: Record<string, string[]> = { mouse: ['pointerleave'], pen: ['pointerleave'], touch: ['pointerup', 'pointercancel'] }
 const POINTER_EVENTS = ['pointerenter', 'pointerleave', 'pointerdown', 'pointerup', 'pointercancel']
 

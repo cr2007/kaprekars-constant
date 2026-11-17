@@ -6,8 +6,9 @@ import { EASE_OUT, reducedMotion } from '@/lib/motion'
 const DURATION_MS = 550
 
 /**
- * The seed of the loops. A fixed seed gives the same loops on every
- * replay. Of six seeds that start upper left and clear "=" by 4 px or
+ * The seed of the loops, fixed so every replay draws the same loops.
+ *
+ * @remarks Of six seeds that start upper left and clear "=" by 4 px or
  * more, this one drew the neatest loops at phone and desktop sizes.
  */
 const SEED = 24116
