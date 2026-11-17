@@ -189,6 +189,29 @@ origin-text          # its paragraph
 wikipedia-link       # "Read more on Wikipedia"
 ```
 
+## Pull requests
+
+- Show proof (screenshots, video) in the PR body. Upload each file to
+  GitHub, then embed the `.url` that comes back:
+
+  ```sh
+  curl -s "https://uploads.github.com/user-attachments/assets?name=<file>&content_type=<mime>&repository_id=<id>" \
+    -X POST -H "Authorization: Bearer $(gh auth token)" \
+    -H "Accept: application/json" --data-binary @<file>
+  ```
+
+  Get `<id>` with `gh api repos/<owner>/<repo> --jq .id`. The files go
+  to the same CDN as drag and drop, and have the repo's visibility. A
+  422 means the file type is not supported; a 404 means a bad repo id
+  or no push access.
+- Embed an image as `![alt](url)`. For a video, use `video/mp4` or
+  `video/webm`, and put the URL alone on its own line: GitHub then
+  shows a player (image syntax does not). Playwright records WebM;
+  convert it first, for wide playback:
+  `ffmpeg -i in.webm -c:v libx264 -pix_fmt yuv420p out.mp4`.
+- Never push proof files to a branch of this repo. Do not commit
+  `.github/pr-assets`.
+
 ## Verification
 
 `src/lib/` and `src/hooks/` have unit tests for their pure logic; run
