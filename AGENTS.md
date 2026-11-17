@@ -34,20 +34,30 @@ principles.
   them. `oxlint`, `bun check`, and `bun test` are unaffected: `oxlint`
   ships a real native binary, and `bun check` and `bun test` never
   leave Bun. The `build` script type-checks with `bun check -b`.
-- Run `bun --bun run build`, `bun --bun run lint`, and
-  `bun --bun run test` after any code change. Run
-  `bun --bun run test:e2e` too after a change to the UI, motion, or
-  playback. Fix warnings and failing tests before finishing. Do not
-  change a test to make it pass: find why it fails.
+- Run `bun --bun run build`, `bun --bun run lint`, `bun --bun run test`,
+  `bun --bun run check:unused` and `bun --bun run check:tsdoc` after any
+  code change. Run `bun --bun run test:e2e` too after a change to the
+  UI, motion, or playback. CI runs all of these on each pull request.
+  Fix warnings and failing checks before finishing. Do not change a
+  test to make it pass: find why it fails.
 - Use the `font-mono` utility for every digit, and the default fonts
   for words.
 - Every `el.animate()` path must check `reducedMotion()` from
-  `src/lib/stage-motion.ts`: CSS media rules do not stop the Web
-  Animations API.
-- Put new motion math in `src/lib/` as plain functions
-  (`stage-motion.ts`, `pill-motion.ts`), so unit tests can check it
-  with no DOM. Components only measure and call them. The dice icon
-  still keeps its own pose math; move it only when you change it.
+  `src/lib/motion.ts`: CSS media rules do not stop the Web Animations
+  API. Take easings and springs from `motion.ts` (`EASE_OUT`,
+  `EASE_IN_OUT`, `bezier()`, `spring()`), not new copies.
+- Keep motion math pure: a plan as plain data in `src/lib/` (such as
+  `sort-timeline.ts`), so unit and mutation tests can check it with no
+  DOM. The DOM players (`stage-motion.ts`, `pill-motion.ts`) only
+  measure and animate; components and hooks only call them. The dice
+  icon still keeps its own pose math; move it only when you change it.
+- Write TSDoc that is brief and easy to scan: a one-sentence summary,
+  then tags only where they add a fact (`@param name - ...` for units,
+  ranges or what null means; `@returns`; `@remarks` for the why;
+  `{@link Name}` to related code). Mark each phase of a long function
+  with a `// Step N:` comment (`Step N.M` for a sub-phase).
+  `check:tsdoc` (the @microsoft/tsdoc parser) and oxlint's jsdoc rules
+  check the syntax and the tag names.
 - Size layout that holds text with container queries in `rem`
   (`@container` and `@max-[19rem]:`), not viewport `px` breakpoints:
   a `rem` breakpoint also fires at 200% text. Check a change at 280 px
@@ -77,6 +87,9 @@ bun --bun run build       # type-check and build
 bun --bun run lint        # oxlint
 bun --bun run test        # unit tests in src/ (bun:test)
 bun --bun run test:e2e    # build, then browser tests in e2e/ (playwright-core)
+bun --bun run check:unused # knip: unused files, exports, dependencies
+bun --bun run check:tsdoc # TSDoc syntax, with the @microsoft/tsdoc parser
+bun --bun run test:mutation # Stryker: mutation score of the pure code in src/lib
 bun --bun run preview     # preview the production build
 ```
 
@@ -97,10 +110,13 @@ src/
   components/icons/          # the dice icon that rolls on hover
   hooks/use-run.ts           # run state, synced with ?n=
   hooks/use-playback.ts      # which step the stage shows, autoplay, Play
+  hooks/use-pill-drag.ts     # the trail pill's taps, drags and glides
   hooks/                     # also theme and book-side state
   lib/kaprekar.ts            # the routine itself
-  lib/stage-motion.ts        # the sort, the slot flight, handoff and 6174 arrival
-  lib/pill-motion.ts         # the trail pill's spring, glide and lift
+  lib/motion.ts              # reducedMotion, easings, bezier() and spring()
+  lib/sort-timeline.ts       # the plan of one step's sort, as plain data
+  lib/stage-motion.ts        # plays the sort, the slot flight, handoff and 6174 arrival
+  lib/pill-motion.ts         # the trail pill's glide and lift in the DOM
   lib/tile-tone.ts           # solid and outline tile looks
   lib/stats.ts               # step counts over all valid inputs
   lib/url.ts                 # ?n= read, write and share link
@@ -108,6 +124,10 @@ src/
   lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
   lib/*.test.ts              # unit tests (bun:test)
 e2e/app.test.ts              # browser regression tests on the production build
+scripts/check-tsdoc.ts       # the TSDoc syntax check
+knip.json                    # knip config (keeps src/lib/utils.ts for the shadcn CLI)
+stryker.config.json          # mutation testing scope: the pure code in src/lib
+.github/workflows/ci.yml     # CI: lint, knip, TSDoc, unit and e2e on each pull request
 public/
   fonts/                     # Endless, the custom text font
   favicon.ico                # 16 and 32 px tab icon frames
@@ -221,7 +241,18 @@ trail's clicks and drags, focus, the input note, the end panel timing.
 It needs a Chromium at `/snap/bin/chromium`, or set `CHROMIUM_PATH`.
 Add an e2e test for a fixed UI bug, so it cannot come back. Keep each
 test on one behavior; wait for a condition, not a fixed time, where
-you can. Before calling a UI change done:
+you can.
+
+Judge unit tests by the bugs they catch, not by their count. Run
+`bun --bun run test:mutation` after a change to the pure code in
+`src/lib/`. It needs no browser, but takes 20 to 30 minutes. A
+surviving mutant in logic that matters needs a test. A test that only
+repeats what another test checks can go. Stryker runs `bun test` as a
+command runner; `stryker.config.json` points `tsconfigFile` at a file
+that does not exist, because Stryker's TypeScript 6 hooks crash on
+TypeScript 7.
+
+Before calling a UI change done:
 
 1. Type-check, lint, and run the unit and e2e tests (see above).
 2. Check it in the browser, at a mobile width and a desktop width, in

@@ -49,6 +49,9 @@ bun --bun run build     # type-check and build for production
 bun --bun run lint      # run oxlint
 bun --bun run test      # run the unit tests
 bun --bun run test:e2e  # build, then run the browser tests (needs Chromium)
+bun --bun run check:unused  # find unused files, exports and dependencies (knip)
+bun --bun run check:tsdoc   # check the TSDoc syntax
+bun --bun run test:mutation # mutation testing of the pure code (Stryker, 20 to 30 min)
 bun --bun run preview   # preview the production build
 ```
 
