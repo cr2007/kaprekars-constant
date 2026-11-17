@@ -189,7 +189,7 @@ async function openLargeText(path: string, width: number, height: number): Promi
   return page
 }
 
-/** No sideways scroll, every trail number has room in its step, and the playback bar is on screen. */
+/** No sideways scroll, room for every trail number, and the playback bar inside the page gutters. */
 async function checkFits(page: Page, label: string) {
   const r = await page.evaluate(() => {
     const steps = [...document.querySelectorAll('#trail-steps label')].map((l) => {
@@ -197,10 +197,11 @@ async function checkFits(page: Page, label: string) {
       return n ? l.getBoundingClientRect().width - n.getBoundingClientRect().width : 99
     })
     const bar = document.querySelector('#playback-bar fieldset')?.getBoundingClientRect()
+    const column = document.querySelector('#stage-block')!.getBoundingClientRect()
     return {
       sideways: document.documentElement.scrollWidth > innerWidth,
       tightest: Math.min(99, ...steps),
-      barOut: bar ? bar.right > innerWidth || bar.left < 0 : false,
+      barOut: bar ? bar.right > column.right + 0.5 || bar.left < column.left - 0.5 : false,
     }
   })
   expect({ label, ...r, roomy: r.tightest >= 4 }).toEqual({ label, ...r, sideways: false, barOut: false, roomy: true })
@@ -210,7 +211,9 @@ test('the page fits a 280 px screen and 200% text, with the longest run plus the
   // 1004 takes 7 steps; "Do one more round" makes 8 trail steps, the most a run can have.
   const cases: [string, () => Promise<Page>][] = [
     ['280 px', () => open('/?n=1004', 280, 653)],
+    ['320 px', () => open('/?n=1004', 320, 568)],
     ['360 px', () => open('/?n=1004', 360, 780)],
+    ['320 px, 200% text', () => openLargeText('/?n=1004', 320, 653)],
     ['390 px, 200% text', () => openLargeText('/?n=1004', 390, 844)],
   ]
   for (const [label, make] of cases) {
