@@ -1,7 +1,6 @@
 import { ChevronRight, ExternalLink } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
-import { pad4 } from '@/hooks/use-playback'
-import { KAPREKAR_CONSTANT, type KaprekarStep } from '@/lib/kaprekar'
+import { KAPREKAR_CONSTANT, type KaprekarStep, pad4 } from '@/lib/kaprekar'
 import { cn } from 'cn'
 
 /** Classes for a disclosure summary: a 44 px target with a focus ring and no native marker. */

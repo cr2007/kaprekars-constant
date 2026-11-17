@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { useBookSide } from '@/hooks/use-book-side'
 import { usePlayback } from '@/hooks/use-playback'
 import { useRun } from '@/hooks/use-run'
-import { KAPREKAR_CONSTANT, sanitizeDigitInput } from '@/lib/kaprekar'
+import { sanitizeDigitInput, stepsToConstant } from '@/lib/kaprekar'
 import { reducedMotion } from '@/lib/motion'
 import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, stepMotionMs } from '@/lib/stage-motion'
 import { distribution } from '@/lib/stats'
@@ -44,7 +44,7 @@ export default function App() {
 
   const hasRun = steps.length > 0
   const last = steps.length - 1
-  const arrivalIndex = steps.findIndex((s) => s.result === KAPREKAR_CONSTANT)
+  const arrivalIndex = stepsToConstant(steps) - 1
   // The steps beside the stage stay until the circle starts around 6174, then the result takes their place.
   const circleMs = (play.animate && arrivalIndex >= 0 ? stepMotionMs(steps[arrivalIndex].digits, arrivalIndex) : AT_REST_LANDED_MS) + CIRCLE_DELAY_MS
   const arrived = arrivalIndex >= 0 && play.reached >= arrivalIndex

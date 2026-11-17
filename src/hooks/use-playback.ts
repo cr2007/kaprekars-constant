@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { type KaprekarStep, stepsToConstant } from '@/lib/kaprekar'
+import { type KaprekarStep, pad4, stepsToConstant } from '@/lib/kaprekar'
 import { stepMotionMs } from '@/lib/stage-motion'
 
 /** Time on a step at rest, after its motion, before autoplay moves on. */
 const HOLD_MS = 250
-
-/** Writes a number with its leading zeros, as the tiles show it. */
-export const pad4 = (n: number) => String(n).padStart(4, '0')
 
 /** One step as a sentence for the live region. */
 export function stepSentence(steps: KaprekarStep[], i: number): string {

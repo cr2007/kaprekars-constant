@@ -27,13 +27,12 @@ export type InputProblem = 'empty' | 'not-digits' | 'leading-zero' | 'short' | '
 /** The outcome of checking whether a string is a usable 4-digit number. */
 type ValidationResult = { valid: true } | { valid: false; reason: InputProblem }
 
-/**
- * Splits a number into its digits, zero-padded to 4 places.
- *
- * @remarks A result below 1000 keeps its leading zeros: 999 gives [0, 9, 9, 9].
- */
+/** Writes a number with its leading zeros, as the tiles show it: 999 gives "0999". */
+export const pad4 = (n: number) => String(n).padStart(4, '0')
+
+/** Splits a number into its 4 digits, leading zeros included: 999 gives [0, 9, 9, 9]. */
 function digitsOf(value: number): number[] {
-  return value.toString().padStart(4, '0').split('').map(Number)
+  return pad4(value).split('').map(Number)
 }
 
 /** Reassembles a digit array back into the number it spells out. */

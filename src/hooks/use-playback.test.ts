@@ -1,10 +1,6 @@
 import { expect, test } from 'bun:test'
 import { KAPREKAR_CONSTANT, computeStep, runKaprekarRoutine } from '@/lib/kaprekar'
-import { endSentence, pad4, stepSentence } from './use-playback'
-
-test('pad4 keeps the leading zeros the tiles show', () => {
-  expect(pad4(999)).toBe('0999')
-})
+import { endSentence, stepSentence } from './use-playback'
 
 test('a step reads as one sentence', () => {
   expect(stepSentence(runKaprekarRoutine(3524), 0)).toBe('Step 1 of 3: 5432 minus 2345 equals 3087.')
