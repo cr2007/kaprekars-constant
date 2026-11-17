@@ -211,6 +211,8 @@ wikipedia-link       # "Read more on Wikipedia"
 
 ## Pull requests
 
+- Put measured numbers (tests, mutation score, bundle size) in the PR
+  body only after CI passes on the pushed head.
 - Show proof (screenshots, video) in the PR body. Upload each file to
   GitHub, then embed the `.url` that comes back:
 
