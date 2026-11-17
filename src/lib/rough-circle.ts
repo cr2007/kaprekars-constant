@@ -34,9 +34,10 @@ const CURVE_STEP_COUNT = 9
 const CURVE_FITTING = 0.95
 
 /**
- * The two loose pen loops that rough-notation draws for `type: 'circle'`,
- * as SVG path data, in draw order. The same seed and size always give the
- * same paths. Units are px, so the wobble stays pen sized on any box.
+ * Returns the two pen loops that rough-notation draws for `type: 'circle'`, as SVG path data in draw order.
+ *
+ * @remarks The same seed and size always give the same paths.
+ * Units are px, so the wobble stays pen sized on any box.
  *
  * @param cx - Center x.
  * @param cy - Center y.

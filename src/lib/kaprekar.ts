@@ -29,9 +29,9 @@ interface ValidationResult {
 }
 
 /**
- * Splits a number into its individual digits, left-padded with zeros to 4
- * places. Used for intermediate results that may be smaller than 1000
- * (e.g. 999 becomes [0, 9, 9, 9]) as well as for the starting input.
+ * Splits a number into its digits, zero-padded to 4 places.
+ *
+ * @remarks A result below 1000 keeps its leading zeros: 999 gives [0, 9, 9, 9].
  */
 function digitsOf(value: number): number[] {
   return value.toString().padStart(4, '0').split('').map(Number)
@@ -43,20 +43,19 @@ function numberFromDigits(digits: number[]): number {
 }
 
 /**
- * Strips everything but digits from `raw` and caps the result at 4
- * characters. Used to keep the number input numeric-only and at most
- * 4 digits long as the user types, without ever rejecting a keystroke
- * outright (a dropped 5th digit is less surprising than a blocked one).
+ * Strips everything but digits from `raw` and keeps at most 4.
+ *
+ * @remarks The input drops a 5th digit and never blocks a keystroke, which is less surprising.
  */
 export function sanitizeDigitInput(raw: string): string {
   return raw.replace(/\D/g, '').slice(0, 4)
 }
 
 /**
- * Checks whether a raw string is a valid starting point for the routine:
- * exactly 4 digits, no leading zero, and not all digits identical (which
- * would make the biggest and smallest arrangements equal, so the routine
- * would only ever produce 0).
+ * Checks that `raw` is a valid start for the routine.
+ *
+ * @remarks A valid start has exactly 4 digits, no leading zero, and at least two different digits.
+ * Four equal digits give 0 on the first step.
  */
 export function validateInput(raw: string): ValidationResult {
   // Step 1: reject anything that isn't digits-only.
@@ -67,10 +66,7 @@ export function validateInput(raw: string): ValidationResult {
     return { valid: false, message: 'Use digits only.' }
   }
 
-  // Step 2: reject a leading zero as soon as it's typed. "0123" is not a
-  // 4-digit number, and this is true no matter how many digits follow it,
-  // so check it before the length so the error shows immediately instead
-  // of waiting for the 4th digit.
+  // Step 2: reject a leading zero. Check it before the length, so the error shows at once.
   if (raw[0] === '0') {
     return { valid: false, message: 'The first digit cannot be 0.' }
   }
@@ -83,9 +79,7 @@ export function validateInput(raw: string): ValidationResult {
     return { valid: false, message: 'Enter only 4 digits.' }
   }
 
-  // Step 4: reject repdigits (1111, 2222, ...). Every arrangement of a
-  // repdigit is identical, so descending minus ascending is always 0.
-  // Only decidable once all 4 digits are in.
+  // Step 4: reject repdigits (1111, 2222, ...), which always give 0. Needs all 4 digits.
   if (new Set(raw).size === 1) {
     return {
       valid: false,
@@ -97,10 +91,7 @@ export function validateInput(raw: string): ValidationResult {
   return { valid: true }
 }
 
-/**
- * Runs one round of the routine on a number: sort its digits both ways,
- * subtract, and package up everything needed to display the step.
- */
+/** Runs one round of the routine: sorts the digits both ways, subtracts, and returns the full step. */
 export function computeStep(input: number): KaprekarStep {
   // Step 1: get the digits, then sort them both ways.
   const digits = digitsOf(input)
@@ -124,17 +115,10 @@ export function computeStep(input: number): KaprekarStep {
   }
 }
 
-/**
- * The routine always reaches 6174 within 7 steps for any valid input, per
- * `validateInput`. 8 is a safety cap, not a value it should ever need.
- */
+/** A safety cap on rounds. Any valid input reaches 6174 within 7 steps. */
 const MAX_ITERATIONS = 8
 
-/**
- * Repeats {@link computeStep} starting from `start`, stopping as soon as a
- * step's result is {@link KAPREKAR_CONSTANT}, or after {@link MAX_ITERATIONS}
- * rounds if that never happens.
- */
+/** Repeats {@link computeStep} from `start` until a result is {@link KAPREKAR_CONSTANT}, or {@link MAX_ITERATIONS} rounds pass. */
 export function runKaprekarRoutine(start: number): KaprekarStep[] {
   const steps: KaprekarStep[] = []
   let current = start
@@ -150,9 +134,10 @@ export function runKaprekarRoutine(start: number): KaprekarStep[] {
 }
 
 /**
- * How many steps `steps` took to first reach {@link KAPREKAR_CONSTANT}.
- * The extra round after 6174 does not count. Returns 0 when no step
- * reaches it.
+ * Counts the steps up to the first {@link KAPREKAR_CONSTANT} result.
+ *
+ * @remarks The extra round after 6174 does not count.
+ * @returns The step count, or 0 when no step reaches 6174.
  */
 export function stepsToConstant(steps: KaprekarStep[]): number {
   return steps.findIndex((step) => step.result === KAPREKAR_CONSTANT) + 1

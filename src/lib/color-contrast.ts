@@ -2,8 +2,9 @@
 export type Oklch = readonly [l: number, c: number, h: number]
 
 /**
- * Converts an OKLCH color to linear sRGB. Formula from Björn Ottosson's
- * OKLab reference (https://bottosson.github.io/posts/oklab/).
+ * Converts an OKLCH color to linear sRGB.
+ *
+ * @see https://bottosson.github.io/posts/oklab/ for the formula, from Björn Ottosson.
  */
 function oklchToLinearSrgb([l, c, hDeg]: Oklch): [number, number, number] {
   // Step 1: polar OKLCH to OKLab.
@@ -46,10 +47,9 @@ function relativeLuminance([r, g, b]: [number, number, number]): number {
 }
 
 /**
- * Blends `alpha` of `foreground` over `background` (both sRGB 0-255), the
- * same way a CSS color with reduced opacity composites over a solid layer
- * behind it. Used to check a translucent border or fill, not just a solid
- * color, against its backdrop.
+ * Blends `foreground` at `alpha` over `background` (both sRGB 0-255), as CSS does for a translucent color.
+ *
+ * @remarks This lets a test check a translucent border or fill against its backdrop.
  */
 function alphaComposite(
   foreground: [number, number, number],
@@ -64,10 +64,9 @@ function alphaComposite(
 }
 
 /**
- * WCAG 2.x contrast ratio between two OKLCH colors, from 1 (identical) to
- * 21 (black on white). `alpha` composites `a` over `b` first, for checking
- * a translucent color (e.g. `border-muted-foreground/60`) against its
- * actual background instead of assuming full opacity.
+ * Returns the WCAG 2.x contrast ratio between two OKLCH colors, from 1 (identical) to 21 (black on white).
+ *
+ * @param alpha - Opacity of `a` over `b`, for a translucent color such as `border-muted-foreground/60`.
  */
 export function oklchContrastRatio(a: Oklch, b: Oklch, alpha = 1): number {
   const rgbA = oklchToLinearSrgb(a).map(linearChannelToSrgb255) as [number, number, number]

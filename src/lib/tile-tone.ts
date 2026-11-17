@@ -1,7 +1,8 @@
 /**
- * The two tile looks. `solid` tiles are the numbers of the subtraction.
- * `outline` tiles are the number a step starts from: the same shape,
- * drawn in outline, so it reads as the input and not as an operand.
+ * The two tile looks as class strings.
+ *
+ * @remarks `solid` tiles are the numbers of the subtraction.
+ * `outline` tiles are the step input: the same shape in outline, so it does not read as an operand.
  */
 export const TILE_TONE = {
   // The transparent border shows only in forced colors, where it keeps the tile's box.

@@ -1,19 +1,21 @@
 import { EASE_OUT, reducedMotion, spring } from '@/lib/motion'
 
-/*
-  The trail pill's motion, apart from React: the spring it glides on, the
-  lift, and the check that keeps keyboard moves instant.
-*/
+/**
+ * The trail pill's motion, apart from React: the glide spring, the lift, and the keyboard check.
+ *
+ * @packageDocumentation
+ */
 
-/** The glide: stiffness 170, damping 22. Half way at about 120 ms, so a tap answers at once; it settles at about 530 ms. */
+/** The glide spring. It is half way at about 120 ms, so a tap answers at once, and it settles at about 530 ms. */
 const GLIDE = spring(170, 22)
 /** The pill's scale while it is lifted: pressed, dragged, or at the top of a tap's glide. */
 export const LIFT = '1.04 1.1'
 
 /**
- * A pill move this soon after a key press or release comes from the
- * keyboard (radio arrows, the stage's arrow keys, Enter or Space on Back
- * and Next). It jumps: keyboard actions get no motion.
+ * A pill move within this many ms of a key event comes from the keyboard, so it jumps.
+ *
+ * @remarks Keyboard sources: radio arrows, the stage's arrow keys, Enter or Space on Back and Next.
+ * Keyboard actions get no motion.
  */
 const KEY_MS = 250
 let lastKeyAt = -Infinity
@@ -35,13 +37,15 @@ export function paintedX(el: HTMLElement): number {
 }
 
 /**
- * The pill and the step numbers it carries. The numbers move the other
- * way, so they stay on top of the numbers of the track and only the part
- * inside the pill shows: a digit turns to the pill's text color at the
- * exact edge of the pill, not when the pill is nearest.
+ * The pill and the step numbers it carries.
+ *
+ * @remarks The numbers move the other way, so they stay on top of the track numbers.
+ * A digit turns to the pill's text color at the exact edge of the pill.
  */
 export interface PillParts {
+  /** The moving pill. */
   pill: HTMLElement
+  /** The copy of the step numbers inside the pill. */
   copy: HTMLElement
 }
 
@@ -52,10 +56,12 @@ export function place({ pill, copy }: PillParts, x: number | null) {
 }
 
 /**
- * Animates the pill from `from` to `to` (px) on the spring, or stops at
- * once under reduced motion. With `sheen`, the glide carries the lift in
- * the same motion: the pill rises in the first 30% from `lift` (its scale
- * now) and settles back to rest as it lands. Returns the pill's animation.
+ * Animates the pill from `from` to `to` (px) on the spring.
+ *
+ * @remarks Reduced motion, or no distance, jumps with no animation.
+ * @param sheen - The lift element. It rises in the first 30% of the glide and settles as the pill lands.
+ * @param lift - The scale the lift starts from, which is the scale now.
+ * @returns The pill's animation, or null when it did not animate.
  */
 export function glide({ pill, copy }: PillParts, from: number, to: number, sheen?: HTMLElement, lift = '1 1'): Animation | null {
   // Step 1: stop any glide in flight. Reduced motion, or no distance, jumps.

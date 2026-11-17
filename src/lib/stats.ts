@@ -11,10 +11,10 @@ interface Distribution {
 let cache: Distribution | null = null
 
 /**
- * Groups all 9,000 four-digit numbers by step count, once, and caches it.
- * A number takes one step more than its difference, so each number runs
- * one step only. A full run per number made a 200 ms long task on a
- * throttled phone (Lighthouse mobile).
+ * Groups the valid 4-digit numbers by step count, once, and caches the result.
+ *
+ * @remarks A number takes one step more than its difference, so each number runs one step only.
+ * A full run per number made a 200 ms long task on a throttled phone (Lighthouse mobile).
  */
 export function distribution(): Distribution {
   if (cache) return cache

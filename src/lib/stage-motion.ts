@@ -11,13 +11,15 @@ import { RESULT_MS, type SortLine, sortTimeline } from '@/lib/sort-timeline'
 
 /** The last result moves up into the input row over this time. */
 const HANDOFF_MS = 300
-/**
- * A new run: each digit flies from its slot in the empty stage to its
- * place in the input row, over this time, this far apart. The copies drop
- * only once the last one lands, so the start does not feel rushed.
- */
+/** A new run: one digit flies from its slot to the input row over this time. */
 const SLOT_MS = 400
+/** The slot flights start this far apart. */
 const SLOT_STAGGER_MS = 50
+/**
+ * The time of the whole slot flight, in ms.
+ *
+ * @remarks The copies drop only once the last digit lands, so the start does not feel rushed.
+ */
 export const SLOTS_IN_MS = SLOT_MS + 3 * SLOT_STAGGER_MS
 
 /** One row fades in over this time. */
@@ -44,20 +46,17 @@ const REDUCED = {
 }
 
 /**
- * How long step `index` with these input digits moves when autoplay
- * arrives at it: step 1 starts a run (its digits fly in from the slots;
- * a replay fades them in, sooner, so the wait is never short), and every
- * later step arrives by the handoff. Autoplay waits this long.
+ * Returns how long step `index` moves when autoplay arrives at it. Autoplay waits this long.
+ *
+ * @remarks Step 1 starts a run, so its digits fly in from the slots. A replay of step 1 fades in sooner,
+ * so this wait is never too short. Every later step arrives by the handoff.
  */
 export function stepMotionMs(digits: number[], index: number): number {
   if (reducedMotion()) return REDUCED.end
   return sortTimeline(digits, index === 0, index > 0 ? HANDOFF_MS : SLOTS_IN_MS).end
 }
 
-/**
- * A spring for the copies as they drop into their line: stiffness 456,
- * damping 27.3, so it overshoots by 7% and settles in about 400 ms.
- */
+/** The spring for a copy as it drops into its line: 7% overshoot, settles in about 400 ms. */
 const DROP_SPRING = spring(456, 27.3).easing
 /** The fill is the page text color at this opacity: it raises the digit contrast on the tile. */
 const FILL_OPACITY = 0.3
@@ -74,9 +73,9 @@ function slide(el: HTMLElement, dx: number, dy: number, delay: number, duration:
 }
 
 /**
- * Plays one sorted line. Each tile shows when its copy leaves, drops from
- * its source tile to its first place, follows its track (transform only),
- * and fills to its digit. Measure every rect before this runs.
+ * Plays one sorted line: each tile appears, drops from its source tile, follows its track, and fills.
+ *
+ * @remarks Measure every rect before this runs. The track moves use transform only.
  */
 function playLine(tiles: HTMLElement[], rest: DOMRect[], sources: DOMRect[], line: SortLine, copyMs: number) {
   const pitch = rest[1].left - rest[0].left
@@ -103,11 +102,11 @@ function playLine(tiles: HTMLElement[], rest: DOMRect[], sources: DOMRect[], lin
 const currentFill = new WeakMap<HTMLElement, HTMLElement>()
 
 /**
- * A fill inside the tile rises to d / 9 of its height, stays while the
- * tiles slide, then drains. The tile is isolated (NumberTiles), so the
- * fill paints over its background and under its digit. A z-index by digit
- * puts the bigger digit in front as paths cross. The fill removes itself
- * when it ends or is cancelled.
+ * Plays a fill in a tile: it rises to d / 9 of the tile height, holds while the tiles slide, then drains.
+ *
+ * @remarks The tile is isolated (NumberTiles), so the fill paints over the background and under the digit.
+ * A z-index by digit puts the bigger digit in front as paths cross.
+ * The fill removes itself when it ends or is cancelled.
  */
 function fillTile(tile: HTMLElement, at: number, drainAt: number, ms: number) {
   // Step 1: the bigger digit passes in front. The tile's own classes make it the fill's stacking context.
@@ -164,8 +163,9 @@ function fadeIn(el: HTMLElement, delay: number, duration = FADE_MS): Animation {
 }
 
 /**
- * FLIP: animates `el` from a rect measured before a DOM change (`first`)
- * to where it sits now. Returns null when nothing moved.
+ * Animates `el` from `first`, a rect measured before a DOM change, to where it sits now (FLIP).
+ *
+ * @returns The animation, or null when nothing moved.
  */
 function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Animation | null {
   const last = el.getBoundingClientRect()
@@ -180,9 +180,10 @@ function flipFrom(el: HTMLElement, first: DOMRect, duration: number): Animation 
 }
 
 /**
- * Each input tile flies from its slot in the empty stage (`slots`, measured
- * before the stage changed) to its place, one after another: a shared
- * element move, so the typed digits become the run.
+ * Flies each input tile from its slot in the empty stage to its place, one after another.
+ *
+ * @remarks This shared element move makes the typed digits become the run.
+ * @param slots - The slot rects, measured before the stage changed.
  */
 function flyFromSlots(tiles: HTMLElement[], slots: DOMRect[]) {
   // Step 1: the direction of the move. The tile at the front leaves first, so no tile passes one that has landed.
@@ -205,13 +206,13 @@ function flyFromSlots(tiles: HTMLElement[], slots: DOMRect[]) {
 }
 
 /**
- * Plays one step on the stage. With `handoff`, the last result moves up
- * into the input row, so the eye sees it become the next input. With
- * `slots`, a new run's digits fly in from the slots of the empty stage.
- * Otherwise the input fades in. Then the copies drop and lines 2 and 3 sort in place
- * (see `sortTimeline`), and the difference rises into place. Reduced
- * motion: the input, line 2, line 3 and the difference fade in, in that
- * order. Returns the time in ms at which the step is at rest.
+ * Plays one step on the stage: the input arrives, lines 2 and 3 sort in place, and the difference rises.
+ *
+ * @remarks Reduced motion fades the input, line 2, line 3 and the difference in, in that order.
+ * The sort follows {@link sortTimeline}.
+ * @param handoff - The last result moves up into the input row, so it becomes the next input.
+ * @param slots - A new run: the digits fly in from these slot rects. With neither, the input fades in.
+ * @returns The time in ms when the step is at rest.
  */
 export function playStep(
   root: HTMLElement,
@@ -261,9 +262,10 @@ export function playStep(
 }
 
 /**
- * The 6174 arrival: the result tiles hop one after another from their
- * bottom edge, then the badge comes in. Reduced motion: the badge fades
- * in and nothing scales.
+ * Plays the 6174 arrival: the result tiles hop one after another from their bottom edge, then the badge comes in.
+ *
+ * @remarks Reduced motion fades the badge in and scales nothing.
+ * @param delay - Time in ms before the hops start.
  */
 export function playArrival(rows: StageRows, delay: number) {
   // Step 1: reduced motion shows the badge only.
