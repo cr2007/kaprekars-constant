@@ -61,6 +61,9 @@ export function usePillDrag(index: number, count: number, onPick: (index: number
     animation.finished.catch(() => undefined).finally(() => setGliding(false))
   }
 
+  // A trail that unmounts mid-drag (a new number typed) must not leave its Escape listener on window.
+  useLayoutEffect(() => () => press.current?.stopKeys?.(), [])
+
   // Glide the pill to each new step: lifted after a tap or a release, plain for autoplay, a jump for a key.
   useLayoutEffect(() => {
     const p = parts()
