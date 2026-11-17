@@ -88,10 +88,11 @@ export default function App() {
         Skip to the number field
       </a>
 
-      {/* Step 1: type. isolate keeps the watermark's -z-10 inside the header, above the page background. */}
-      <header id="page-header" className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
+      {/* Step 1: type. isolate keeps the watermark's -z-10 inside the header, above the page background.
+          A container: below 15rem (large text on a phone) the toggles get their own row above the title. */}
+      <header id="page-header" className="@container relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
         <Hero />
-        <div className="flex max-sm:absolute max-sm:top-0 max-sm:right-0">
+        <div className="flex max-sm:absolute max-sm:top-0 max-sm:right-0 @max-[15rem]:static @max-[15rem]:order-first @max-[15rem]:col-span-2 @max-[15rem]:justify-self-end">
           <BookSideToggle side={book.side} toggleSide={book.toggleSide} />
           <ThemeToggle />
         </div>

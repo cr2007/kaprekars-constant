@@ -14,9 +14,9 @@ export function Hero() {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden font-mono text-[min(8rem,30vw)] leading-none font-bold text-primary/12 before:content-['6174'] sm:justify-end lg:text-[10rem] dark:text-primary/15"
       />
-      {/* hgroup: one heading, then a p. Phones pad only the title for the toggles; the subline uses the full width. */}
+      {/* hgroup: one heading, then a p. Phones pad only the title for the toggles, unless large text moves them to their own row. */}
       <hgroup id="hero" className="flex flex-col gap-1">
-        <h1 id="page-title" className="text-balance font-heading max-sm:px-11 text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
+        <h1 id="page-title" className="text-balance font-heading max-sm:px-11 @max-[15rem]:px-0 text-[clamp(1.25rem,6.2vw,2rem)] leading-tight font-bold text-foreground lg:text-4xl">
           Watch a number become <span className="font-mono text-primary">6174</span>
         </h1>
         <p id="hero-subline" className="text-pretty text-base text-muted-foreground lg:text-lg">

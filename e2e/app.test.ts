@@ -189,7 +189,7 @@ async function openLargeText(path: string, width: number, height: number): Promi
   return page
 }
 
-/** No sideways scroll, room for every trail number, and the playback bar inside the page gutters. */
+/** No sideways scroll, the title clear of the theme toggle, room for every trail number, and the playback bar inside the gutters. */
 async function checkFits(page: Page, label: string) {
   const r = await page.evaluate(() => {
     const steps = [...document.querySelectorAll('#trail-steps label')].map((l) => {
@@ -198,13 +198,19 @@ async function checkFits(page: Page, label: string) {
     })
     const bar = document.querySelector('#playback-bar fieldset')?.getBoundingClientRect()
     const column = document.querySelector('#stage-block')!.getBoundingClientRect()
+    const toggle = document.querySelector('#theme-toggle')!.getBoundingClientRect()
+    const title = document.createRange()
+    title.selectNodeContents(document.querySelector('#page-title')!)
     return {
       sideways: document.documentElement.scrollWidth > innerWidth,
+      titleUnderToggle: [...title.getClientRects()].some(
+        (l) => l.left < toggle.right && l.right > toggle.left && l.top < toggle.bottom && l.bottom > toggle.top
+      ),
       tightest: Math.min(99, ...steps),
       barOut: bar ? bar.right > column.right + 0.5 || bar.left < column.left - 0.5 : false,
     }
   })
-  expect({ label, ...r, roomy: r.tightest >= 4 }).toEqual({ label, ...r, sideways: false, barOut: false, roomy: true })
+  expect({ label, ...r, roomy: r.tightest >= 4 }).toEqual({ label, ...r, sideways: false, titleUnderToggle: false, barOut: false, roomy: true })
 }
 
 test('the page fits a 280 px screen and 200% text, with the longest run plus the loop round', async () => {
@@ -225,9 +231,11 @@ test('the page fits a 280 px screen and 200% text, with the longest run plus the
     await checkFits(page, `${label} 8 steps`)
     await page.context().close()
   }
-  const empty = await openLargeText('/', 390, 844)
-  await checkFits(empty, 'empty stage, 200% text')
-  await empty.context().close()
+  for (const width of [320, 390]) {
+    const empty = await openLargeText('/', width, 844)
+    await checkFits(empty, `empty stage, ${width} px, 200% text`)
+    await empty.context().close()
+  }
 })
 
 test('on a 360 px phone every control in the result is at least 44 by 44 px', async () => {
