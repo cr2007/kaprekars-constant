@@ -48,6 +48,10 @@ principles.
   (`stage-motion.ts`, `pill-motion.ts`), so unit tests can check it
   with no DOM. Components only measure and call them. The dice icon
   still keeps its own pose math; move it only when you change it.
+- Size layout that holds text with container queries in `rem`
+  (`@container` and `@max-[19rem]:`), not viewport `px` breakpoints:
+  a `rem` breakpoint also fires at 200% text. Check a change at 280 px
+  and at 200% text; `e2e/app.test.ts` checks both.
 - Export a constant or a helper from `src/lib/`, not from a component
   file: a component file that exports other things breaks fast refresh
   (oxlint `only-export-components`).

@@ -174,10 +174,139 @@ test('"Do one more round" circles the start 6174 and the result 6174', async () 
   await page.context().close()
 })
 
-test('the page has no sideways scroll on a phone, before and during a run', async () => {
-  for (const path of ['/', '/?n=1004']) {
-    const page = await open(path, 360, 780)
-    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
+/** Opens `path` with the root text size raised to 200%, as a large Android text setting does. */
+async function openLargeText(path: string, width: number, height: number): Promise<Page> {
+  const context = await browser.newContext({ viewport: { width, height } })
+  await context.addInitScript(() =>
+    document.addEventListener('DOMContentLoaded', () => {
+      const style = document.createElement('style')
+      style.textContent = 'html { font-size: 200%; }'
+      document.head.append(style)
+    })
+  )
+  const page = await context.newPage()
+  await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' })
+  return page
+}
+
+/** No sideways scroll, every trail number has room in its step, and the playback bar is on screen. */
+async function checkFits(page: Page, label: string) {
+  const r = await page.evaluate(() => {
+    const steps = [...document.querySelectorAll('#trail-steps label')].map((l) => {
+      const n = l.querySelector('.trail-num')
+      return n ? l.getBoundingClientRect().width - n.getBoundingClientRect().width : 99
+    })
+    const bar = document.querySelector('#playback-bar fieldset')?.getBoundingClientRect()
+    return {
+      sideways: document.documentElement.scrollWidth > innerWidth,
+      tightest: Math.min(99, ...steps),
+      barOut: bar ? bar.right > innerWidth || bar.left < 0 : false,
+    }
+  })
+  expect({ label, ...r, roomy: r.tightest >= 4 }).toEqual({ label, ...r, sideways: false, barOut: false, roomy: true })
+}
+
+test('the page fits a 280 px screen and 200% text, with the longest run plus the loop round', async () => {
+  // 1004 takes 7 steps; "Do one more round" makes 8 trail steps, the most a run can have.
+  const cases: [string, () => Promise<Page>][] = [
+    ['280 px', () => open('/?n=1004', 280, 653)],
+    ['360 px', () => open('/?n=1004', 360, 780)],
+    ['390 px, 200% text', () => openLargeText('/?n=1004', 390, 844)],
+  ]
+  for (const [label, make] of cases) {
+    const page = await make()
+    await page.locator('#trail-step-7').click()
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('#end-result')!).opacity === '1', null, { timeout: 8000 })
+    await page.locator('#one-more-button').click()
+    await waitForStep(page, 'Step 8 of 8', 2000)
+    await checkFits(page, `${label} 8 steps`)
     await page.context().close()
   }
+  const empty = await openLargeText('/', 390, 844)
+  await checkFits(empty, 'empty stage, 200% text')
+  await empty.context().close()
+})
+
+test('a new number typed mid-sort keeps every fill inside its tile, and leaves no tile style behind', async () => {
+  const page = await open('/?n=2323')
+  await page.waitForTimeout(700)
+  // 3524 takes 3 steps, so the new run has a step 2 to wait for.
+  await page.locator('#number-input').fill('3524')
+  // Sample frames: a fill that lost its tile would paint across the page.
+  let escaped = 0
+  for (let k = 0; k < 20; k++) {
+    escaped += await page.evaluate(() => {
+      let n = 0
+      for (const tile of document.querySelectorAll<HTMLElement>('#stage-sum [aria-hidden="true"] > span')) {
+        const t = tile.getBoundingClientRect()
+        for (const fill of tile.querySelectorAll(':scope > span:not(:first-child)')) {
+          const f = fill.getBoundingClientRect()
+          if (f.width > t.width + 1 || f.height > t.height + 1) n++
+        }
+      }
+      return n
+    })
+    await page.waitForTimeout(80)
+  }
+  expect(escaped).toBe(0)
+  await waitForStep(page, 'Step 2 of 3', 10_000)
+  await page.locator('#trail-step-1').click()
+  await page.waitForTimeout(1500)
+  const styled = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('#stage-sum [aria-hidden="true"] > span')].filter((t) => t.getAttribute('style')).length
+  )
+  expect(styled).toBe(0)
+  await page.context().close()
+})
+
+test('the same number again keeps the run, and an unusable ?n= link says why it cannot run', async () => {
+  const page = await open('/?n=2323')
+  await waitForStep(page, 'Step 2 of 4')
+  // A 5th key into the full field: the run goes on.
+  await page.locator('#number-input').press('End')
+  await page.keyboard.press('5')
+  await page.waitForTimeout(200)
+  expect(await heading(page)).not.toBe('Step 1 of 4')
+  await page.context().close()
+
+  const link = await open('/?n=1111')
+  expect(await link.locator('#input-note-title').textContent()).toBe('1111 stops at 0.')
+  expect(await link.evaluate(() => location.search)).toBe('')
+  await link.context().close()
+})
+
+test('a drag during autoplay pauses it and lands on the step it ends on; Escape cancels a drag', async () => {
+  const page = await open('/?n=1000', 1440, 900)
+  const a = (await page.locator('#trail-step-1').boundingBox())!
+  const b = (await page.locator('#trail-step-4').boundingBox())!
+  const y = a.y + a.height / 2
+  await page.mouse.move(a.x + a.width / 2, y)
+  await page.mouse.down()
+  await page.mouse.move(b.x + b.width / 2, y, { steps: 20 })
+  await page.waitForTimeout(2500)
+  await page.mouse.up()
+  await waitForStep(page, 'Step 4 of 5', 2000)
+  await page.waitForTimeout(3000)
+  expect(await heading(page)).toBe('Step 4 of 5')
+
+  // Escape mid-drag: the pill goes back, and the stage stays on the shown step.
+  const c = (await page.locator('#trail-step-2').boundingBox())!
+  const d = (await page.locator('#trail-step-4').boundingBox())!
+  await page.mouse.move(d.x + d.width / 2, y)
+  await page.mouse.down()
+  await page.mouse.move(c.x + c.width / 2, y, { steps: 10 })
+  await page.keyboard.press('Escape')
+  await page.mouse.up()
+  await page.waitForTimeout(400)
+  expect(await heading(page)).toBe('Step 4 of 5')
+  await page.context().close()
+})
+
+test('forced colors mark the shown trail step with an outline', async () => {
+  const page = await open('/?n=2323', 390, 844)
+  await page.emulateMedia({ forcedColors: 'active' })
+  await page.locator('#trail-step-2').click()
+  const outline = await page.locator('#trail .glass-sheen').evaluate((el) => getComputedStyle(el).outlineStyle)
+  expect(outline).toBe('solid')
+  await page.context().close()
 })
