@@ -1,5 +1,4 @@
 import { Puzzle } from 'lucide-react'
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { countWithSteps } from '@/lib/stats'
 
@@ -11,15 +10,17 @@ interface ChallengeProps {
   current: number
   /** Steps the current number took. */
   stepCount: number
+  /** Which target to show; it counts up past the end of the list. */
+  targetIndex: number
+  onNext: () => void
 }
 
 /**
  * A small hunt that invites a second try: "Can you find a number that takes exactly 1 step?"
  *
- * @remarks It checks each run against the target and moves to the next target when asked.
+ * @remarks It checks each run against the target. The target lives in {@link useRun}, because the end panel remounts for each run.
  */
-export function Challenge({ current, stepCount }: ChallengeProps) {
-  const [targetIndex, setTargetIndex] = useState(0)
+export function Challenge({ current, stepCount, targetIndex, onNext }: ChallengeProps) {
   const target = TARGETS[targetIndex % TARGETS.length]
   const found = stepCount === target
   const steps = (
@@ -48,7 +49,7 @@ export function Challenge({ current, stepCount }: ChallengeProps) {
         </span>
       </p>
       {found && (
-        <Button id="next-challenge" type="button" variant="secondary" className="h-11 w-fit" onClick={() => setTargetIndex((i) => i + 1)}>
+        <Button id="next-challenge" type="button" variant="secondary" className="h-11 w-fit" onClick={onNext}>
           Next challenge
         </Button>
       )}

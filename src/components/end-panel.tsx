@@ -132,7 +132,7 @@ export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
           <div id="quick-picks" className="chip-scroller -mx-1 overflow-x-auto px-1 py-1 [contain:inline-size] max-sm:[&_li]:shrink-0 max-sm:[&>ul]:flex-nowrap">
             <QuickPicks onPick={run.runNumber} />
           </div>
-          <Challenge current={Number(run.rawInput)} stepCount={run.stepCount} />
+          <Challenge current={Number(run.rawInput)} stepCount={run.stepCount} targetIndex={run.challenge} onNext={run.nextChallenge} />
         </section>
       </div>
     </div>

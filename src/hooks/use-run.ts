@@ -32,6 +32,10 @@ export interface Run {
   runNumber: (value: number) => void
   /** Adds one more round after 6174, to show that it loops to itself. */
   goFurther: () => void
+  /** Which step-count challenge to show. It lasts across runs, so a new run can meet it. */
+  challenge: number
+  /** Moves to the next challenge. */
+  nextChallenge: () => void
 }
 
 /**
@@ -50,6 +54,7 @@ export function useRun(): Run {
   const [steps, setSteps] = useState<KaprekarStep[]>(() => (startsValid ? runKaprekarRoutine(Number(start)) : []))
   const [wentFurther, setWentFurther] = useState(false)
   const [runId, setRunId] = useState(0)
+  const [challenge, setChallenge] = useState(0)
 
   // Step 2: the address holds only a link that runs: the cleaned number (?n=12345 becomes ?n=1234), or no n.
   useEffect(() => {
@@ -132,5 +137,7 @@ export function useRun(): Run {
     random,
     runNumber,
     goFurther,
+    challenge,
+    nextChallenge: () => setChallenge((c) => c + 1),
   }
 }

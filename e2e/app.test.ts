@@ -310,6 +310,16 @@ test('the theme toggle sets the browser bar color too', async () => {
   await page.context().close()
 })
 
+test('"Next challenge" keeps its target after a new run', async () => {
+  // 1036 takes 1 step, so it meets the first challenge.
+  const page = await open('/?n=1036', 390, 844)
+  await page.locator('#next-challenge').click()
+  await page.locator('#number-input').fill('3524')
+  await waitForStep(page, 'Step 1 of 3')
+  expect(await page.locator('#challenge').textContent()).toContain('exactly 2 steps')
+  await page.context().close()
+})
+
 test('a new number typed mid-sort keeps every fill inside its tile, and leaves no tile style behind', async () => {
   const page = await open('/?n=2323')
   await page.waitForTimeout(700)
