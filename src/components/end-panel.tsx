@@ -54,9 +54,9 @@ export function HowItWorks({ id }: { id: string }) {
 export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
   const loopNote = useRef<HTMLParagraphElement>(null)
 
-  /** Adds the loop round, then moves focus to the note that replaces the button. */
-  function goFurther() {
-    flushSync(() => run.goFurther())
+  /** Adds the loop step, then moves focus to the note that replaces the button. */
+  function addLoopStep() {
+    flushSync(() => run.addLoopStep())
     loopNote.current?.focus()
   }
 
@@ -100,9 +100,9 @@ export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
                 id="one-more-button"
                 type="button"
                 variant="secondary"
-                inert={run.wentFurther}
-                className={cn('h-auto min-h-11 gap-2 px-4 text-base whitespace-normal', run.wentFurther && 'invisible')}
-                onClick={goFurther}
+                inert={run.hasLoopStep}
+                className={cn('h-auto min-h-11 gap-2 px-4 text-base whitespace-normal', run.hasLoopStep && 'invisible')}
+                onClick={addLoopStep}
               >
                 <RotateCw className="size-4" aria-hidden />
                 Do one more round
@@ -114,7 +114,7 @@ export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
                 tabIndex={-1}
                 className={cn(
                   'w-0 min-w-full rounded-lg text-sm text-muted-foreground outline-none transition-opacity delay-150 duration-200 ease-out focus-visible:ring-2 focus-visible:ring-ring',
-                  !run.wentFurther && hiddenLayer
+                  !run.hasLoopStep && hiddenLayer
                 )}
               >
                 <span className="font-mono">6174</span> leads straight back to itself.

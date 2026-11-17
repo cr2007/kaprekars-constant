@@ -60,7 +60,7 @@ export default function App() {
   // A run from the page load keeps the title in view, so only later runs scroll to show the controls.
   const loadRunId = useRef(runId)
 
-  // A new run, or the extra round, brings the stage into view: its top when started from below it,
+  // A new run, or the loop step, brings the stage into view: its top when started from below it,
   // its playback bar when that starts below a short phone screen. A field that still has focus
   // (a hardware keyboard) stays in view; on touch the 4th digit has closed the keyboard.
   useEffect(() => {
@@ -157,7 +157,7 @@ export default function App() {
               runId={runId}
               arrival={play.index === arrivalIndex}
               animate={play.animate}
-              take={play.take}
+              replay={play.replay}
               empty={
                 <div className="flex w-full max-w-sm flex-col gap-4 text-left">
                   <InputNote raw={run.rawInput} problem={run.error} />

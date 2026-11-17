@@ -11,7 +11,7 @@ export function stepSentence(steps: KaprekarStep[], i: number): string {
   return `Step ${i + 1} of ${steps.length}: ${pad4(s.descendingNumber)} minus ${pad4(s.ascendingNumber)} equals ${pad4(s.result)}.`
 }
 
-/** The sentence for the end of a run. The extra round does not count. */
+/** The sentence for the end of a run. The loop step does not count. */
 export function endSentence(steps: KaprekarStep[]): string {
   const n = stepsToConstant(steps)
   return `Reached 6174 in ${n} step${n === 1 ? '' : 's'}.`
@@ -33,7 +33,7 @@ export interface Playback {
   /** False after Back, Next, an arrow key, or a trail pick: the stage shows that step at rest. */
   animate: boolean
   /** Goes up each time Play starts, so the stage plays the shown step again before autoplay moves on. */
-  take: number
+  replay: number
   /** Text for the one polite live region. */
   message: string
   /** Shows step `i`, pauses, and announces its equation. */
@@ -57,12 +57,12 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   const [playing, setPlaying] = useState(steps.length > 1)
   const [animate, setAnimate] = useState(true)
   const [message, setMessage] = useState(() => (steps.length === 1 ? endSentence(steps) : ''))
-  const [take, setTake] = useState(0)
+  const [replay, setReplay] = useState(0)
   const [seen, setSeen] = useState({ runId, length: steps.length })
   /** The step on the stage and the time its motion ends. */
   const motion = useRef({ key: '', end: 0 })
 
-  // Step 1: react to a new run, a cleared run, or the extra round during render, so no frame pairs the old index with new steps.
+  // Step 1: react to a new run, a cleared run, or the loop step during render, so no frame pairs the old index with new steps.
   if (seen.runId !== runId || seen.length !== steps.length) {
     const grew = seen.runId === runId && steps.length === seen.length + 1
     setSeen({ runId, length: steps.length })
@@ -82,7 +82,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
   // Step 2: note when the stage's motion for a newly shown step ends. The
   // stage starts it in the same commit. A step shown at rest has none.
   useEffect(() => {
-    const key = `${runId}:${index}:${take}`
+    const key = `${runId}:${index}:${replay}`
     if (motion.current.key === key) return
     motion.current = { key, end: animate && steps[index] ? performance.now() + stepMotionMs(steps[index].digits, index) : 0 }
   })
@@ -120,7 +120,7 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
       return
     }
     if (index >= last) setIndex(0)
-    setTake((t) => t + 1)
+    setReplay((t) => t + 1)
     setAnimate(true)
     setMessage('')
     setPlaying(true)
@@ -140,5 +140,5 @@ export function usePlayback(steps: KaprekarStep[], runId: number): Playback {
     return () => window.removeEventListener('keydown', onKey)
   })
 
-  return { index, reached, playing, animate, take, message, go, toggle }
+  return { index, reached, playing, animate, replay, message, go, toggle }
 }

@@ -1,7 +1,7 @@
 /** The number every Kaprekar routine on 4 digits settles on. */
 export const KAPREKAR_CONSTANT = 6174
 
-/** One iteration of the routine: an input number and its computed result. */
+/** One step of the routine: an input number and its computed result. */
 export interface KaprekarStep {
   /** The number this step started from. */
   input: number
@@ -107,14 +107,14 @@ export function computeStep(input: number): KaprekarStep {
 }
 
 /** A safety cap on rounds. Any valid input reaches 6174 within 7 steps. */
-const MAX_ITERATIONS = 8
+const MAX_STEPS = 8
 
-/** Repeats {@link computeStep} from `start` until a result is {@link KAPREKAR_CONSTANT}, or {@link MAX_ITERATIONS} rounds pass. */
+/** Repeats {@link computeStep} from `start` until a result is {@link KAPREKAR_CONSTANT}, or {@link MAX_STEPS} steps pass. */
 export function runKaprekarRoutine(start: number): KaprekarStep[] {
   const steps: KaprekarStep[] = []
   let current = start
 
-  for (let i = 0; i < MAX_ITERATIONS; i++) {
+  for (let i = 0; i < MAX_STEPS; i++) {
     const step = computeStep(current)
     steps.push(step)
     if (step.result === KAPREKAR_CONSTANT) break
@@ -127,7 +127,7 @@ export function runKaprekarRoutine(start: number): KaprekarStep[] {
 /**
  * Counts the steps up to the first {@link KAPREKAR_CONSTANT} result.
  *
- * @remarks The extra round after 6174 does not count.
+ * @remarks The loop step after 6174 does not count.
  * @returns The step count, or 0 when no step reaches 6174.
  */
 export function stepsToConstant(steps: KaprekarStep[]): number {

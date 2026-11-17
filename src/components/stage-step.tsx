@@ -41,7 +41,7 @@ interface StageStepProps {
   /** False shows a new step at rest, for Back, Next and trail picks. */
   animate: boolean
   /** A new value plays the same step again (Play on a step shown at rest). */
-  take: number
+  replay: number
   /** Shown over the empty stage before a run: a hint or the input error. */
   empty: ReactNode
 }
@@ -54,7 +54,7 @@ interface StageStepProps {
  * - The layout is the same for every step, so the page never changes height between steps.
  * - The motion comes from {@link playStep} and {@link playArrival}. {@link Trail} and the playback bar choose the step.
  */
-export function StageStep({ step, index, total, runId, arrival, animate, take, empty }: StageStepProps) {
+export function StageStep({ step, index, total, runId, arrival, animate, replay, empty }: StageStepProps) {
   const root = useRef<HTMLDivElement>(null)
   const input = useRef<HTMLElement>(null)
   const desc = useRef<HTMLElement>(null)
@@ -62,7 +62,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
   const result = useRef<HTMLDivElement>(null)
   const resultBox = useRef<HTMLDivElement>(null)
   const badge = useRef<HTMLSpanElement>(null)
-  const shown = useRef<{ runId: number; index: number; take: number } | null>(null)
+  const shown = useRef<{ runId: number; index: number; replay: number } | null>(null)
   const celebrated = useRef<number | null>(null)
   const shownStep = step ?? PLACEHOLDER
   const isConstant = step?.result === KAPREKAR_CONSTANT
@@ -97,8 +97,8 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
     // Step 1: decide the motion. A step picked with Back, Next or the trail paints at rest.
     // A run plays, also from `?n=`. The same step again (StrictMode runs effects twice) does nothing.
     const prev = shown.current
-    shown.current = { runId, index, take }
-    const same = prev?.runId === runId && prev.index === index && prev.take === take
+    shown.current = { runId, index, replay }
+    const same = prev?.runId === runId && prev.index === index && prev.replay === replay
     let landedAt = AT_REST_LANDED_MS
     if (!same && !animate) {
       root.current.getAnimations({ subtree: true }).forEach((a) => a.cancel())
@@ -125,7 +125,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, take, e
       celebrated.current = runId
       playArrival(rows as StageRows, landedAt)
     }
-  }, [step, index, runId, arrival, loop, animate, take])
+  }, [step, index, runId, arrival, loop, animate, replay])
 
   const label = `text-sm text-muted-foreground sm:text-base ${STACK}`
   const op = 'text-center font-mono text-2xl font-bold md:text-3xl'

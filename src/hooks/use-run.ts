@@ -17,12 +17,12 @@ export interface Run {
   rawInput: string
   /** Why the input cannot run yet. Null when there is nothing to report. */
   error: InputProblem | null
-  /** Every step on screen, including the extra round after "Do one more round". */
+  /** Every step on screen, including the loop step after "Do one more round". */
   steps: KaprekarStep[]
-  /** Steps it took to first reach 6174. Excludes the extra round. 0 before a run. */
+  /** Steps it took to first reach 6174. Excludes the loop step. 0 before a run. */
   stepCount: number
   /** True after "Do one more round" added the loop step. */
-  wentFurther: boolean
+  hasLoopStep: boolean
   /** Goes up by one on each new run. Use it as a React key or an effect trigger. */
   runId: number
   /** Sanitizes typed text and runs the routine once 4 valid digits are in. */
@@ -32,7 +32,7 @@ export interface Run {
   /** Runs `value` directly (for quick picks). Ignores invalid values. */
   runNumber: (value: number) => void
   /** Adds one more round after 6174, to show that it loops to itself. */
-  goFurther: () => void
+  addLoopStep: () => void
   /** Which step-count challenge to show. It lasts across runs, so a new run can meet it. */
   challenge: number
   /** Moves to the next challenge. */
@@ -57,7 +57,7 @@ export function useRun(): Run {
   const [rawInput, setRawInput] = useState(start ?? '')
   const [error, setError] = useState(() => (start === null ? null : problemOf(start)))
   const [steps, setSteps] = useState<KaprekarStep[]>(() => (startsValid ? runKaprekarRoutine(Number(start)) : []))
-  const [wentFurther, setWentFurther] = useState(false)
+  const [hasLoopStep, setHasLoopStep] = useState(false)
   const [runId, setRunId] = useState(0)
   const [challenge, setChallenge] = useState(0)
 
@@ -69,7 +69,7 @@ export function useRun(): Run {
   /** Clears the result without touching the input or the error. */
   function clearRun() {
     setSteps([])
-    setWentFurther(false)
+    setHasLoopStep(false)
     writeNumberParam(null)
   }
 
@@ -83,10 +83,10 @@ export function useRun(): Run {
       return
     }
 
-    // Step 2: run the routine, reset the extra round, and give the run a new id.
+    // Step 2: run the routine, reset the loop step, and give the run a new id.
     setError(null)
     setSteps(runKaprekarRoutine(Number(value)))
-    setWentFurther(false)
+    setHasLoopStep(false)
     setRunId((id) => id + 1)
     writeNumberParam(value)
   }
@@ -123,12 +123,12 @@ export function useRun(): Run {
     runNumber(randomValidNumber())
   }
 
-  /** Adds the loop round once: 6174 gives 6174 again. */
-  function goFurther() {
+  /** Adds the loop step once: 6174 gives 6174 again. */
+  function addLoopStep() {
     const last = steps.at(-1)
-    if (!last || wentFurther) return
+    if (!last || hasLoopStep) return
     setSteps([...steps, computeStep(last.result)])
-    setWentFurther(true)
+    setHasLoopStep(true)
   }
 
   return {
@@ -136,12 +136,12 @@ export function useRun(): Run {
     error,
     steps,
     stepCount: stepsToConstant(steps),
-    wentFurther,
+    hasLoopStep,
     runId,
     setInput,
     random,
     runNumber,
-    goFurther,
+    addLoopStep,
     challenge,
     nextChallenge: () => setChallenge((c) => c + 1),
   }

@@ -220,7 +220,7 @@ async function checkFits(page: Page, label: string) {
   expect({ label, ...r, roomy: r.tightest >= 4 }).toEqual({ label, ...r, sideways: false, titleUnderToggle: false, barOut: false, roomy: true })
 }
 
-test('the page fits a 280 px screen and 200% text, with the longest run plus the loop round', async () => {
+test('the page fits a 280 px screen and 200% text, with the longest run plus the loop step', async () => {
   // 1004 takes 7 steps; "Do one more round" makes 8 trail steps, the most a run can have.
   const cases: [string, () => Promise<Page>][] = [
     ['280 px', () => open('/?n=1004', 280, 653)],

@@ -126,7 +126,7 @@ describe('stepsToConstant', () => {
     expect(stepsToConstant(runKaprekarRoutine(3524))).toBe(3)
   })
 
-  test('leaves out the extra round after 6174', () => {
+  test('leaves out the loop step after 6174', () => {
     const steps = runKaprekarRoutine(3524)
     expect(stepsToConstant([...steps, computeStep(KAPREKAR_CONSTANT)])).toBe(3)
   })
