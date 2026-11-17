@@ -57,11 +57,21 @@ export default function App() {
     return () => window.clearTimeout(id)
   }, [])
 
-  // A new run, or the extra round, started from below the stage brings the stage back into view.
+  // A run from the page load keeps the title in view, so only later runs scroll to show the controls.
+  const loadRunId = useRef(runId)
+
+  // A new run, or the extra round, brings the stage into view: its top when started from below it,
+  // its playback bar when that starts below a short phone screen. A field that still has focus
+  // (a hardware keyboard) stays in view; on touch the 4th digit has closed the keyboard.
   useEffect(() => {
     const stage = stageRef.current
-    if (stage && stage.getBoundingClientRect().top < 0) {
-      stage.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' })
+    if (!stage || steps.length === 0) return
+    const { top, bottom } = stage.getBoundingClientRect()
+    const behavior = reducedMotion() ? 'auto' : 'smooth'
+    const typing = document.activeElement === inputRef.current
+    if (top < 0) stage.scrollIntoView({ behavior, block: 'start' })
+    else if (runId !== loadRunId.current && !typing && bottom > document.documentElement.clientHeight) {
+      stage.scrollIntoView({ behavior, block: 'nearest' })
     }
   }, [runId, steps.length])
 

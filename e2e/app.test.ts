@@ -277,6 +277,29 @@ test('on a 360 px phone every control in the result is at least 44 by 44 px', as
   await page.context().close()
 })
 
+test('on a short phone a typed run scrolls the playback bar into view; a ?n= link or a hardware keyboard keeps the top', async () => {
+  // 375 x 553: an iPhone SE in Safari with its bars shown. The bar starts below the screen.
+  const link = await open('/?n=3524', 375, 553, { hasTouch: true })
+  await waitForStep(link, 'Step 2 of 3')
+  expect(await link.evaluate(() => scrollY)).toBe(0)
+  await link.context().close()
+
+  const page = await open('/', 375, 553, { hasTouch: true })
+  await page.locator('#number-input').pressSequentially('3524')
+  // 1 px slack: the scroll position is whole pixels, the layout is not.
+  await page.waitForFunction(() => document.querySelector('#playback-bar')!.getBoundingClientRect().bottom <= innerHeight + 1, null, { timeout: 3000 })
+  // The field stays in view, so the next number is one tap away.
+  expect(await page.locator('#number-input').evaluate((el) => el.getBoundingClientRect().top >= 0)).toBe(true)
+  await page.context().close()
+
+  // No touch: the field keeps focus for the next keys, so the page does not move it away.
+  const keys = await open('/', 375, 553)
+  await keys.locator('#number-input').pressSequentially('3524')
+  await waitForStep(keys, 'Step 2 of 3')
+  expect(await keys.evaluate(() => [scrollY, document.activeElement?.id])).toEqual([0, 'number-input'])
+  await keys.context().close()
+})
+
 test('the theme toggle sets the browser bar color too', async () => {
   const page = await open('/', 390, 844)
   const barColor = () =>
