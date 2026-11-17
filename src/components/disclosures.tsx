@@ -7,8 +7,9 @@ import { cn } from 'cn'
 /** Classes for a disclosure summary: a 44 px target with a focus ring and no native marker. */
 const SUMMARY =
   'flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden'
-/** Classes for the chevron that turns when the disclosure opens. */
-const CHEVRON = 'size-4 shrink-0 transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none'
+/** Classes for the chevron that turns when the disclosure opens. The curve is EASE_OUT from motion.ts. */
+const CHEVRON =
+  'size-4 shrink-0 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-open:rotate-90 motion-reduce:transition-none'
 
 interface DisclosureProps {
   id: string
