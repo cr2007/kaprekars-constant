@@ -1,0 +1,30 @@
+name: CI
+
+# Every push to a pull request, and to main, runs the same checks as AGENTS.md asks for locally.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # Pinned: ubuntu-latest moves to 26.04 in November 2026, and the e2e tests need a known Chromium path.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.4
+      - run: bun install --frozen-lockfile
+      - run: bun --bun run lint
+      - run: bun --bun run check:unused
+      - run: bun --bun run check:tsdoc
+      - run: bun --bun run test
+      # test:e2e builds first. The runner image ships Chromium at /usr/bin/chromium.
+      - run: bun --bun run test:e2e
+        env:
+          CHROMIUM_PATH: /usr/bin/chromium
