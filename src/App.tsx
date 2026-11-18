@@ -20,9 +20,13 @@ import { reducedMotion } from '@/lib/motion'
 import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, stepMotionMs } from '@/lib/stage-motion'
 import { distribution } from '@/lib/stats'
 
-/** Side and bottom padding that keeps clear of notches and home bars. */
+/**
+ * Side and bottom padding that keeps clear of notches and home bars.
+ *
+ * @remarks In px, not rem: at 200% text, rem gutters took the width the stage tiles need, and the digits got smaller.
+ */
 const GUTTERS =
-  'pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]'
+  'pl-[max(16px,env(safe-area-inset-left))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(16px,env(safe-area-inset-bottom))]'
 
 /**
  * The page: the header with the number field, then the Stage that plays one step at a time.
