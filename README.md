@@ -8,15 +8,21 @@ reaches 6174 within seven steps.
 
 ## Features
 
-- Live step-by-step calculation, with a compact view on small screens
-  and a tile view on large screens.
+- The Stage: one step at a time, large, played step by step. A trail
+  and a playback bar move between steps, and each result moves down
+  into the next input. At 6174 the tiles hop and a pen circle goes
+  round the answer.
+- After 6174: the step count in context, one more round, a share link
+  (`?n=1004` opens that run), quick picks and a step-count challenge.
 - Light and dark theme, with a toggle. Both meet WCAG AA contrast, and
   both get a stronger color scheme when the OS "increase contrast"
   setting is on.
-- A book-mode layout for foldable devices with two screen segments.
-  A button swaps which side holds the calculation.
-- Full keyboard and screen reader support. Skip link, live status
-  region, and labeled controls.
+- Foldables with two screen segments get two pages. Book posture: the
+  stage on one page, the input and reading on the other; a button swaps
+  them. Tabletop posture: the stage on top, the controls below.
+- Full keyboard and screen reader support. Skip link, landmarks, an
+  output live region, a native radio group for the steps, and the arrow
+  keys to step through a run.
 
 ## Stack
 
@@ -27,11 +33,11 @@ reaches 6174 within seven steps.
 
 ## Run it
 
-Install Bun first: https://bun.sh
+Install Bun first (CI uses 1.4.4): https://bun.sh
 
 ```sh
 bun install
-bun --bun dev
+bun --bun run dev
 ```
 
 Open the printed local URL in your browser.
@@ -41,7 +47,11 @@ Open the printed local URL in your browser.
 ```sh
 bun --bun run build     # type-check and build for production
 bun --bun run lint      # run oxlint
-bun --bun run test      # run the regression tests
+bun --bun run test      # run the unit tests
+bun --bun run test:e2e  # build, then run the browser tests (needs Chromium)
+bun --bun run check:unused  # find unused files, exports and dependencies (knip)
+bun --bun run check:tsdoc   # check the TSDoc syntax
+bun --bun run test:mutation # mutation testing of the pure code (Stryker, 20 to 30 min)
 bun --bun run preview   # preview the production build
 ```
 
@@ -61,17 +71,4 @@ to `/`.
 
 ## Project structure
 
-```
-src/
-  App.tsx                 # main layout and state
-  components/              # UI components
-  components/ui/           # shadcn primitives
-  components/icons/         # one-off icons shadcn/lucide don't ship
-  hooks/                    # theme and book-side state
-  lib/kaprekar.ts           # the routine itself
-  lib/kaprekar.test.ts       # regression tests for the routine
-  lib/color-contrast.ts      # OKLCH contrast-ratio math for theme tokens
-  lib/color-contrast.test.ts # regression tests reading index.css tokens
-public/
-  fonts/                    # the custom heading font
-```
+See the structure and the element ids in [AGENTS.md](AGENTS.md).

@@ -7,10 +7,12 @@ interface BookSideToggleProps {
 }
 
 /**
- * Icon button that swaps which page of the foldable "book" layout holds
- * the calculation. Hidden by CSS (see `#book-side-toggle` in `index.css`)
- * until the browser actually reports two viewport segments, so it never
- * appears on an ordinary single-screen device.
+ * Icon button that swaps the two pages of the foldable book layout.
+ *
+ * @remarks
+ * - The stage sits on one page, the input and reading on the other.
+ * - CSS hides it (see `#book-side-toggle` in `index.css`) until the browser reports two viewport segments.
+ * - State comes from {@link useBookSide}.
  */
 export function BookSideToggle({ side, toggleSide }: BookSideToggleProps) {
   return (
@@ -20,11 +22,7 @@ export function BookSideToggle({ side, toggleSide }: BookSideToggleProps) {
       variant="ghost"
       size="icon"
       onClick={toggleSide}
-      aria-label={
-        side === 'left'
-          ? 'Move the calculation to the left page'
-          : 'Move the calculation to the right page'
-      }
+      aria-label={side === 'left' ? 'Move the stage to the left page' : 'Move the stage to the right page'}
       title="Swap book pages"
     >
       {side === 'left' ? <PanelRight className="size-5" /> : <PanelLeft className="size-5" />}

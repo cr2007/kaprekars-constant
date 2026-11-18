@@ -1,23 +1,43 @@
-@import "tailwindcss";
+/* Scan only the app's own files, so local folders outside src/ never add classes to the app build. */
+@import "tailwindcss" source(none);
+@source "../index.html";
+@source "./";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
-@import "@fontsource/kalam/700.css";
+@import "@fontsource-variable/atkinson-hyperlegible-mono";
 
+/*
+  Words are set in Endless, digits in Atkinson Hyperlegible Mono. Endless
+  has no digit-safe shapes (its 0 matches O), and it covers printable ASCII
+  only. So the stack takes letters and ASCII marks from Endless, digits from
+  Atkinson, and anything else (curly quotes, the minus sign) from Geist.
+*/
 @font-face {
     font-family: 'Endless';
-    src: url('/fonts/endless-regular.ttf') format('truetype');
+    src: url('/fonts/endless-regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
+    unicode-range: U+0020-002F, U+003A-007E;
+}
+
+@font-face {
+    font-family: 'Atkinson Digits';
+    src: url('@fontsource-variable/atkinson-hyperlegible-mono/files/atkinson-hyperlegible-mono-latin-wght-normal.woff2')
+        format('woff2-variations');
+    font-weight: 200 800;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0030-0039;
 }
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: 'Endless', var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-    --font-chalk: 'Kalam', 'Comic Sans MS', cursive;
+    --font-heading: var(--font-sans);
+    --font-sans: 'Endless', 'Atkinson Digits', 'Geist Variable', sans-serif;
+    --font-mono: 'Atkinson Hyperlegible Mono Variable', ui-monospace, monospace;
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
@@ -46,6 +66,7 @@
 }
 
 :root {
+    color-scheme: light;
     --background: oklch(0.97 0.014 168);
     --foreground: oklch(0.22 0.02 168);
     --card: oklch(0.995 0.006 168);
@@ -62,12 +83,18 @@
     --accent-foreground: oklch(0.22 0.02 168);
     --destructive: oklch(0.53 0.22 27.325);
     --border: oklch(0.88 0.03 168);
-    --input: oklch(0.88 0.03 168);
+    /* Field edges: 3:1 on card and page (WCAG 1.4.11). On phones the label is hidden, so the edge is the cue. */
+    --input: oklch(0.6 0.05 168);
     --ring: oklch(0.42 0.14 168);
+    /* Graph-paper lines on the page: --primary at about 9% on --background. */
+    --grid: oklch(0.92 0.025 168);
+    /* The hand-drawn circle around 6174: a warm marker on the teal tiles. */
+    --mark: oklch(0.56 0.18 45);
     --radius: 0.625rem;
 }
 
 .dark {
+    color-scheme: dark;
     --background: oklch(0.16 0.02 168);
     --foreground: oklch(0.95 0.012 168);
     /* Elevated surface: brighter than --background so cards and popovers
@@ -86,8 +113,10 @@
     --accent-foreground: oklch(0.97 0.01 168);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(0.32 0.03 168);
-    --input: oklch(0.32 0.03 168);
+    --input: oklch(0.52 0.04 168);
     --ring: oklch(0.68 0.15 168);
+    --grid: oklch(0.21 0.03 168);
+    --mark: oklch(0.78 0.14 55);
 }
 
 /*
@@ -100,13 +129,11 @@
 @media (prefers-contrast: more) {
   :root {
     --border: oklch(0.6 0.05 168);
-    --input: oklch(0.6 0.05 168);
     --muted-foreground: oklch(0.3 0.03 168);
   }
 
   .dark {
     --border: oklch(0.52 0.04 168);
-    --input: oklch(0.52 0.04 168);
     --muted-foreground: oklch(0.8 0.025 168);
   }
 }
@@ -117,134 +144,337 @@
     }
   body {
     @apply bg-background text-foreground;
+    /* Graph paper on the page only: cards and tiles are opaque and cover it. */
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 22px 22px;
     }
   html {
     @apply font-sans;
     }
+  /* The field selects its digits on each focus: a primary tint, not the browser blue. */
+  ::selection {
+    background-color: color-mix(in oklch, var(--primary) 25%, transparent);
+  }
+  /* On the things people tap: no double-tap zoom delay, and a long press does not select the label. */
+  button,
+  summary,
+  label {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
-@keyframes step-in {
+/* A theme flip turns transitions off for one style flush (see use-theme.ts). */
+html[data-theme-flip] *,
+html[data-theme-flip] *::before,
+html[data-theme-flip] *::after {
+  transition: none !important;
+}
+
+/*
+  The hand-drawn circle (hand-circle.tsx). Its viewBox is the box size in
+  px, so the 2 px line stays pen sized. An SVG is a replaced element: left
+  plus right does not stretch it, so it gets a width.
+*/
+.hand-circle {
+  position: absolute;
+  top: -8px;
+  left: -11px;
+  width: calc(100% + 22px);
+  height: calc(100% + 16px);
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: var(--mark);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/*
+  A pinch of Liquid Glass on the trail (Apple's "regular" variant only).
+  Apple HIG Materials: glass is for the control layer, never for content.
+  The track is a see-through tint with blur and a light top edge. The pill
+  stays solid primary, so its digits keep their contrast, with the same
+  top edge as a sheen. While dragged, the pill lifts: its shadow deepens.
+*/
+.glass-track,
+.glass-sheen {
+  --glass-tint: color-mix(in oklch, var(--card) 70%, transparent);
+  --glass-rim: color-mix(in oklch, var(--foreground) 10%, transparent);
+  --glass-specular: color-mix(in oklch, var(--card) 95%, transparent);
+  --glass-shadow: color-mix(in oklch, var(--foreground) 18%, transparent);
+}
+
+.dark .glass-track,
+.dark .glass-sheen {
+  --glass-tint: color-mix(in oklch, var(--card) 62%, transparent);
+  --glass-rim: color-mix(in oklch, var(--foreground) 14%, transparent);
+  --glass-specular: color-mix(in oklch, var(--foreground) 24%, transparent);
+  --glass-shadow: color-mix(in oklch, var(--background) 80%, transparent);
+}
+
+.glass-track {
+  background-color: var(--glass-tint);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  backdrop-filter: blur(12px) saturate(1.5);
+  border: 1px solid var(--glass-rim);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-specular),
+    0 1px 2px 0 var(--glass-shadow),
+    0 10px 28px -12px var(--glass-shadow);
+}
+
+.glass-sheen {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklch, var(--primary-foreground) 35%, transparent),
+    inset 0 -1px 0 0 color-mix(in oklch, var(--foreground) 12%, transparent),
+    0 2px 6px -2px var(--glass-shadow);
+  transition: box-shadow 200ms ease-out;
+}
+
+.glass-sheen[data-lifted] {
+  box-shadow:
+    inset 0 1px 1px 0 color-mix(in oklch, var(--primary-foreground) 45%, transparent),
+    inset 0 -1px 0 0 color-mix(in oklch, var(--foreground) 12%, transparent),
+    0 8px 20px -6px var(--glass-shadow);
+}
+
+/* No backdrop-filter, or Reduce Transparency: a solid card keeps the numbers legible. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-track {
+    background-color: var(--card);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-track {
+    background-color: var(--card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .glass-track {
+    background-color: var(--card);
+    border-color: var(--border);
+  }
+}
+
+/*
+  Trail digits fit their step. The trail is a size container; each step is
+  100cqi / --n wide. Four mono digits take about 2.5em, plus 0.875rem for
+  the step's padding and a gap, so a long run on a narrow screen (or with
+  large text) shrinks the digits instead of running them together. The
+  floor is 10 px, not rem: the stage shows the same numbers in large type,
+  so at 200% text a crowded trail may stay small and still fit.
+*/
+.trail-num {
+  --trail-max: 0.875rem;
+  font-size: min(var(--trail-max), max(10px, calc((100cqi / var(--n) - 0.875rem) / 2.5)));
+}
+
+@media (width >= 40rem) {
+  .trail-num {
+    --trail-max: 1.125rem;
+  }
+}
+
+/* A step joins the trail with an opacity fade only, because people scan the trail often. */
+@keyframes stage-fade-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
-.animate-step-in {
-  animation: step-in 0.3s cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-@keyframes constant-pulse {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.03);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.animate-constant-pulse {
-  animation: constant-pulse 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+.stage-fade-in {
+  animation: stage-fade-in 150ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-step-in,
-  .animate-constant-pulse {
+  .stage-fade-in {
     animation: none;
   }
 }
 
 /*
-  Foldable devices: hinge-aware "book" layout.
+  The quick-pick row scrolls sideways on phones. Each edge fades only
+  while there are more chips past it. Without scroll timelines, no fade.
+*/
+@property --chip-fade-start {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
 
-  These use the CSS Viewport Segments API (`horizontal-viewport-
-  segments` / `vertical-viewport-segments` media features and the
-  matching `env(viewport-segment-*)` values) and the newer Device
-  Posture API (`device-posture`). Support today is limited to a
-  handful of dual-screen/foldable browser builds; everywhere else
-  these media features are simply unrecognized, so the blocks below
-  never match and the normal single-column layout above is untouched.
-  This is pure progressive enhancement, not a requirement to ship.
+@property --chip-fade-end {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.chip-scroller {
+  --chip-fade: 2.5rem;
+  scrollbar-width: none;
+  scroll-padding-inline: var(--chip-fade);
+  mask:
+    linear-gradient(black, black) no-clip subtract,
+    linear-gradient(to right, black, transparent) 0 0 / var(--chip-fade-start) 100% no-repeat no-clip,
+    linear-gradient(to right, transparent, black) 100% 0 / var(--chip-fade-end) 100% no-repeat no-clip;
+  animation:
+    chip-fade-start linear both,
+    chip-fade-end linear both;
+  animation-timeline: scroll(self inline);
+  animation-range:
+    0 var(--chip-fade),
+    calc(100% - var(--chip-fade)) 100%;
+}
+
+@keyframes chip-fade-start {
+  to {
+    --chip-fade-start: var(--chip-fade);
+  }
+}
+
+@keyframes chip-fade-end {
+  from {
+    --chip-fade-end: var(--chip-fade);
+  }
+}
+
+/*
+  Foldable devices: two segments make two pages with two roles.
+
+  These rules use the CSS Viewport Segments API (`horizontal-viewport-
+  segments` / `vertical-viewport-segments` and `env(viewport-segment-*)`).
+  Chrome and Samsung Internet support it; elsewhere the media features
+  are unknown, the blocks never match, and the normal layout stays. A
+  foldable that lies flat reports one segment and gets the normal layout.
+  Nothing spans the fold, and no control sits on it.
 */
 
-/* The page-swap button only makes sense once two segments actually
-   exist, so it stays hidden until this same media condition is
-   real, rather than guessing support from JavaScript. */
+/* The page-swap button only makes sense once two side-by-side segments exist. */
 #book-side-toggle {
   display: none;
 }
 
-/* Unfolded into two side-by-side segments (book/laptop posture,
-   hinge running top-to-bottom): the intro, input, and background
-   reading stay on one page; the working calculation fills the
-   other page top to bottom. `data-book-side` on #page-content
-   flips which physical segment holds which (set from JS, since a
-   media query alone can't be user-toggled). */
+/*
+  Book posture (fold runs top to bottom). One page is the show: the stage
+  card, the trail and the playback bar. It stays in view and scrolls on
+  its own. The other page holds the input, the end panel and the reading,
+  and scrolls with the document. `data-book-side` names the page that
+  holds the input; the stage takes the other one.
+*/
 @media (horizontal-viewport-segments: 2) {
   #book-side-toggle {
     display: inline-flex;
   }
 
-  #page-content {
+  #page {
     display: grid;
+    max-width: none;
+    padding-inline: 0;
+    padding-top: 0;
     grid-template-columns:
       env(viewport-segment-width 0 0, 1fr)
       env(viewport-segment-width 1 0, 1fr);
-    column-gap: calc(
-      env(viewport-segment-left 1 0, 2rem) - env(viewport-segment-right 0 0, 0px)
-    );
-    row-gap: 2rem;
+    column-gap: calc(env(viewport-segment-left 1 0, 2rem) - env(viewport-segment-right 0 0, 0px));
+    grid-template-rows: auto auto auto 1fr;
     grid-template-areas:
-      "top-bar top-bar"
-      "hero    steps"
-      "form    steps"
-      "history steps";
-    align-items: start;
-    max-width: none;
+      "header  stage"
+      "end     stage"
+      "steps   stage"
+      "origin  stage";
+    align-content: start;
   }
 
-  #page-content[data-book-side='right'] {
+  #page[data-book-side='right'] {
     grid-template-areas:
-      "top-bar top-bar"
-      "steps   hero"
-      "steps   form"
-      "steps   history";
+      "stage header"
+      "stage end"
+      "stage steps"
+      "stage origin";
   }
 
-  #top-bar {
-    grid-area: top-bar;
+  #main-content {
+    display: contents;
   }
-  #hero {
-    grid-area: hero;
+
+  #page-header,
+  #end-panel,
+  #all-steps,
+  #origin-details {
+    margin-inline: 1rem;
   }
-  #input-form {
-    grid-area: form;
+
+  #page-header {
+    grid-area: header;
+    padding-top: max(1rem, env(safe-area-inset-top));
   }
-  #steps {
+  #end-panel {
+    grid-area: end;
+  }
+  #all-steps {
     grid-area: steps;
-    align-self: stretch;
   }
-  #history {
-    grid-area: history;
+  #origin-details {
+    grid-area: origin;
+  }
+
+  #stage-block {
+    grid-area: stage;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100dvh;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 
-/* Folded into a tent/tabletop posture (hinge running left-to-right):
-   the page still scrolls as one column, but the gap between sections
-   is widened by the real hinge measurement so a section is less
-   likely to land straddling the crease. */
+/*
+  Tabletop posture (fold runs left to right). The top page is for
+  looking: the stage card and the trail, pinned, with no scroll. It also
+  covers the hinge, so nothing scrolls across the fold. The bottom page is
+  for the hands: the playback bar first, then the input, the end panel
+  and the reading, which scroll under the top page.
+*/
 @media (vertical-viewport-segments: 2) {
-  #page-content {
-    row-gap: max(
-      2.5rem,
-      calc(env(viewport-segment-top 0 1, 2.5rem) - env(viewport-segment-bottom 0 0, 0px))
-    );
+  #page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    padding-top: 0;
+  }
+
+  #main-content,
+  #stage-block {
+    display: contents;
+  }
+
+  #stage-view {
+    order: -2;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: env(viewport-segment-top 0 1, 50dvh);
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-bottom: calc(env(viewport-segment-top 0 1, 0px) - env(viewport-segment-bottom 0 0, 0px) + 0.5rem);
+    justify-content: center;
+    overflow: hidden;
+    background: var(--background);
+  }
+
+  /* The bar stays at the top of the bottom page while the rest scrolls under it. */
+  #playback-bar {
+    order: -1;
+    position: sticky;
+    top: env(viewport-segment-top 0 1, 50dvh);
+    z-index: 10;
   }
 }

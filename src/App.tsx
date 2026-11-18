@@ -1,288 +1,193 @@
-import { ExternalLink, RotateCw } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useRef } from 'react'
 import { BookSideToggle } from '@/components/book-side-toggle'
-import { SolidDiceIcon } from '@/components/icons/solid-dice-icon'
-import { KaprekarStepCard } from '@/components/kaprekar-step-card'
+import { AllSteps, OriginDetails } from '@/components/disclosures'
+import { EndPanel, HowItWorks } from '@/components/end-panel'
+import { Hero } from '@/components/hero'
+import { InputNote } from '@/components/input-note'
+import { DiceIcon } from '@/components/icons/dice-icon'
+import { PlaybackBar } from '@/components/playback-bar'
+import { StageStep } from '@/components/stage-step'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Trail } from '@/components/trail'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useBookSide } from '@/hooks/use-book-side'
-import {
-  KAPREKAR_CONSTANT,
-  type KaprekarStep,
-  nextStep,
-  randomValidNumber,
-  runKaprekarRoutine,
-  sanitizeDigitInput,
-  validateInput,
-} from '@/lib/kaprekar'
+import { usePlayback } from '@/hooks/use-playback'
+import { useRun } from '@/hooks/use-run'
+import { sanitizeDigitInput, stepsToConstant } from '@/lib/kaprekar'
+import { reducedMotion } from '@/lib/motion'
+import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, stepMotionMs } from '@/lib/stage-motion'
+import { distribution } from '@/lib/stats'
+
+/** Side and bottom padding that keeps clear of notches and home bars. */
+const GUTTERS =
+  'pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]'
 
 /**
- * The whole app: the input form, the step-by-step calculation, and the
- * history section. There is one screen; state lives here and flows down.
+ * The page: the header with the number field, then the Stage that plays one step at a time.
+ *
+ * @remarks
+ * The page reads in story order: type a number, watch the stage, see 6174, try another.
+ * Each part shows only when its state needs it. The {@link Trail} and the {@link PlaybackBar}
+ * wait for a run. The {@link EndPanel} result waits for 6174.
  */
 export default function App() {
-  const [rawInput, setRawInput] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [steps, setSteps] = useState<KaprekarStep[]>([])
-  const [wentFurther, setWentFurther] = useState(false)
-  const [runId, setRunId] = useState(0)
-  const { side: bookSide, toggleSide: toggleBookSide } = useBookSide()
+  const run = useRun()
+  // The input echoes the key at once. The stage renders the new run just after, so the 4th key does not wait.
+  const steps = useDeferredValue(run.steps)
+  const runId = useDeferredValue(run.runId)
+  const play = usePlayback(steps, runId)
   const inputRef = useRef<HTMLInputElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const book = useBookSide()
 
-  const reachedConstant = steps.at(-1)?.result === KAPREKAR_CONSTANT
-  const statusMessage =
-    steps.length > 0 && reachedConstant
-      ? `Reached 6174 in ${steps.length} step${steps.length === 1 ? '' : 's'}.`
-      : ''
+  const hasRun = steps.length > 0
+  const last = steps.length - 1
+  const arrivalIndex = stepsToConstant(steps) - 1
+  // The steps beside the stage stay until the circle starts around 6174, then the result takes their place.
+  const circleMs = (play.animate && arrivalIndex >= 0 ? stepMotionMs(steps[arrivalIndex].digits, arrivalIndex) : AT_REST_LANDED_MS) + CIRCLE_DELAY_MS
+  const arrived = arrivalIndex >= 0 && play.reached >= arrivalIndex
+  // Too few digits is not an error yet; a leading 0 or four equal digits is.
+  const invalid = run.error === 'leading-zero' || run.error === 'same-digits'
 
-  /** Clears any earlier result, if there is one, without touching the input or error. */
-  function resetRun() {
-    if (steps.length === 0) return
-    setSteps([])
-    setWentFurther(false)
-  }
+  // Build the step counts while the page is idle, so the first 6174 does not pay for them.
+  useEffect(() => {
+    const id = window.setTimeout(distribution, 300)
+    return () => window.clearTimeout(id)
+  }, [])
 
-  /**
-   * Validates `value` and either runs the full routine on it or reports
-   * why it can't be run. Shared by the input's own auto-run and the
-   * random-number button, since both need the same validate-then-run
-   * sequence.
-   */
-  function runFor(value: string) {
-    // Step 1: stop and show a message if the number isn't usable.
-    const validation = validateInput(value)
-    if (!validation.valid) {
-      setError(validation.message ?? 'Enter a 4-digit number.')
-      resetRun()
-      return
+  // A run from the page load keeps the title in view, so only later runs scroll to show the controls.
+  const loadRunId = useRef(runId)
+
+  // A new run, or the loop step, brings the stage into view: its top when started from below it,
+  // its playback bar when that starts below a short phone screen and the whole block fits. A field
+  // that still has focus (a hardware keyboard) stays in view; on touch the 4th digit has closed the keyboard.
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage || steps.length === 0) return
+    const { top, bottom } = stage.getBoundingClientRect()
+    const behavior = reducedMotion() ? 'auto' : 'smooth'
+    const typing = document.activeElement === inputRef.current
+    const viewport = document.documentElement.clientHeight
+    // The loop step makes the run one step longer than its count to 6174.
+    const later = runId !== loadRunId.current || steps.length > stepsToConstant(steps)
+    if (top < 0) stage.scrollIntoView({ behavior, block: 'start' })
+    else if (later && !typing && bottom > viewport && bottom - top <= viewport) {
+      stage.scrollIntoView({ behavior, block: 'nearest' })
     }
+  }, [runId, steps])
 
-    // Step 2: run the routine and reset the state from any earlier run.
-    setError(null)
-    setSteps(runKaprekarRoutine(Number(value)))
-    setWentFurther(false)
-    // Step 3: give this run a fresh key, so its DOM subtree remounts and
-    // the entrance animation replays even if the previous run had the
-    // same number of steps.
-    setRunId((id) => id + 1)
-    // Step 4: drop focus so mobile browsers close the on-screen keyboard,
-    // revealing the calculation instead of leaving the numpad up.
-    inputRef.current?.blur()
-  }
-
-  /** Fills the input with a random valid number and runs it immediately. */
-  function handleRandom() {
-    const value = randomValidNumber().toString()
-    setRawInput(value)
-    runFor(value)
-  }
-
-  /**
-   * Keeps the input numeric and at most 4 digits as the user types (a 5th
-   * digit is dropped, not appended). Once the 4th digit lands, runs the
-   * routine immediately rather than making the user click a Calculate
-   * button; an incomplete or otherwise invalid number shows its error
-   * right away too, instead of waiting for a submit.
-   */
-  function handleInputChange(value: string) {
-    const digitsOnly = sanitizeDigitInput(value)
-    setRawInput(digitsOnly)
-
-    // Step 1: 4 digits in means there's a full number to run the routine on.
-    if (digitsOnly.length === 4) {
-      runFor(digitsOnly)
-      return
+  /** Runs the typed value. On touch, closes the keyboard once 4 digits are in. */
+  function handleChange(value: string) {
+    run.setInput(value)
+    if (sanitizeDigitInput(value).length === 4 && window.matchMedia('(pointer: coarse)').matches) {
+      inputRef.current?.blur()
     }
-
-    // Step 2: fewer than 4 digits. An empty field has nothing to report
-    // yet; a partial one shows why it isn't a usable number so far.
-    resetRun()
-    setError(digitsOnly.length === 0 ? null : (validateInput(digitsOnly).message ?? null))
-  }
-
-  /** Appends one more round after reaching 6174, to show it loops back to itself. */
-  function handleGoFurther() {
-    const last = steps.at(-1)
-    if (!last) return
-    setSteps([...steps, nextStep(last.result)])
-    setWentFurther(true)
   }
 
   return (
-    <div id="page" className="min-h-svh px-4 py-6 sm:px-6 sm:py-10">
+    <div
+      id="page"
+      data-book-side={book.side}
+      className={`mx-auto flex min-h-svh max-w-5xl flex-col gap-4 pt-[max(1rem,env(safe-area-inset-top))] lg:gap-5 lg:pt-8 ${GUTTERS}`}
+    >
+      {/* The link targets the field, not <main>: before a run <main> has nothing to focus. */}
       <a
-        href="#main-content"
+        id="skip-link"
+        href="#number-input"
         className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-50 focus-visible:rounded-lg focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-primary-foreground focus-visible:shadow-lg"
       >
-        Skip to main content
+        Skip to the number field
       </a>
 
-      <div
-        id="page-content"
-        data-book-side={bookSide}
-        className="mx-auto flex w-full max-w-2xl flex-col gap-10 md:max-w-3xl lg:max-w-4xl xl:max-w-6xl"
-      >
-        <div id="top-bar" className="flex items-center justify-between">
-          <span className="font-heading text-sm font-semibold text-muted-foreground">
-            Kaprekar's routine
-          </span>
-          <div className="flex items-center gap-1">
-            <BookSideToggle side={bookSide} toggleSide={toggleBookSide} />
-            <ThemeToggle />
+      {/* Part 1: type. isolate keeps the watermark's -z-10 inside the header, above the page background.
+          A container: below 15rem (large text on a phone) the toggles get their own row above the title. */}
+      <header id="page-header" className="@container relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-3">
+        <Hero />
+        <div className="flex max-sm:absolute max-sm:top-0 max-sm:right-0 @max-[15rem]:static @max-[15rem]:order-first @max-[15rem]:col-span-2 @max-[15rem]:justify-self-end">
+          <BookSideToggle side={book.side} toggleSide={book.toggleSide} />
+          <ThemeToggle />
+        </div>
+        {/* A container: below 19rem (a 280 to 320 px screen, or large text) the field and Random stack. */}
+        <div className="@container col-span-2 flex flex-col gap-1.5">
+          <Label id="number-label" htmlFor="number-input" className="sr-only text-muted-foreground lg:not-sr-only">
+            Your 4-digit number
+          </Label>
+          <div className="flex gap-2 @max-[19rem]:flex-col">
+            {/* No maxLength: it would cut a pasted "1,234" to "1,23" before the sanitizer keeps 4 digits. */}
+            <Input
+              id="number-input"
+              ref={inputRef}
+              inputMode="numeric"
+              autoComplete="off"
+              enterKeyHint="done"
+              spellCheck={false}
+              placeholder="····"
+              value={run.rawInput}
+              onChange={(event) => handleChange(event.target.value)}
+              // A full field takes no more keys, so select it: the next 4 keys type a new number.
+              onFocus={(event) => event.currentTarget.select()}
+              aria-invalid={invalid || undefined}
+              aria-describedby={run.error ? 'input-note' : undefined}
+              className="h-14 flex-1 bg-card text-center dark:bg-card font-mono text-3xl font-bold tracking-[0.2em] shadow-sm md:text-3xl lg:w-44 lg:flex-none"
+            />
+            <Button
+              id="random-button"
+              type="button"
+              variant="outline"
+              className="h-14 gap-2 bg-card px-4 text-base dark:bg-card"
+              onClick={run.random}
+            >
+              <DiceIcon id="random-dice-icon" className="size-5" />
+              Random
+            </Button>
           </div>
         </div>
+      </header>
 
-        <p role="status" className="sr-only">
-          {statusMessage}
-        </p>
+      {/* minmax(0, 1fr): content can never widen the phone column past the screen. */}
+      <main id="main-content" className="grid grid-cols-[minmax(0,1fr)] gap-4 min-[52.5rem]:grid-cols-[minmax(0,1fr)_21rem] min-[52.5rem]:gap-x-8 min-[52.5rem]:gap-y-5 lg:gap-x-10">
+        <output id="playback-status" className="sr-only">{play.message}</output>
 
-        <main id="main-content" className="contents">
-          <header
-            id="hero"
-            className="relative flex min-h-44 flex-col justify-center overflow-hidden text-center sm:min-h-56"
-          >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2 select-none font-heading text-[10rem] leading-none font-bold text-primary/12 sm:text-[13rem] dark:text-primary/15"
-            >
-              6174
-            </span>
-            <h1 className="text-balance font-heading text-[clamp(1.5rem,9vw,2.25rem)] font-bold text-foreground sm:text-5xl">
-              Watch a number become <span className="text-primary">6174</span>
-            </h1>
-            <p className="mx-auto mt-4 max-w-prose text-pretty text-base text-muted-foreground sm:text-lg">
-              Pick almost any 4-digit number. Sort its digits high to low and low to
-              high, subtract, and repeat. Every path ends at the same place, within
-              seven steps.
-            </p>
-          </header>
+        {/* Part 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
+        <div id="stage-block" ref={stageRef} className="flex min-w-0 scroll-mt-4 flex-col gap-3">
+          <div id="stage-view" className="flex min-w-0 flex-col gap-3">
+            <StageStep
+              step={steps[play.index] ?? null}
+              index={play.index}
+              total={steps.length}
+              runId={runId}
+              arrival={play.index === arrivalIndex}
+              animate={play.animate}
+              replay={play.replay}
+              empty={
+                <div className="flex w-full max-w-sm flex-col gap-4 text-left">
+                  <InputNote raw={run.rawInput} problem={run.error} />
+                  <HowItWorks id="how-it-works-intro" />
+                </div>
+              }
+            />
 
-          <div
-            id="input-form"
-            className="flex flex-col gap-3 rounded-3xl bg-secondary/40 p-5 sm:p-7"
-          >
-            <Label htmlFor="kaprekar-input" className="text-muted-foreground">
-              Your 4-digit number
-            </Label>
-            <div id="input-row" className="flex flex-col gap-3 sm:flex-row">
-              <Input
-                id="kaprekar-input"
-                ref={inputRef}
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="e.g. 3524"
-                value={rawInput}
-                onChange={(event) => handleInputChange(event.target.value)}
-                className="h-14 border-0 bg-card text-center text-2xl font-bold tracking-[0.3em] shadow-sm sm:text-3xl md:h-16 md:text-4xl xl:h-20 xl:text-5xl"
-                aria-invalid={error ? true : undefined}
-                aria-describedby={error ? 'input-error' : undefined}
-              />
-              <Button
-                id="random-button"
-                type="button"
-                variant="outline"
-                size="lg"
-                className="h-14 gap-2 border-0 bg-card px-4 md:h-16 md:text-lg xl:h-20 xl:text-xl"
-                onClick={handleRandom}
-              >
-                <SolidDiceIcon className="size-4 md:size-5" />
-                Random
-              </Button>
-            </div>
-            {error && (
-              <Alert id="input-error" variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+            {hasRun && (
+              <Trail steps={steps} index={play.index} reached={play.reached} arrived={arrived} onPick={play.go} />
             )}
           </div>
 
-          {steps.length > 0 && (
-            <div
-              id="steps"
-              key={runId}
-              className="@container rounded-3xl border border-border bg-card p-5 sm:p-7"
-            >
-              <p id="steps-legend" className="mb-5 text-xs text-muted-foreground @[800px]:hidden">
-                Each round: digits sorted biggest first, minus digits sorted smallest first.
-              </p>
-              {steps.map((step, index) => (
-                <KaprekarStepCard
-                  key={index}
-                  step={step}
-                  index={index}
-                  isFirst={index === 0}
-                  isLast={index === steps.length - 1}
-                  animate
-                />
-              ))}
+          {hasRun && <PlaybackBar play={play} last={last} />}
+        </div>
 
-              {reachedConstant && !wentFurther && (
-                <div
-                  id="go-further-prompt"
-                  className="animate-step-in mt-2 flex flex-col items-center gap-3 border-t border-border pt-6 text-center"
-                  style={{ animationDelay: `${steps.length * 70}ms` }}
-                >
-                  <p className="text-sm text-muted-foreground">
-                    Curious what happens if you keep going?
-                  </p>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="gap-2"
-                    onClick={handleGoFurther}
-                  >
-                    <RotateCw className="size-4" aria-hidden />
-                    Do one more round
-                  </Button>
-                </div>
-              )}
+        {/* Parts 3 and 4: how far to 6174, then the result and the next number. */}
+        {hasRun && (
+          <EndPanel key={runId} run={run} arrived={arrived} remaining={arrivalIndex - play.index} circleMs={circleMs} />
+        )}
 
-              {wentFurther && (
-                <p
-                  id="loop-explainer"
-                  className="animate-step-in mt-2 border-t border-border pt-6 text-center text-sm text-muted-foreground"
-                >
-                  6174 leads straight back to itself. It is the routine's only
-                  resting point for 4-digit numbers with at least two different
-                  digits.
-                </p>
-              )}
-            </div>
-          )}
+        {hasRun && <AllSteps steps={steps} className="min-[52.5rem]:col-start-2 min-[52.5rem]:row-start-2" />}
 
-          <section
-            id="history"
-            aria-labelledby="history-heading"
-            className="flex flex-col gap-3 rounded-3xl bg-muted/60 p-5 sm:p-7"
-          >
-            <h2 id="history-heading" className="font-heading text-lg font-bold text-foreground">
-              Where 6174 comes from
-            </h2>
-            <p className="max-w-prose text-pretty text-sm text-muted-foreground sm:text-base">
-              The mathematician D. R. Kaprekar discovered this routine in 1949 while
-              experimenting with digit arrangements by hand. He noticed that no
-              matter which 4-digit number he started with, as long as its digits
-              weren't all the same, repeating the sort-and-subtract process always
-              arrived at 6174, and then stayed there. The same kind of routine
-              exists for other digit lengths, each with its own resting number, but
-              6174 is the most famous and now carries his name.
-            </p>
-            <a
-              href="https://en.wikipedia.org/wiki/6174_(number)"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-primary underline-offset-4 hover:underline"
-            >
-              Read more on Wikipedia
-              <ExternalLink className="size-3.5" aria-hidden />
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
-          </section>
-        </main>
-      </div>
+        {/* In a run, wide screens put this under the stage and "See all steps" in the side column. Phones keep source order. */}
+        <OriginDetails className={hasRun ? 'min-[52.5rem]:col-start-1 min-[52.5rem]:row-start-2' : 'min-[52.5rem]:col-span-2'} />
+      </main>
+
     </div>
   )
 }

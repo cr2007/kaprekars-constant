@@ -1,11 +1,12 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  type InputProblem,
   KAPREKAR_CONSTANT,
   computeStep,
-  nextStep,
   randomValidNumber,
   runKaprekarRoutine,
   sanitizeDigitInput,
+  stepsToConstant,
   validateInput,
 } from './kaprekar'
 
@@ -18,6 +19,12 @@ describe('sanitizeDigitInput', () => {
     expect(sanitizeDigitInput('123456')).toBe('1234')
   })
 
+  test('keeps all 4 digits of a pasted number with a separator', () => {
+    // The field has no maxLength: it would cut "1,234" to "1,23" before this keeps the 4 digits.
+    expect(sanitizeDigitInput('1,234')).toBe('1234')
+    expect(sanitizeDigitInput(' 3 524 ')).toBe('3524')
+  })
+
   test('leaves a short digit string untouched', () => {
     expect(sanitizeDigitInput('35')).toBe('35')
   })
@@ -25,39 +32,24 @@ describe('sanitizeDigitInput', () => {
   test('returns an empty string for an empty input', () => {
     expect(sanitizeDigitInput('')).toBe('')
   })
+
+  test('reads Arabic-Indic, Persian and full-width digits from phone keyboards', () => {
+    expect(sanitizeDigitInput('\u0669\u0668\u0667\u0660')).toBe('9870')
+    expect(sanitizeDigitInput('\u06F1\u06F2\u06F3\u06F4')).toBe('1234')
+    expect(sanitizeDigitInput('\uFF15\uFF16\uFF17\uFF19')).toBe('5679')
+  })
 })
 
 describe('validateInput', () => {
-  test('rejects an empty string', () => {
-    expect(validateInput('').valid).toBe(false)
-  })
-
-  test('rejects non-digit characters', () => {
-    expect(validateInput('12a4').valid).toBe(false)
-  })
-
-  test('rejects fewer than 4 digits', () => {
-    expect(validateInput('123').valid).toBe(false)
-  })
-
-  test('rejects more than 4 digits', () => {
-    expect(validateInput('12345').valid).toBe(false)
-  })
-
-  test('rejects a leading zero', () => {
-    expect(validateInput('0123').valid).toBe(false)
-  })
-
-  test('rejects a leading zero before 4 digits are typed', () => {
-    const result = validateInput('0')
-    expect(result.valid).toBe(false)
-    expect(result.message).toMatch(/first digit cannot be 0/)
-  })
-
-  test('rejects a repdigit', () => {
-    const result = validateInput('1111')
-    expect(result.valid).toBe(false)
-    expect(result.message).toMatch(/same/)
+  test.each<[string, string, InputProblem]>([
+    ['an empty string', '', 'empty'],
+    ['a non-digit', '12a4', 'not-digits'],
+    ['fewer than 4 digits', '123', 'short'],
+    ['more than 4 digits', '12345', 'long'],
+    ['a leading zero', '0123', 'leading-zero'],
+    ['a repdigit', '1111', 'same-digits'],
+  ])('rejects %s, and says why', (_case, raw, reason) => {
+    expect(validateInput(raw)).toEqual({ valid: false, reason })
   })
 
   test('accepts a valid 4-digit number', () => {
@@ -90,38 +82,26 @@ describe('computeStep', () => {
 })
 
 describe('runKaprekarRoutine', () => {
-  test('reaches 6174 within 7 steps for a typical number', () => {
-    const steps = runKaprekarRoutine(3524)
-    expect(steps.length).toBeLessThanOrEqual(7)
-    expect(steps.at(-1)?.result).toBe(KAPREKAR_CONSTANT)
-  })
-
-  test('reaches 6174 for a number with a zero digit', () => {
-    const steps = runKaprekarRoutine(1000)
-    expect(steps.at(-1)?.result).toBe(KAPREKAR_CONSTANT)
-  })
-
-  test('reaches 6174 in a single step when already there', () => {
-    const steps = runKaprekarRoutine(KAPREKAR_CONSTANT)
-    expect(steps).toHaveLength(1)
-    expect(steps[0].result).toBe(KAPREKAR_CONSTANT)
-  })
-
-  test('every 4-digit number with at least two different digits converges', () => {
-    for (let n = 1000; n <= 9999; n += 37) {
+  test('every valid 4-digit input reaches 6174 in at most 7 steps', () => {
+    // Step 1: run the routine on all 8,991 valid inputs and count steps.
+    const stepCounts: Record<number, number> = {}
+    for (let n = 1000; n <= 9999; n++) {
       if (!validateInput(String(n)).valid) continue
       const steps = runKaprekarRoutine(n)
       expect(steps.at(-1)?.result).toBe(KAPREKAR_CONSTANT)
+      stepCounts[steps.length] = (stepCounts[steps.length] ?? 0) + 1
     }
-  })
-})
 
-describe('nextStep', () => {
-  test('shows that 6174 loops back to itself', () => {
-    const step = nextStep(KAPREKAR_CONSTANT)
-    expect(step.descendingDigits).toEqual([7, 6, 4, 1])
-    expect(step.ascendingDigits).toEqual([1, 4, 6, 7])
-    expect(step.result).toBe(KAPREKAR_CONSTANT)
+    // Step 2: compare with the known distribution (6174 itself is 1 step).
+    expect(stepCounts).toEqual({
+      1: 357,
+      2: 519,
+      3: 2124,
+      4: 1124,
+      5: 1379,
+      6: 1508,
+      7: 1980,
+    })
   })
 })
 
@@ -133,5 +113,25 @@ describe('randomValidNumber', () => {
       expect(candidate).toBeLessThanOrEqual(9999)
       expect(validateInput(String(candidate)).valid).toBe(true)
     }
+  })
+
+  test('spreads its picks: Random must not keep giving the same number', () => {
+    const picks = new Set(Array.from({ length: 50 }, randomValidNumber))
+    expect(picks.size).toBeGreaterThan(40)
+  })
+})
+
+describe('stepsToConstant', () => {
+  test('counts the steps up to the first 6174', () => {
+    expect(stepsToConstant(runKaprekarRoutine(3524))).toBe(3)
+  })
+
+  test('leaves out the loop step after 6174', () => {
+    const steps = runKaprekarRoutine(3524)
+    expect(stepsToConstant([...steps, computeStep(KAPREKAR_CONSTANT)])).toBe(3)
+  })
+
+  test('is 0 for no steps', () => {
+    expect(stepsToConstant([])).toBe(0)
   })
 })

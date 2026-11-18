@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "command",
+  "commandRunner": { "command": "STRYKER=1 bun test ./src" },
+  "mutate": [
+    "src/lib/kaprekar.ts",
+    "src/lib/stats.ts",
+    "src/lib/color-contrast.ts",
+    "src/lib/rough-circle.ts",
+    "src/lib/date-number.ts",
+    "src/lib/dice-roll.ts",
+    "src/lib/sort-timeline.ts",
+    "src/lib/motion.ts:33-73",
+    "src/lib/url.ts:10-13"
+  ],
+  "ignorePatterns": ["dist", "e2e", "public", ".claude"],
+  "coverageAnalysis": "off",
+  "concurrency": 4,
+  "reporters": ["clear-text", "progress", "json"],
+  "jsonReporter": { "fileName": "reports/mutation/mutation.json" },
+  "tsconfigFile": "stryker.no-tsconfig.json"
+}

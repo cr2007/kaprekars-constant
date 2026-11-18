@@ -5,33 +5,43 @@
   "type": "module",
   "scripts": {
     "dev": "bun --bun node_modules/vite/bin/vite.js",
-    "build": "bun --bun node_modules/typescript/bin/tsc -b && bun --bun node_modules/vite/bin/vite.js build",
+    "build": "bun check -b && bun --bun node_modules/vite/bin/vite.js build",
     "lint": "oxlint",
     "preview": "bun --bun node_modules/vite/bin/vite.js preview",
-    "test": "bun test"
+    "test": "bun test ./src",
+    "test:e2e": "bun --bun run build && bun test ./e2e",
+    "check:unused": "knip",
+    "check:tsdoc": "bun scripts/check-tsdoc.ts",
+    "test:mutation": "stryker run"
   },
   "dependencies": {
+    "@fontsource-variable/atkinson-hyperlegible-mono": "^5.3.0",
     "@fontsource-variable/geist": "^5.3.0",
-    "@fontsource/kalam": "^5.3.0",
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.5",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.3.0",
-    "lucide-react": "^1.47.0",
-    "radix-ui": "^1.6.7",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "shadcn": "^4.21.0",
-    "tailwindcss": "^4.3.3",
+    "cn": "^0.5.2",
+    "lucide-react": "^1.70.0",
+    "radix-ui": "^1.8.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.5",
     "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.2",
-    "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
-    "@vitejs/plugin-react": "^6.1.1",
-    "oxlint": "^1.81.0",
-    "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "@microsoft/tsdoc": "0.17.1",
+    "@stryker-mutator/core": "10.1.1",
+    "@types/bun": "^1.4.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "knip": "6.44.2",
+    "oxlint": "^1.92.0",
+    "playwright-core": "^1.65.0",
+    "shadcn": "^4.23.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
   }
 }

@@ -2,9 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- ICO only: Chrome prefers a listed SVG, and the ICO holds a 16 px and a 32 px frame drawn for each size. -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/endless-regular.woff2" as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Kaprekar's Constant</title>
+    <meta name="description" content="Type any 4-digit number and watch Kaprekar's routine sort, subtract and repeat until it reaches 6174." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#edf8f3" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#05100c" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Kaprekar's Constant" />
+    <meta property="og:description" content="Type any 4-digit number and watch Kaprekar's routine sort, subtract and repeat until it reaches 6174." />
+    <meta property="og:url" content="__SITE_URL__" />
     <script>
       (function () {
         try {
