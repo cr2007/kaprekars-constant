@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { useBookSide } from '@/hooks/use-book-side'
 import { usePlayback } from '@/hooks/use-playback'
 import { useRun } from '@/hooks/use-run'
+import { useStageSwipe } from '@/hooks/use-stage-swipe'
 import { sanitizeDigitInput, stepsToConstant } from '@/lib/kaprekar'
 import { reducedMotion } from '@/lib/motion'
 import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, stepMotionMs } from '@/lib/stage-motion'
@@ -45,6 +46,7 @@ export default function App() {
   const inputRef = useRef<HTMLInputElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const book = useBookSide()
+  const { ref: swipeRef, handlers: swipeHandlers } = useStageSwipe(play.index, steps.length - 1, play.go)
 
   const hasRun = steps.length > 0
   const last = steps.length - 1
@@ -158,6 +160,8 @@ export default function App() {
         {/* Part 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
         <div id="stage-block" ref={stageRef} className="flex min-w-0 scroll-mt-4 flex-col gap-3">
           <div id="stage-view" className="flex min-w-0 flex-col gap-3">
+            {/* pan-y pinch-zoom: the page keeps its vertical scroll and its zoom; a sideways touch is a swipe. */}
+            <div ref={swipeRef} {...(hasRun ? swipeHandlers : {})} className="touch-pan-y touch-pinch-zoom">
             <StageStep
               step={steps[play.index] ?? null}
               index={play.index}
@@ -173,6 +177,7 @@ export default function App() {
                 </div>
               }
             />
+            </div>
 
             {hasRun && (
               <Trail steps={steps} index={play.index} reached={play.reached} arrived={arrived} onPick={play.go} />

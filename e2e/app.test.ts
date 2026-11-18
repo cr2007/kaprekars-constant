@@ -453,6 +453,31 @@ test('on a phone the playback bar docks at the bottom of the screen while the st
   await page.context().close()
 })
 
+test('a sideways swipe on the stage shows the next or the previous step; past step 1 it stays', async () => {
+  const page = await open('/?n=2323', 390, 844, { hasTouch: true })
+  const cdp = await page.context().newCDPSession(page)
+  const card = (await page.locator('#stage-card').boundingBox())!
+  const y = card.y + card.height / 2
+  /** A touch swipe across the stage, from `x0` to `x1`. */
+  async function swipe(x0: number, x1: number) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y }] })
+    for (let k = 1; k <= 8; k++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + ((x1 - x0) * k) / 8, y }] })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  }
+  const left = card.x + card.width * 0.2
+  const right = card.x + card.width * 0.8
+  await swipe(left, right)
+  expect(await heading(page)).toBe('Step 1 of 4')
+  await swipe(right, left)
+  await waitForStep(page, 'Step 2 of 4', 2000)
+  await swipe(left, right)
+  await waitForStep(page, 'Step 1 of 4', 2000)
+  // The swipe paused autoplay, and the stage is back at rest.
+  await page.waitForTimeout(3000)
+  expect(await heading(page)).toBe('Step 1 of 4')
+  await page.context().close()
+})
+
 test('the quick picks show every card at 320 px, with no sideways scroll', async () => {
   const page = await open('/?n=2323', 320, 568, { hasTouch: true })
   await waitForResult(page)
