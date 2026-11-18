@@ -58,8 +58,9 @@ bun --bun run preview   # preview the production build
 ## Deployment
 
 Push to `main` to deploy to GitHub Pages. The workflow is at
-`.github/workflows/deploy.yml`. It calls a reusable workflow from
-[cr2007/actions](https://github.com/cr2007/actions).
+`.github/workflows/deploy.yml`. It runs the CI checks in `ci.yml`
+first, and deploys only if they pass. The deploy step calls a
+reusable workflow from [cr2007/actions](https://github.com/cr2007/actions).
 
 Set the Pages source to "GitHub Actions" once, in repo settings, under
 Pages.

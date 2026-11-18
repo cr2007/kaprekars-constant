@@ -136,7 +136,7 @@ stryker.config.json          # mutation testing scope: the pure code in src/lib
 public/
   fonts/                     # Endless, the custom text font
   favicon.ico                # 16 and 32 px tab icon frames
-.github/workflows/           # GitHub Pages deploy
+.github/workflows/deploy.yml # on main: runs ci.yml, then deploys to GitHub Pages if it passes
 ```
 
 ## Element ids
