@@ -14,6 +14,7 @@ const LABEL = '@max-[20rem]:sr-only'
  * @remarks
  * - On a phone or tablet (one column) it docks at the bottom of the screen while the stage block is in view, so
  *   it stays in reach of the thumb. Past the block it scrolls away with it, so it never covers the result.
+ *   On a screen under 30rem tall (landscape, or 200% text) it stays in flow: there it would cover the stage.
  * - Below 20rem (a 320 px screen, or large text) the bar fills the column, and its buttons share the width and show only their icons.
  * - Play reads Pause while playing and Replay at the end. See {@link usePlayback}.
  *
@@ -26,10 +27,10 @@ export function PlaybackBar({ play, last }: { play: Playback; last: number }) {
   return (
     <div
       id="playback-bar"
-      className="[container:dock/inline-size_scroll-state] max-[52.5rem]:sticky max-[52.5rem]:bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-[52.5rem]:z-10"
+      className="[container:dock/inline-size_scroll-state] max-[52.5rem]:[@media(min-height:30rem)]:sticky max-[52.5rem]:[@media(min-height:30rem)]:bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-[52.5rem]:[@media(min-height:30rem)]:z-10"
     >
       {/* While docked, a fade in the page color hides what scrolls under the bar. */}
-      <span aria-hidden className="dock-fade pointer-events-none absolute -inset-x-[16px] -top-14 -bottom-[max(0.75rem,env(safe-area-inset-bottom))] min-[52.5rem]:hidden" />
+      <span aria-hidden className="dock-fade pointer-events-none absolute -inset-x-[16px] -top-14 -bottom-[max(0.75rem,env(safe-area-inset-bottom))] hidden max-[52.5rem]:[@media(min-height:30rem)]:block" />
       <fieldset className="relative mx-auto flex w-fit items-center gap-2 rounded-full @max-[20rem]:w-full border border-border bg-card p-1.5 shadow-sm">
         <legend className="sr-only">Playback</legend>
         {/* aria-disabled, not disabled: the button keeps focus when it ends the run. */}

@@ -453,6 +453,14 @@ test('on a phone the playback bar docks at the bottom of the screen while the st
   await page.context().close()
 })
 
+test('at 200% text the playback bar stays in flow, so it never covers the difference row', async () => {
+  // Docked, the 114 px bar covered the top of the difference on a 390 x 844 phone.
+  const page = await openLargeText('/?n=3524', 390, 844)
+  await waitForStep(page, 'Step 2 of 3')
+  expect(await page.locator('#playback-bar').evaluate((el) => getComputedStyle(el).position)).toBe('static')
+  await page.context().close()
+})
+
 test('a sideways swipe on the stage shows the next or the previous step; past step 1 it stays', async () => {
   const page = await open('/?n=2323', 390, 844, { hasTouch: true })
   const cdp = await page.context().newCDPSession(page)
