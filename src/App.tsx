@@ -15,14 +15,19 @@ import { Label } from '@/components/ui/label'
 import { useBookSide } from '@/hooks/use-book-side'
 import { usePlayback } from '@/hooks/use-playback'
 import { useRun } from '@/hooks/use-run'
+import { useStageSwipe } from '@/hooks/use-stage-swipe'
 import { sanitizeDigitInput, stepsToConstant } from '@/lib/kaprekar'
 import { reducedMotion } from '@/lib/motion'
 import { AT_REST_LANDED_MS, CIRCLE_DELAY_MS, stepMotionMs } from '@/lib/stage-motion'
 import { distribution } from '@/lib/stats'
 
-/** Side and bottom padding that keeps clear of notches and home bars. */
+/**
+ * Side and bottom padding that keeps clear of notches and home bars.
+ *
+ * @remarks In px, not rem: at 200% text, rem gutters took the width the stage tiles need, and the digits got smaller.
+ */
 const GUTTERS =
-  'pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))]'
+  'pl-[max(16px,env(safe-area-inset-left))] pr-[max(16px,env(safe-area-inset-right))] pb-[max(16px,env(safe-area-inset-bottom))]'
 
 /**
  * The page: the header with the number field, then the Stage that plays one step at a time.
@@ -41,6 +46,7 @@ export default function App() {
   const inputRef = useRef<HTMLInputElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const book = useBookSide()
+  const { ref: swipeRef, handlers: swipeHandlers } = useStageSwipe(play.index, steps.length - 1, play.go)
 
   const hasRun = steps.length > 0
   const last = steps.length - 1
@@ -60,9 +66,10 @@ export default function App() {
   // A run from the page load keeps the title in view, so only later runs scroll to show the controls.
   const loadRunId = useRef(runId)
 
-  // A new run, or the loop step, brings the stage into view: its top when started from below it,
-  // its playback bar when that starts below a short phone screen and the whole block fits. A field
-  // that still has focus (a hardware keyboard) stays in view; on touch the 4th digit has closed the keyboard.
+  // A new run, or the loop step, brings the stage into view: its top when started from below it. When the
+  // block ends below a short phone screen, the whole block if it fits, else its top, so the docked bar never
+  // covers the difference. A field that still has focus (a hardware keyboard) stays in view; on touch the
+  // 4th digit has closed the keyboard.
   useEffect(() => {
     const stage = stageRef.current
     if (!stage || steps.length === 0) return
@@ -73,8 +80,8 @@ export default function App() {
     // The loop step makes the run one step longer than its count to 6174.
     const later = runId !== loadRunId.current || steps.length > stepsToConstant(steps)
     if (top < 0) stage.scrollIntoView({ behavior, block: 'start' })
-    else if (later && !typing && bottom > viewport && bottom - top <= viewport) {
-      stage.scrollIntoView({ behavior, block: 'nearest' })
+    else if (later && !typing && bottom > viewport) {
+      stage.scrollIntoView({ behavior, block: bottom - top <= viewport ? 'nearest' : 'start' })
     }
   }, [runId, steps])
 
@@ -153,6 +160,8 @@ export default function App() {
         {/* Part 2: watch. The trail and the bar sit under the stage, like a player's controls. */}
         <div id="stage-block" ref={stageRef} className="flex min-w-0 scroll-mt-4 flex-col gap-3">
           <div id="stage-view" className="flex min-w-0 flex-col gap-3">
+            {/* pan-y pinch-zoom: the page keeps its vertical scroll and its zoom; a sideways touch is a swipe. */}
+            <div ref={swipeRef} {...(hasRun ? swipeHandlers : {})} className="touch-pan-y touch-pinch-zoom">
             <StageStep
               step={steps[play.index] ?? null}
               index={play.index}
@@ -168,6 +177,7 @@ export default function App() {
                 </div>
               }
             />
+            </div>
 
             {hasRun && (
               <Trail steps={steps} index={play.index} reached={play.reached} arrived={arrived} onPick={play.go} />

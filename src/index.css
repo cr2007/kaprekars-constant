@@ -302,47 +302,23 @@ html[data-theme-flip] *::after {
 }
 
 /*
-  The quick-pick row scrolls sideways on phones. Each edge fades only
-  while there are more chips past it. Without scroll timelines, no fade.
+  The playback dock lifts while it floats over the page, and a fade in the
+  page color hides what scrolls under it. Browsers without scroll-state
+  queries keep the flat bar.
 */
-@property --chip-fade-start {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
+.dock-fade {
+  background: linear-gradient(to bottom, transparent, var(--background) 55%);
+  opacity: 0;
+  transition: opacity 150ms ease-out;
 }
 
-@property --chip-fade-end {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
-}
-
-.chip-scroller {
-  --chip-fade: 2.5rem;
-  scrollbar-width: none;
-  scroll-padding-inline: var(--chip-fade);
-  mask:
-    linear-gradient(black, black) no-clip subtract,
-    linear-gradient(to right, black, transparent) 0 0 / var(--chip-fade-start) 100% no-repeat no-clip,
-    linear-gradient(to right, transparent, black) 100% 0 / var(--chip-fade-end) 100% no-repeat no-clip;
-  animation:
-    chip-fade-start linear both,
-    chip-fade-end linear both;
-  animation-timeline: scroll(self inline);
-  animation-range:
-    0 var(--chip-fade),
-    calc(100% - var(--chip-fade)) 100%;
-}
-
-@keyframes chip-fade-start {
-  to {
-    --chip-fade-start: var(--chip-fade);
+@container dock scroll-state(stuck: bottom) {
+  #playback-bar > fieldset {
+    @apply shadow-lg;
   }
-}
 
-@keyframes chip-fade-end {
-  from {
-    --chip-fade-end: var(--chip-fade);
+  .dock-fade {
+    opacity: 1;
   }
 }
 

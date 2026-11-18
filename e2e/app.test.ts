@@ -442,3 +442,59 @@ test('forced colors mark the shown trail step with an outline', async () => {
   expect(outline).toBe('solid')
   await page.context().close()
 })
+
+test('on a phone the playback bar docks at the bottom of the screen while the stage is in view', async () => {
+  // 360 x 780: in flow, the bar would end below the screen.
+  const page = await open('/?n=3524', 360, 780, { hasTouch: true })
+  await waitForStep(page, 'Step 2 of 3')
+  const [bottom, height] = await page.evaluate(() => [document.querySelector('#playback-bar')!.getBoundingClientRect().bottom, innerHeight])
+  expect(bottom).toBeLessThanOrEqual(height)
+  expect(await page.evaluate(() => scrollY)).toBe(0)
+  await page.context().close()
+})
+
+test('at 200% text the playback bar stays in flow, so it never covers the difference row', async () => {
+  // Docked, the 114 px bar covered the top of the difference on a 390 x 844 phone.
+  const page = await openLargeText('/?n=3524', 390, 844)
+  await waitForStep(page, 'Step 2 of 3')
+  expect(await page.locator('#playback-bar').evaluate((el) => getComputedStyle(el).position)).toBe('static')
+  await page.context().close()
+})
+
+test('a sideways swipe on the stage shows the next or the previous step; past step 1 it stays', async () => {
+  const page = await open('/?n=2323', 390, 844, { hasTouch: true })
+  const cdp = await page.context().newCDPSession(page)
+  const card = (await page.locator('#stage-card').boundingBox())!
+  const y = card.y + card.height / 2
+  /** A touch swipe across the stage, from `x0` to `x1`. */
+  async function swipe(x0: number, x1: number) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y }] })
+    for (let k = 1; k <= 8; k++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x0 + ((x1 - x0) * k) / 8, y }] })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  }
+  const left = card.x + card.width * 0.2
+  const right = card.x + card.width * 0.8
+  await swipe(left, right)
+  expect(await heading(page)).toBe('Step 1 of 4')
+  await swipe(right, left)
+  await waitForStep(page, 'Step 2 of 4', 2000)
+  await swipe(left, right)
+  await waitForStep(page, 'Step 1 of 4', 2000)
+  // The swipe paused autoplay, and the stage is back at rest.
+  await page.waitForTimeout(3000)
+  expect(await heading(page)).toBe('Step 1 of 4')
+  await page.context().close()
+})
+
+test('the quick picks show every card at 320 px, with no sideways scroll', async () => {
+  const page = await open('/?n=2323', 320, 568, { hasTouch: true })
+  await waitForResult(page)
+  const cards = await page.locator('#quick-picks button').evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => [r.left, r.right, r.height]))
+  expect(cards.length).toBeGreaterThanOrEqual(3)
+  for (const [l, r, h] of cards) {
+    expect(l).toBeGreaterThanOrEqual(0)
+    expect(r).toBeLessThanOrEqual(320)
+    expect(h).toBeGreaterThanOrEqual(44)
+  }
+  await page.context().close()
+})

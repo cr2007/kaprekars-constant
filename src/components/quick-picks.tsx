@@ -9,37 +9,40 @@ interface QuickPicksProps {
 }
 
 /**
- * Numbers with a reason to try them, as small chips.
+ * Numbers with a reason to try them, as a grid of small cards.
  *
- * @remarks Each chip runs at once, so a second number costs one tap.
+ * @remarks Each card runs at once, so a second number costs one tap. The grid shows all of them with no sideways scroll.
  */
 export function QuickPicks({ onPick }: QuickPicksProps) {
-  // The date is read once per mount, so the chips stay put while the panel is open.
+  // The date is read once per mount, so the cards stay put while the panel is open.
   const [now] = useState(() => new Date())
   const year = now.getFullYear()
   const today = dateNumber(now)
-  /** A number in the digit font, inside a chip label. */
+  /** A number in the digit font. */
   const mono = (n: number) => <span className="font-mono">{n}</span>
-  const chips: { key: string; label: ReactNode; pick: () => number }[] = [
-    ...(today ? [{ key: 'today', label: <>Today, {mono(today)}</>, pick: () => today }] : []),
-    ...(validateInput(String(year)).valid
-      ? [{ key: 'year', label: <>This year, {mono(year)}</>, pick: () => year }]
-      : []),
-    { key: 'slow', label: <>A slow one ({mono(7)} steps)</>, pick: () => randomWithSteps(7) },
-    { key: 'fast', label: <>A fast one ({mono(1)} step)</>, pick: () => randomWithSteps(1) },
+  const cards: { key: string; reason: string; value: ReactNode; pick: () => number }[] = [
+    ...(today ? [{ key: 'today', reason: 'Today', value: mono(today), pick: () => today }] : []),
+    ...(validateInput(String(year)).valid ? [{ key: 'year', reason: 'This year', value: mono(year), pick: () => year }] : []),
+    { key: 'slow', reason: 'A slow one', value: <>{mono(7)} steps</>, pick: () => randomWithSteps(7) },
+    { key: 'fast', reason: 'A fast one', value: <>{mono(1)} step</>, pick: () => randomWithSteps(1) },
   ]
 
   return (
-    // role="list": Safari drops list semantics when list-style is none.
-    <ul role="list" className="flex flex-wrap gap-2">
-      {chips.map((chip) => (
-        <li key={chip.key}>
+    // role="list": Safari drops list semantics when list-style is none. Below 16rem (280 px, or large text) one column.
+    // In two columns, an odd last card takes the full row.
+    <ul role="list" className="grid grid-cols-2 gap-2 @max-[16rem]:grid-cols-1 @min-[16rem]:[&>li:last-child:nth-child(odd)]:col-span-2">
+      {cards.map((card) => (
+        <li key={card.key} className="grid">
           <button
             type="button"
-            onClick={() => onPick(chip.pick())}
-            className="min-h-11 rounded-full border border-border bg-card px-4 text-sm font-medium whitespace-nowrap text-foreground transition-[background-color,scale] duration-150 ease-out select-none hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97 motion-reduce:active:scale-100"
+            onClick={() => onPick(card.pick())}
+            className="flex min-h-16 flex-col items-start justify-center gap-0.5 rounded-2xl border border-border bg-card px-4 py-2.5 text-left transition-[background-color,scale] duration-150 ease-out select-none hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:scale-97 motion-reduce:active:scale-100"
           >
-            {chip.label}
+            <span className="text-sm text-muted-foreground">
+              {card.reason}
+              <span className="sr-only">,</span>
+            </span>
+            <span className="text-lg font-semibold text-foreground">{card.value}</span>
           </button>
         </li>
       ))}

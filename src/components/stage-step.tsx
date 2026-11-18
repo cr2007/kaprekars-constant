@@ -10,12 +10,13 @@ import { cn } from 'cn'
 const PLACEHOLDER = computeStep(3524)
 
 /**
- * Bigger tiles from `md` up, and card-sized tiles below 19rem (a 280 to 320 px screen, or large text).
+ * Bigger tiles from `md` up, and tiles that fill the card below 19rem (a 280 to 320 px screen, or large text).
  *
- * @remarks Card-sized tiles share the card width less the 3 tile gaps (1.125rem). `NumberTiles` puts this class on the tile row.
+ * @remarks The tiles share the card width less the 3 tile gaps (1.125rem). The card's phone padding is in px, so 200% text
+ * does not take that width. `NumberTiles` puts this class on the tile row.
  */
 const TILE_SIZE =
-  'md:*:size-14 md:*:text-2xl @max-[19rem]:gap-1.5 @max-[19rem]:*:size-[min(2.75rem,calc((100cqi_-_1.125rem)/4))] @max-[19rem]:*:text-[length:min(1.25rem,calc((100cqi_-_1.125rem)/9))]'
+  'md:*:size-14 md:*:text-2xl @max-[19rem]:gap-1.5 @max-[19rem]:*:size-[min(4rem,calc((100cqi_-_1.125rem)/4))] @max-[19rem]:*:text-[length:min(1.75rem,calc((100cqi_-_1.125rem)/9))]'
 
 /**
  * In a narrow card, each label takes its own full-width row above its tiles (HIG: a stacked layout at large text sizes).
@@ -136,7 +137,7 @@ export function StageStep({ step, index, total, runId, arrival, animate, replay,
     <section
       id="stage-card"
       aria-labelledby="stage-heading"
-      className="grid rounded-3xl border border-border bg-card p-3 sm:p-6 *:col-start-1 *:row-start-1"
+      className="grid rounded-3xl border border-border bg-card p-[12px] sm:p-6 *:col-start-1 *:row-start-1"
     >
       <div ref={root} className={cn('@container flex flex-col gap-3 md:gap-4', !step && 'invisible')}>
         <div className="flex min-h-7 flex-wrap items-center justify-between gap-2">
