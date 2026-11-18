@@ -216,6 +216,10 @@ wikipedia-link       # "Read more on Wikipedia"
 
 ## Pull requests
 
+- Before you make a branch, run `git fetch` and branch from
+  `origin/main`. The local `main` can be stale.
+- On `main`, the CI result is in the "Deploy to GitHub Pages" run, as
+  the check `ci / check`. A branch protection rule must use that name.
 - Put measured numbers (tests, mutation score, bundle size) in the PR
   body only after CI passes on the pushed head.
 - Show proof (screenshots, video) in the PR body. Upload each file to
