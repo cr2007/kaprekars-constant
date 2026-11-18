@@ -64,9 +64,10 @@ export default function App() {
   // A run from the page load keeps the title in view, so only later runs scroll to show the controls.
   const loadRunId = useRef(runId)
 
-  // A new run, or the loop step, brings the stage into view: its top when started from below it,
-  // its playback bar when that starts below a short phone screen and the whole block fits. A field
-  // that still has focus (a hardware keyboard) stays in view; on touch the 4th digit has closed the keyboard.
+  // A new run, or the loop step, brings the stage into view: its top when started from below it. When the
+  // block ends below a short phone screen, the whole block if it fits, else its top, so the docked bar never
+  // covers the difference. A field that still has focus (a hardware keyboard) stays in view; on touch the
+  // 4th digit has closed the keyboard.
   useEffect(() => {
     const stage = stageRef.current
     if (!stage || steps.length === 0) return
@@ -77,8 +78,8 @@ export default function App() {
     // The loop step makes the run one step longer than its count to 6174.
     const later = runId !== loadRunId.current || steps.length > stepsToConstant(steps)
     if (top < 0) stage.scrollIntoView({ behavior, block: 'start' })
-    else if (later && !typing && bottom > viewport && bottom - top <= viewport) {
-      stage.scrollIntoView({ behavior, block: 'nearest' })
+    else if (later && !typing && bottom > viewport) {
+      stage.scrollIntoView({ behavior, block: bottom - top <= viewport ? 'nearest' : 'start' })
     }
   }, [runId, steps])
 

@@ -302,6 +302,27 @@ html[data-theme-flip] *::after {
 }
 
 /*
+  The playback dock lifts while it floats over the page, and a fade in the
+  page color hides what scrolls under it. Browsers without scroll-state
+  queries keep the flat bar.
+*/
+.dock-fade {
+  background: linear-gradient(to bottom, transparent, var(--background) 55%);
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+@container dock scroll-state(stuck: bottom) {
+  #playback-bar > fieldset {
+    @apply shadow-lg;
+  }
+
+  .dock-fade {
+    opacity: 1;
+  }
+}
+
+/*
   Foldable devices: two segments make two pages with two roles.
 
   These rules use the CSS Viewport Segments API (`horizontal-viewport-

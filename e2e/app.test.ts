@@ -443,6 +443,16 @@ test('forced colors mark the shown trail step with an outline', async () => {
   await page.context().close()
 })
 
+test('on a phone the playback bar docks at the bottom of the screen while the stage is in view', async () => {
+  // 360 x 780: in flow, the bar would end below the screen.
+  const page = await open('/?n=3524', 360, 780, { hasTouch: true })
+  await waitForStep(page, 'Step 2 of 3')
+  const [bottom, height] = await page.evaluate(() => [document.querySelector('#playback-bar')!.getBoundingClientRect().bottom, innerHeight])
+  expect(bottom).toBeLessThanOrEqual(height)
+  expect(await page.evaluate(() => scrollY)).toBe(0)
+  await page.context().close()
+})
+
 test('the quick picks show every card at 320 px, with no sideways scroll', async () => {
   const page = await open('/?n=2323', 320, 568, { hasTouch: true })
   await waitForResult(page)
