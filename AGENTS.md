@@ -66,7 +66,9 @@ principles.
   `html` does not reach media queries: the e2e helper sets the
   browser's default size through CDP). Check a change at 280 px,
   at 320 px and at 200% text; `e2e/app.test.ts` checks them. On a
-  phone, keep each control at 44 by 44 px or more.
+  phone, keep each control at 44 by 44 px or more. Keep the page
+  gutters and the stage card's phone padding in px: in rem they double
+  at 200% text and take the width the tiles need.
 - Export a constant or a helper from `src/lib/`, not from a component
   file: a component file that exports other things breaks fast refresh
   (oxlint `only-export-components`).
@@ -106,7 +108,7 @@ src/
   components/hero.tsx        # title, subline and the 6174 watermark
   components/stage-step.tsx  # the column sum of one step, and its circles
   components/trail.tsx       # the step trail with the draggable pill
-  components/playback-bar.tsx # Back, Play and Next
+  components/playback-bar.tsx # Back, Play and Next; docked at the bottom on phones
   components/input-note.tsx  # the empty stage: slots, hint, input errors
   components/end-panel.tsx   # rounds left, then the result and next number
   components/disclosures.tsx # "See all steps" and "Where 6174 comes from"
@@ -116,6 +118,7 @@ src/
   hooks/use-run.ts           # run state, synced with ?n=
   hooks/use-playback.ts      # which step the stage shows, autoplay, Play
   hooks/use-pill-drag.ts     # the trail pill's taps, drags and glides
+  hooks/use-stage-swipe.ts   # a sideways touch swipe on the stage: next or previous step
   hooks/                     # also theme and book-side state
   lib/kaprekar.ts            # the routine itself
   lib/motion.ts              # reducedMotion, easings, bezier() and spring()
@@ -184,7 +187,7 @@ trail                # the step trail: tap a step, or drag the pill
   trail-steps        # the fieldset of steps
   trail-step-N       # step N in the trail (trail-step-1, trail-step-2, ...)
 trail-goal           # the 6174 goal at the end of the trail
-playback-bar         # Back, Play and Next
+playback-bar         # Back, Play and Next (docked at the bottom on phones)
 back-button          # Back
 play-button          # Play, Pause or Replay
 next-button          # Next
@@ -202,7 +205,7 @@ share-button         # "Share 1234"
 share-url            # the link as text, if the clipboard fails
 try-another-section  # quick picks and the challenge, under its heading
 try-another          # "Try another number" heading
-quick-picks          # the quick-pick chips
+quick-picks          # the quick-pick cards
 challenge            # the step-count challenge
 next-challenge       # "Next challenge"
 all-steps            # "See all steps" disclosure
