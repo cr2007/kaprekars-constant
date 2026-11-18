@@ -442,3 +442,16 @@ test('forced colors mark the shown trail step with an outline', async () => {
   expect(outline).toBe('solid')
   await page.context().close()
 })
+
+test('the quick picks show every card at 320 px, with no sideways scroll', async () => {
+  const page = await open('/?n=2323', 320, 568, { hasTouch: true })
+  await waitForResult(page)
+  const cards = await page.locator('#quick-picks button').evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => [r.left, r.right, r.height]))
+  expect(cards.length).toBeGreaterThanOrEqual(3)
+  for (const [l, r, h] of cards) {
+    expect(l).toBeGreaterThanOrEqual(0)
+    expect(r).toBeLessThanOrEqual(320)
+    expect(h).toBeGreaterThanOrEqual(44)
+  }
+  await page.context().close()
+})

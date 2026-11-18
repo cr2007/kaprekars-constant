@@ -128,8 +128,7 @@ export function EndPanel({ run, arrived, remaining, circleMs }: EndPanelProps) {
           <h2 id="try-another" className="font-heading text-lg font-bold text-foreground">
             Try another number
           </h2>
-          {/* Phones: one row of chips that scrolls sideways. Inline-size containment keeps the row from widening the page. */}
-          <div id="quick-picks" className="chip-scroller -mx-1 overflow-x-auto px-1 py-1 [contain:inline-size] max-sm:[&_li]:shrink-0 max-sm:[&>ul]:flex-nowrap">
+          <div id="quick-picks" className="@container">
             <QuickPicks onPick={run.runNumber} />
           </div>
           <Challenge current={Number(run.rawInput)} stepCount={run.stepCount} targetIndex={run.challenge} onNext={run.nextChallenge} />
